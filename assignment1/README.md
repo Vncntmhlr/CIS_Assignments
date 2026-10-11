@@ -1,138 +1,84 @@
 # CIS I — Assignment 1: Pivot Calibration
 
-This assignment is done entirely in a Jupyter notebook. You'll design a
-pointer and a calibration object (marker-sphere layouts + approximate
-workspace placement), then implement pivot calibration against a simulated
-optical tracker.
+## Submission overview
 
-## What's in this folder
+This directory contains the final implementation and supporting source code for CIS I Assignment 1 (pivot calibration using a simulated optical tracker).
 
-```
+**Primary notebook:** `notebooks/assignment1_final.ipynb`
+
+**Final report:** `notebooks/final_report.pdf` (added separately before final submission).
+
+**For grading:** Execute the primary notebook from top to bottom in a fresh kernel. The `archive_notebooks/` directory is included only to document earlier development, experiments, and unit tests; those notebooks are not prerequisites for the final run and are not the authoritative implementation.
+
+## Directory structure
+
+```text
 assignment1/
+├── notebooks/
+│   ├── assignment1_final.ipynb      # final executable notebook
+│   └── final_report.pdf             # written report (added before submission)
+├── archive_notebooks/              # intermediate versions and test notebooks
+├── functions/                       # student-developed algorithm and plotting helpers
+│   ├── calibration_pose.py
+│   ├── marker_refinement.py
+│   ├── tip_calibration.py
+│   ├── tip_prediction.py
+│   └── workspace_viz.py
+├── src/                             # course-provided simulation and tracking code
+├── data_types/                      # course-provided geometry and covariance types
+├── uncertainty_networks/           # course-provided transformation/uncertainty utilities
 ├── requirements.txt
-├── src/                          the simulation library (don't need to edit this)
-│   ├── marker.py, pointer.py, tracker.py, utils.py   -- core classes
-│   └── simulation/                -- the functions you'll actually call
-└── notebooks/
-    ├── assignment1_template.ipynb   <- start here, this is your homework
+└── README.md
 ```
 
-You do not need to read or modify anything under `src/` — you only call
-functions from `src.simulation` inside the notebook.
+## Requirements
 
-## 1. Set up your environment
+- Python **3.9 or newer**, as specified in the course setup instructions.
+- Python packages are listed in `requirements.txt` (NumPy, SciPy, Matplotlib, ipykernel, and notebook).
+- The local `src/`, `data_types/`, `uncertainty_networks/`, and `functions/` folders are required. They are included in this submission and should remain alongside `notebooks/`.
 
-You need **Python 3.9 or newer**. Check with:
+## Clean execution — Windows PowerShell
 
-- Linux/macOS: `python3 --version`
-- Windows: `python --version` (or `py --version`)
-
-All commands below are run from the `assignment1/` folder (the one this
-README is in).
-
-### Linux / macOS
-
-```bash
-cd assignment1
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-### Windows
-
-Command Prompt:
-
-```bat
-cd assignment1
-py -m venv venv
-venv\Scripts\activate.bat
-pip install -r requirements.txt
-```
-
-PowerShell:
+Open PowerShell in the extracted `assignment1/` directory:
 
 ```powershell
-cd assignment1
-py -m venv venv
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m notebook
 ```
 
-> If PowerShell refuses to run the activation script ("running scripts is
-> disabled on this system"), run this once in an **admin** PowerShell, then
-> retry: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
+In Jupyter, open **`notebooks/assignment1_final.ipynb`**. Select the kernel using `assignment1/.venv/Scripts/python.exe`, then choose **Kernel → Restart & Run All**.
 
-Once activated, your terminal prompt should show `(venv)`. You'll need to
-re-run the activate command (not the venv creation) every time you open a
-new terminal to work on this assignment.
+The notebook expects **`notebooks/` to be its working directory**. Running the notebook through Jupyter from its usual location maintains the relative imports used by its first code cell. Do not relocate the final notebook without adjusting those paths.
 
-## 2. Launch the notebook
+## Clean execution — Linux/macOS
 
-With the `venv` still active, pick one:
-
-**Jupyter, from the terminal** (works the same on all OSes):
+From the extracted `assignment1/` directory:
 
 ```bash
-jupyter notebook
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+./.venv/bin/python -m notebook
 ```
 
-(or `jupyter lab` if you prefer the newer interface). This opens a browser
-tab — navigate into `notebooks/` and open `assignment1_template.ipynb`.
+Open `notebooks/assignment1_final.ipynb` and select the environment's Python kernel. Restart the kernel and run all cells in order.
 
-**VS Code**: open the `assignment1` folder, open
-`notebooks/assignment1_template.ipynb`, and click the kernel picker in the
-top-right corner of the notebook. Select the Python interpreter inside your
-`venv` (Linux/macOS: `venv/bin/python`; Windows: `venv\Scripts\python.exe`)
-— VS Code sometimes needs the "Python" and "Jupyter" extensions installed
-first, which it will prompt you to install if missing.
+## Implementation outline
 
-Either way, run the first code cell (the imports) first — if it fails with
-a `ModuleNotFoundError`, you likely installed `requirements.txt` into a
-different Python environment than the one the notebook's kernel is using;
-double check the kernel picker matches your `venv`.
+The final notebook implements the assignment workflow: defining marker layouts and approximate poses; refining marker-body geometry; collecting tracker and calibration-sensor observations; solving for the pointer-tip offset; and evaluating predicted tip positions on test poses. The separate `functions/` files contain reusable student-implemented functionality.
 
-## 3. What you have to do
+The simulation contains random measurement and placement effects, so numerical outcomes may vary between independent runs. The final report describes validation methods and achieved performance.
 
-Open `assignment1_template.ipynb` and work through it top to bottom — it's
-organized into sections matching the handout's numbered steps. Markdown
-cells explain each section; code cells marked `# TODO` are yours to fill
-in, everything else is provided plumbing. In order, you will:
+## Notes on archived notebooks
 
-1. **Design** the pointer's and calibration object's marker-sphere layouts,
-   and the tracker's/calibration object's approximate workspace poses
-   (Steps 1-2 of the handout). This is a real design decision — read the
-   markdown notes on marker spread and conditioning before picking numbers.
-2. **Implement marker-geometry refinement** — averaging multiple tracker
-   readings to tighten your estimate of the true marker positions (Step 3).
-3. Run the provided data-collection loop (hand-guide + sample + sense-tip,
-   Steps 4-6) — you choose how many observations and how to vary the
-   pointer's orientation between them.
-4. **Implement pivot calibration itself** (Step 7) — this is the core of
-   the assignment; the markdown above that cell walks through the
-   derivation and the key design questions to think through (and answer in
-   your report), but the math is yours to write.
-5. **Validate** against the handout's test-pose grid (Step 8) and report
-   your achieved accuracy against the 2mm spec.
-
-The notebook will run cleanly up to wherever your next unfilled TODO is,
-then stop with `NotImplementedError` — that's expected, not a bug.
-
-**Don't forget**: the notebook is only the code portion. The handout also
-requires a written report (design rationale, math derivation, algorithmic
-approach, validation discussion, performance tables, etc.) — see the
-assignment for the full report requirements and submission format.
+The `archive_notebooks/` folder preserves the project history, including intermediate drafts and experimental/unit-test notebooks. It is provided for transparency and reference; some archived notebooks may assume earlier file layouts or execution environments. **Please use `notebooks/assignment1_final.ipynb` as the entry point for evaluating the final system.**
 
 ## Troubleshooting
 
-- **`ModuleNotFoundError: No module named 'scipy'` (or `numpy`, etc.)** —
-  your kernel isn't using the `venv` you installed `requirements.txt` into.
-  Re-check the kernel picker (VS Code) or that you activated `venv` before
-  running `jupyter notebook` (terminal).
-- **`ModuleNotFoundError: No module named 'src'`** — the notebook assumes
-  it's running with its own folder (`notebooks/`) as the working directory,
-  which is the default for both Jupyter and VS Code. If you moved or
-  renamed files, or launched Jupyter in an unusual way, this can break.
-- **`pip install` fails or `venv` module missing (Linux)** — install your
-  distro's Python venv package first, e.g. `sudo apt install python3-venv`
-  on Debian/Ubuntu, then retry.
+- **Missing NumPy/SciPy/Jupyter:** Confirm that the notebook's kernel is the Python interpreter in the newly created `.venv` and that `requirements.txt` was installed there.
+- **`ModuleNotFoundError: src`, `data_types`, `uncertainty_networks`, or `functions`:** Confirm the full folder structure above is present and the notebook is executing with `notebooks/` as its working directory.
+- **Notebook runs only after manually executing cells:** Restart the kernel and use **Run All** to verify execution order; the final submission should not rely on previously saved Python variables.
+
+## Course code acknowledgement
+
+The course-provided simulation and mathematical support modules are included to make the submission self-contained. Their upstream source is the [CIS I Course repository](https://github.com/LCSR-CIIS/CIS_I_Course). The `functions/` directory and final notebook contain the assignment-specific implementation.
