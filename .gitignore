@@ -5,3 +5,9 @@ assignment1/venv/
 **/venv/
 **/__pycache__/
 **/.ipynb_checkpoints/
+
+# Local archives and workspace metadata
+/.local_archive/
+/.agents/
+/.codex/
+/.aws/
