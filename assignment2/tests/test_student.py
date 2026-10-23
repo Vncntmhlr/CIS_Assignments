@@ -1,8 +1,7 @@
 """
-Unit tests for YOUR components (src/student). The complete tests below fail
-with NotImplementedError until you implement the function they exercise;
-the ones marked TODO are yours to write -- the handout requires you to
-describe your unit tests and report their results.
+Unit tests for student components (src/student). These tests fail with
+NotImplementedError until the corresponding algorithms are implemented.
+Ground truth appears only in controlled test fixtures, never calibration code.
 
 Run from the assignment2 folder:  python -m pytest tests -q
 """
@@ -79,15 +78,46 @@ def test_average_frames_is_a_proper_rotation():
     assert np.allclose(R.T @ R, np.eye(3), atol=1e-9) and np.isclose(np.linalg.det(R), 1.0)
 
 
-def test_refine_marker_body_reduces_layout_error():
-    """TODO: write this test.
+def test_refine_marker_body_reduces_layout_error(monkeypatch):
+    """Refinement must improve body shape, preserve truth, and account for time."""
+    from src import uvct3
+    from scipy.spatial.transform import Rotation
 
-    Hint: define a body, place it in front of a tracker, measure how far the
-    nominal layout is from body.get_actual_marker_positions() (ground truth,
-    allowed in a test) up to a rigid transform, refine, and show the
-    distance shrank. Also check how much simulated time it cost.
-    """
-    pytest.skip("TODO")
+    # Make camera noise deterministic without changing NumPy's global RNG state.
+    rng = np.random.default_rng(11)
+    monkeypatch.setattr(np.random, "multivariate_normal", rng.multivariate_normal)
+    simulation.clock.reset()
+    tracker = simulation.create_tracker("refine_tracker", Frame(Rot(), vct3(0, 0, -1600)), seed=11)
+    nominal = [vct3(-30, -30, -30), vct3(30, 30, -30),
+               vct3(30, -30, 30), vct3(-30, 30, 30)]
+    body = simulation.define_marker_body("refine_body", nominal)
+    # A known manufacturing deformation is test data, not available to the solver.
+    offsets = [vct3(-1, 2, 1), vct3(2, -1, -2), vct3(-2, 1, -1), vct3(1, -2, 2)]
+    truth = [p + offset for p, offset in zip(nominal, offsets)]
+    body.actual_marker_positions = [uvct3(p) for p in truth]
+    placed = simulation.place_marker_body(body, Frame(Rot('z', 0.2), vct3()), precision="exact")
+    simulation.add_marker_bodies(tracker, [placed])
+    truth_before = np.array([p.vec.ravel() for p in truth])
+
+    def shape_error(layout):
+        # Independent proper-rotation alignment removes gauge but rejects reflection.
+        points = np.array([p.vec.ravel() for p in layout])
+        centered = points - points.mean(axis=0)
+        reference = truth_before - truth_before.mean(axis=0)
+        rotation, _ = Rotation.align_vectors(reference, centered)
+        residual = rotation.apply(centered) - reference
+        return float(np.sqrt(np.mean(np.sum(residual ** 2, axis=1))))
+
+    before = shape_error(nominal)
+    started = simulation.clock.elapsed
+    n_readings = 60
+    refined = registration.refine_marker_body(tracker, placed, n_readings=n_readings)
+    assert len(refined) == len(nominal)
+    assert shape_error(refined) < 0.25 * before
+    assert np.allclose([p.vec for p in refined], [p.vec for p in body.nominal_marker_positions])
+    assert np.array_equal(truth_before, [p.p.vec.ravel() for p in body.get_actual_marker_positions()])
+    assert np.isclose(simulation.clock.elapsed - started,
+                      n_readings * simulation.constants.SAMPLE_DELTA_T_SEC)
 
 
 # ---------------------------------------------------------------- workflow
@@ -108,8 +138,25 @@ def test_estimate_base_frame_on_synthetic_data():
 
 
 def test_planned_poses_are_visible_and_within_limits():
-    """TODO: write this test for your plan_calibration_poses."""
-    pytest.skip("TODO")
+    """A useful plan stays visible/in limits and excites every joint without moving."""
+    simulation.clock.reset()
+    rob = simulation.create_robot("plan_robot", Frame(Rot(), vct3(-800, 0, 1300)), seed=12)
+    trk = simulation.create_tracker("plan_tracker", Frame.eye(), seed=12)
+    s = 37.5
+    markers = [vct3(s, s, s), vct3(s, -s, -s), vct3(-s, s, -s), vct3(-s, -s, s)]
+    before_theta = rob.state().theta.copy()
+    poses = workflow.plan_calibration_poses(
+        rob, trk, markers, desired_accuracy=simulation.constants.TARGET_ANG_ERR_RAD)
+    poses = np.asarray(poses, dtype=float)
+    assert poses.ndim == 2 and poses.shape[0] > 0 and poses.shape[1] == 6
+    assert np.all(np.isfinite(poses))
+    assert np.all(np.ptp(poses, axis=0) > 1e-6), "Every joint needs excitation"
+    for theta in poses:
+        assert rob.within_limits(theta)
+        F_ee = rob.F_rob * rob.fwd_kins(theta)
+        assert trk.is_visible([F_ee * p for p in markers])
+    assert simulation.clock.elapsed == 0.0
+    assert np.array_equal(rob.state().theta, before_theta)
 
 
 def test_measure_home_offsets_matches_encoders():
@@ -150,12 +197,38 @@ def test_improved_inv_kins_round_trip():
 
 
 def test_fit_recovers_synthetic_parameters():
-    """TODO: write this test.
+    """Fit noiseless synthetic data and recover held-out poses, allowing gauge freedom."""
+    from scipy.spatial.transform import Rotation
 
-    Hint: generate CalibrationData from your own model with a known,
-    non-zero parameter vector (no noise), fit from zero, and check that
-    predict_in_tracker agrees with the generating model on new poses. Note that
-    the parameters themselves need not match if your model has a null
-    direction -- compare poses, not parameters.
-    """
-    pytest.skip("TODO")
+    rob = simulation.create_robot("fit_robot", Frame.eye(), seed=13)
+    F_X = Frame(Rot('z', 0.2), vct3(50, -20, 100))
+    rng = np.random.default_rng(13)
+    generating = kinematics.ImprovedKinematics(rob, F_X)
+    generating.params = generating.initial_params() + 1e-3 * rng.normal(size=generating.params.shape)
+    data = workflow.CalibrationData()
+    for _ in range(60):
+        theta = random_theta(rng)
+        data.thetas.append(theta)
+        data.frames.append(generating.predict_in_tracker(theta))
+    held_out = [random_theta(rng) for _ in range(20)]
+    fitted = kinematics.ImprovedKinematics(rob, F_X)
+
+    def prediction_errors(model):
+        errors = []
+        for theta in held_out:
+            truth = generating.predict_in_tracker(theta)
+            estimate = model.predict_in_tracker(theta)
+            # Independent oracle avoids depending on the unimplemented metrics module.
+            angle = Rotation.from_matrix(truth.R.matrix.T @ estimate.R.matrix).magnitude()
+            distance = (truth.p - estimate.p).norm()
+            errors.append((angle, distance))
+        return np.asarray(errors)
+
+    angle_tol, position_tol = 1e-5, 1e-3  # rad, mm; synthetic noise-free tolerances
+    before = prediction_errors(fitted)
+    assert np.any(before.max(axis=0) > 10 * np.array([angle_tol, position_tol]))
+    fitted.fit(data)
+    after = prediction_errors(fitted)
+    assert np.all(np.isfinite(after))
+    assert after[:, 0].max() < angle_tol
+    assert after[:, 1].max() < position_tol
