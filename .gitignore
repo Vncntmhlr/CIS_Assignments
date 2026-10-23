@@ -1,10 +1,27 @@
-assignment1/venv/
-**/__pycache__/
+# Python environments and caches
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .ipynb_checkpoints/
-**/venv/
-**/venv/
-**/__pycache__/
-**/.ipynb_checkpoints/
+.coverage
+htmlcov/
+
+# Temporary files and local settings
+*.tmp
+*.temp
+*.swp
+*~
+*.log
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
+/assignment2/setup_validation/
 
 # Local archives and workspace metadata
 /.local_archive/
