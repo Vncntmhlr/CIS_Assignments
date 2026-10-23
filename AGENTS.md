@@ -25,6 +25,7 @@ JHU Computer Integrated Surgery I, Fall 2026; one repository for assignments 1â€
 
 ## Report-Oriented Documentation
 - Maintain `REPORT_NOTES.md` inside each assignment directory for report-worthy material only: major design decisions, mathematical derivations and key equations, algorithmic approaches, important experimental settings and quantitative results, validation evidence, and meaningful limitations.
+- Keep environment/setup checks, dependency/import results, and setup test summaries out of report notes. Put necessary runtime instructions in `SETUP.md`; retain algorithmic validation relevant to the final report.
 - Update notes after significant milestones, not every interaction or minor code change. Organize by topic, consolidate superseded material, and avoid repetitive activity logs. Preserve links to relevant code, figures, tables, and test results; distinguish measured evidence from planned work.
 - Target approximately 20 pages for the final report, following the general quality and structure of Assignment 1's report while avoiding unnecessary length; official assignment requirements take precedence.
 - Focus the report's unit-test discussion on approximately 2â€“4 high-value tests, especially kinematics tests. Still implement and run all officially required tests; the discussion limit does not reduce testing requirements.

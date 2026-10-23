@@ -3,7 +3,8 @@
 The [official starter](https://github.com/LCSR-CIIS/CIS_I_Course/tree/0723d0b6793c3288457b34acfaf2cd872914207e/assignments/assignment2)
 is pinned to TA commit `0723d0b6793c3288457b34acfaf2cd872914207e`.
 `src/`, `notebooks/`, `tests/`, and `requirements.txt` are unmodified.
-[STARTER_README.md](STARTER_README.md) contains the TA workflow guide.
+The [official TA README](https://github.com/LCSR-CIIS/CIS_I_Course/blob/0723d0b6793c3288457b34acfaf2cd872914207e/assignments/assignment2/README.md)
+contains the assignment workflow guide.
 
 ## Fresh clone (Linux/macOS)
 
@@ -56,10 +57,9 @@ modules and shared geometry/uncertainty packages, preserving the official namesp
 venv through `cis_assignment2_course.pth`. Keep the vendor snapshot in Git.
 See [provenance](vendor/PROVENANCE.md) and [checksums](vendor/SHA256SUMS.json).
 
-## Validation and development
+## Development
 
-See [VALIDATION.md](VALIDATION.md) for the setup baseline and checks. To run all
-provided tests, use `venv/bin/python -m pytest tests -q`. Student tests currently
+To run all provided tests, use `venv/bin/python -m pytest tests -q`. Student tests currently
 fail on unimplemented stubs or skip TODO tests; those are expected at setup time.
 Full notebook execution also awaits scene and algorithm TODOs. Implement student
 work in `src/student/`; preserve the supplied simulator and support snapshot.
