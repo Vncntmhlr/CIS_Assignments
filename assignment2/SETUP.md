@@ -2,7 +2,8 @@
 
 The [official starter](https://github.com/LCSR-CIIS/CIS_I_Course/tree/0723d0b6793c3288457b34acfaf2cd872914207e/assignments/assignment2)
 is pinned to TA commit `0723d0b6793c3288457b34acfaf2cd872914207e`.
-`src/`, `notebooks/`, `tests/`, and `requirements.txt` are unmodified.
+The TA simulator, vendor support snapshot, and `requirements.txt` are preserved;
+student modules, tests, and notebook design cells are developed in this repository.
 The [official TA README](https://github.com/LCSR-CIIS/CIS_I_Course/blob/0723d0b6793c3288457b34acfaf2cd872914207e/assignments/assignment2/README.md)
 contains the assignment workflow guide.
 
@@ -58,6 +59,12 @@ venv through `cis_assignment2_course.pth`. Keep the vendor snapshot in Git.
 See [provenance](vendor/PROVENANCE.md) and [checksums](vendor/SHA256SUMS.json).
 
 ## Development
+
+`pytest.ini` disables automatic loading of third-party plugins, preventing
+inherited system ROS plugins from conflicting with this assignment's pytest.
+Built-in plugins and `tests/conftest.py` still load. Keep the notebook's original
+test command; no environment-variable workaround is needed in its code cell.
+Load any intentionally needed third-party plugin explicitly with `-p plugin_name`.
 
 To run all provided tests, use `venv/bin/python -m pytest tests -q`. Student tests currently
 fail on unimplemented stubs or skip TODO tests; those are expected at setup time.
