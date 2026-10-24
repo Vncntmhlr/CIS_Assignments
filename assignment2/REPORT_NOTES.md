@@ -10,7 +10,7 @@ Maintain concise, topic-organized material for the final report. Update after si
 ## Design Decisions
 - Tracker frame coincides with the workspace frame and looks along `+z`. The robot base has identity orientation and translation `(-800, 0, 1300)` mm, placing the center of its wrist-center travel box at `(0, 0, 1600)` mm in the camera volume. The earlier positive-x, negative-z placement put the robot behind the camera.
 - Retain the four-marker tetrahedron `(s,s,s)`, `(s,-s,-s)`, `(-s,s,-s)`, `(-s,-s,s)`, with `s=37.5` mm. Each marker is `sqrt(3)*s = 64.952` mm from the EE origin, within the 75 mm limit.
-- Design parameters and visibility sweep: [notebook, Steps 1–2.1](notebooks/assignment2_template.ipynb). Nominal geometry visualization: [function](src/student/visualization.py), [figure](figures/workspace_design.png). The function uses no hidden truth and does not move the robot or spend simulated time.
+- Design parameters and visibility sweep: [notebook, Steps 1–2.1](notebooks/assignment2_template.ipynb). Nominal geometry visualization: [function](vendor/functions/visualization.py), [figure](figures/workspace_design.png). The function uses no hidden truth and does not move the robot or spend simulated time.
 
 ## Mathematical Derivations and Key Equations
 - In tracker coordinates, the nominal wrist center spans `x,y in [-300,300]` and `z in [1300,1900]` mm. This includes the nominal 500 mm base-to-wrist offset.

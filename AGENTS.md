@@ -10,6 +10,7 @@ JHU Computer Integrated Surgery I, Fall 2026; one repository for assignments 1â€
 - `assignment1/src/` (including `simulation/`), `data_types/`, and `uncertainty_networks/` contain course support code. Preserve these unless explicitly asked to modify them.
 - `assignment2/`: current work; brief: `2026_assignment_2.pdf`. `assignment3/` and `assignment4/` are placeholders. Keep each assignment's code and documentation in its own directory.
 - `.local_archive/` holds ignored local backups, including a course checkout; consult only as relevant reference, not as the active implementation.
+- For Assignment 2, when implementing or selecting mathematical methods (e.g., registration, calibration, interpolation, least squares, covariance propagation, or kinematics-related derivations), prioritize the methods documented in `assignment2/CIS_I_Assignment2_Classroom_Math_Methods.md` before considering alternative approaches. Alternative methods may be used when justified by accuracy, numerical stability, or runtime requirements.
 
 ## Development
 - Follow the relevant assignment README and brief. Assignment 1 uses Python 3.9+ and `assignment1/requirements.txt`; use an isolated environment.

@@ -120,7 +120,7 @@ def visualize_workspace_design(rob, trk, local_markers, *, grid_points=3):
     ], loc="upper left", fontsize=7)
 
     # The radius constraint is fixed by the handout, independent of chosen layout.
-    from ..simulation.constants import CAL_BODY_MAX_RADIUS_MM
+    from src.simulation.constants import CAL_BODY_MAX_RADIUS_MM
     limit = CAL_BODY_MAX_RADIUS_MM
     u, v = np.meshgrid(np.linspace(0, 2 * np.pi, 25), np.linspace(0, np.pi, 13))
     body.plot_wireframe(limit * np.cos(u) * np.sin(v), limit * np.sin(u) * np.sin(v),
