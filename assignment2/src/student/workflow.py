@@ -91,7 +91,92 @@ def plan_calibration_poses(rob: Robot, trk: Tracker, mbee_local_positions: List[
         kwargs - whatever your design needs (grid sizes, margins, ...)
     output: ordered List of joint vectors (np.ndarray of 6)
     """
-    raise NotImplementedError("TODO: implement plan_calibration_poses")
+    from ..simulation import constants
+
+    desired_accuracy = float(desired_accuracy)
+    position_accuracy = float(kwargs.pop("position_accuracy", constants.TARGET_POS_ERR_MM))
+    noise_fraction = float(kwargs.pop("noise_fraction", 0.5))
+    angular_step = float(kwargs.pop("max_angular_step", np.pi / 4))
+    if kwargs:
+        raise TypeError(f"unknown planning options: {', '.join(kwargs)}")
+    if (not np.isfinite(desired_accuracy) or desired_accuracy <= 0
+            or not np.isfinite(position_accuracy) or position_accuracy <= 0
+            or not np.isfinite(noise_fraction) or not 0 < noise_fraction < 1
+            or not np.isfinite(angular_step) or angular_step <= 0):
+        raise ValueError("accuracies/step must be positive and 0 < noise_fraction < 1")
+    markers = np.asarray([p.vec.ravel() for p in mbee_local_positions], dtype=np.float64)
+    if (markers.ndim != 2 or markers.shape[1] != 3 or len(markers) < 3
+            or not np.all(np.isfinite(markers))):
+        raise ValueError("need at least 3 finite calibration markers")
+    if np.any(np.linalg.norm(markers, axis=1) > constants.CAL_BODY_MAX_RADIUS_MM + 1e-9):
+        raise ValueError("calibration markers must lie within the 75 mm radius")
+    centered = markers - markers.mean(axis=0)
+    information = (np.sum(centered ** 2) * np.eye(3) - centered.T @ centered)
+    eigenvalues = np.linalg.eigvalsh(information)
+    if eigenvalues[0] <= 3 * np.finfo(float).eps * eigenvalues[-1]:
+        raise ValueError("calibration marker geometry must be noncollinear")
+
+    # First-order independent-noise estimate: Cov(alpha) = sigma_b^2 G^-1.
+    # Consecutive commands deliberately re-roll robot repeatability too.
+    marker_angle_var = constants.SENSOR_NOISE_STD ** 2 * np.trace(np.linalg.inv(information))
+    angle_var = marker_angle_var + np.sum(constants.SIGMA_RND[3:] ** 2)
+    tool_lever = rob.F_WE.p.norm() + constants.WE_EPS_MAX
+    position_var = (3 * constants.SENSOR_NOISE_STD ** 2 / len(markers)
+                    + np.sum(markers.mean(axis=0) ** 2) * marker_angle_var
+                    + np.sum(constants.SIGMA_RND[:3] ** 2)
+                    + tool_lever ** 2 * np.sum(constants.SIGMA_RND[3:] ** 2))
+    # Tightening the angle request also tightens the spatial design budget.
+    position_accuracy *= min(1.0, desired_accuracy / constants.TARGET_ANG_ERR_RAD)
+    repetitions = int(np.ceil(max(angle_var / (noise_fraction * desired_accuracy) ** 2,
+                                  position_var / (noise_fraction * position_accuracy) ** 2)))
+
+    # Classroom first-derivative interpolation bound: error <= L*h/2.
+    # Linear residual profiles include tracker bias along a fixed-wrist sweep.
+    # This bounds individual profiles with exact endpoints, not final FK error.
+    profile_slope = (constants.OMEGA_SYS[:3] + constants.TRACKER_SYS_GRAD_MAX
+                     * (1 + constants.OMEGA_SYS[:3]))
+    linear_steps = 2 * (position_accuracy / 8) / profile_slope
+    wrist_steps = np.minimum(min(angular_step, np.pi / 4),
+                              2 * (desired_accuracy / 24) / constants.OMEGA_SYS[3:])
+    steps = np.r_[linear_steps, wrist_steps]
+    lower, upper = np.asarray(rob.theta_min), np.asarray(rob.theta_max)
+    if (lower.shape != (6,) or upper.shape != (6,)
+            or not np.all(np.isfinite(np.r_[lower, upper])) or np.any(upper <= lower)):
+        raise ValueError("need finite nonzero travel for all six joints")
+    # This list interface expresses encoder commands, not HomeRobot actions.
+    # Step 6 performs physical homing; zero is the common nominal reference.
+    home = np.clip(np.zeros(6), lower, upper)
+    intervals = np.ceil((upper - lower) / steps)
+    if (not np.all(np.isfinite(intervals))
+            or repetitions * (np.sum(intervals) + 13) > 100000):
+        raise ValueError("requested accuracy exceeds the 100000-reading planning limit")
+    visits = [home.copy()]
+    for k in range(6):
+        # Monotone lower-to-upper traversal visits every knot and returns to
+        # the same reference; total single-axis travel is the minimum 2*range.
+        values = np.linspace(lower[k], upper[k], int(intervals[k]) + 1)
+        for value in values:
+            if np.isclose(value, home[k], atol=1e-12, rtol=0):
+                continue
+            theta = home.copy()
+            theta[k] = value
+            visits.append(theta)
+        visits.append(home.copy())
+
+    poses = []
+    seen_home = False
+    for theta in visits:
+        if not rob.within_limits(theta):
+            raise ValueError("calibration plan violates joint limits")
+        frame = rob.F_rob * rob.fwd_kins(theta)
+        if not trk.is_visible([frame * p for p in mbee_local_positions]):
+            raise ValueError("full single-axis plan is not visible; revise scene placement")
+        at_home = np.array_equal(theta, home)
+        # Pool repeated reference readings; each return still gets one check.
+        count = 1 if at_home and seen_home else repetitions
+        poses.extend(theta.copy() for _ in range(count))
+        seen_home = seen_home or at_home
+    return poses
 
 
 def collect_calibration_data(rob: Robot, trk: Tracker, mbee_placed: PlacedBody,
