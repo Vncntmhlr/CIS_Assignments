@@ -1,7 +1,8 @@
 """
-Unit tests for student components (src/student). These tests fail with
-NotImplementedError until the corresponding algorithms are implemented.
-Ground truth appears only in controlled test fixtures, never calibration code.
+Unit tests for YOUR components (src/student). The complete tests below fail
+with NotImplementedError until you implement the function they exercise;
+the ones marked TODO are yours to write -- the handout requires you to
+describe your unit tests and report their results.
 
 Run from the assignment2 folder:  python -m pytest tests -q
 """
@@ -79,7 +80,13 @@ def test_average_frames_is_a_proper_rotation():
 
 
 def test_refine_marker_body_reduces_layout_error(monkeypatch):
-    """Refinement must improve body shape, preserve truth, and account for time."""
+    """TODO: write this test.
+
+    Hint: define a body, place it in front of a tracker, measure how far the
+    nominal layout is from body.get_actual_marker_positions() (ground truth,
+    allowed in a test) up to a rigid transform, refine, and show the
+    distance shrank. Also check how much simulated time it cost.
+    """
     from src import uvct3
     from scipy.spatial.transform import Rotation
 
@@ -138,7 +145,7 @@ def test_estimate_base_frame_on_synthetic_data():
 
 
 def test_planned_poses_are_visible_and_within_limits():
-    """A useful plan stays visible/in limits and excites every joint without moving."""
+    """TODO: write this test for your plan_calibration_poses."""
     simulation.clock.reset()
     rob = simulation.create_robot("plan_robot", Frame(Rot(), vct3(-800, 0, 1300)), seed=12)
     trk = simulation.create_tracker("plan_tracker", Frame.eye(), seed=12)
@@ -197,7 +204,14 @@ def test_improved_inv_kins_round_trip():
 
 
 def test_fit_recovers_synthetic_parameters():
-    """Fit noiseless synthetic data and recover held-out poses, allowing gauge freedom."""
+    """TODO: write this test.
+
+    Hint: generate CalibrationData from your own model with a known,
+    non-zero parameter vector (no noise), fit from zero, and check that
+    predict_in_tracker agrees with the generating model on new poses. Note that
+    the parameters themselves need not match if your model has a null
+    direction -- compare poses, not parameters.
+    """
     from scipy.spatial.transform import Rotation
 
     rob = simulation.create_robot("fit_robot", Frame.eye(), seed=13)

@@ -18,6 +18,21 @@ JHU Computer Integrated Surgery I, Fall 2026; one repository for assignments 1â€
 - Validate changes with focused numerical checks and relevant notebooks; for notebook changes, restart the kernel and run all cells when feasible. Account for simulation randomness and report checks run or limitations.
 - Avoid unrelated notebook output churn; do not add environments, caches, or generated artifacts unless required for the task.
 
+
+## TA Starter Code and Template Protection
+
+- Treat all TA-provided starter files as read-only reference material by default.
+- In the assignment notebook, only modify code explicitly marked `TODO` or clearly designated for student implementation.
+- Never modify, rewrite, shorten, expand, or reorganize TA-provided Markdown cells, including the instructions above each code cell, unless explicitly requested by the user.
+- Do not modify non-TODO code cells, original equations, examples, evaluation procedures, or notebook structure without explicit permission.
+- Do not alter TA-provided test cases, assertions, or expected results. Only implement tests explicitly marked as student TODOs when requested.
+- Do not change TA-provided simulation modules or APIs.
+- If a necessary implementation appears to require changes outside the designated TODO areas, explain the reason and request permission before editing.
+- Prefer creating separate experimental files rather than modifying protected starter content.
+- Before completing a task, review the Git diff and ensure no unintended changes were made to protected content.
+- Preserve the original TA notebook template whenever possible; use a separate working copy for student development.
+
+
 ## Collaboration
 - Inspect the working tree before edits, preserve user changes, and keep changes scoped to the request. Do not change other assignments or course simulation code incidentally.
 - Explain material assumptions, mathematical changes, and validation results. Ask when requirements are ambiguous enough to affect correctness.
