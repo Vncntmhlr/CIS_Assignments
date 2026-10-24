@@ -1,6 +1,6 @@
 # Assignment 2 — Report Notes
 
-Maintain concise, topic-organized material for the final report. Update after significant algorithm or experiment milestones; preserve links to relevant code, equations, figures, tables, and test results. Results so far cover nominal scene geometry and kinematic consistency; student calibration accuracy has not been evaluated.
+Maintain concise, topic-organized material for the final report. Update after significant algorithm or experiment milestones; preserve links to relevant code, equations, figures, tables, and test results. Results below are nominal geometry and synthetic numerical checks; student calibration accuracy has not been evaluated.
 
 ## Scope and Report Structure
 - Official brief: [2026_assignment_2.pdf](2026_assignment_2.pdf).
@@ -28,8 +28,16 @@ Maintain concise, topic-organized material for the final report. Update after si
 
 Sources: [classroom-method reference](CIS_I_Assignment2_Classroom_Math_Methods.md), Lecture 2 slides 38/45 and Lecture 3 slides 20/23–24; [SciPy magnitude API](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.magnitude.html).
 
+### Step 5: rigid registration and frame averaging
+
+- **[COURSE]** Arun registration (Lecture 3, slide 17; [local method reference, §2.2](CIS_I_Assignment2_Classroom_Math_Methods.md#22-preferred-rigid-3-d3-d-solution-centering--svd-arun-slide-17)): minimize `sum ||R a_i+t-b_i||^2` over `R in SO(3)`. Center both clouds, set `H=A_centered^T B_centered=U S V^T`, then `R=V D U^T`, `t=b_bar-R a_bar`. **[DERIVED]** `D=diag(1,1,sign(det(V U^T)))` corrects reflections along the smallest-singular-value direction, yielding the best proper rigid fit without scaling.
+- Require matching finite point sets with at least three noncollinear correspondences. Centered clouds and cross-covariance must have numerical rank at least two; three noncollinear or coplanar markers remain valid. Rank checks use relative floating-point tolerances, not a fixed length threshold. A reflected full-rank cloud generally has nonzero residual under any proper rigid transform; the solver must not hide that discrepancy by returning a reflection.
+- **[DERIVED]** Equal-weight chordal frame mean: `p_bar=mean(p_i)`; project `M=mean(R_i)=U S V^T` onto `SO(3)` with `R_bar=U diag(1,1,sign(det(U V^T))) V^T`. This minimizes `sum ||R-R_i||_F^2`, since expanding the objective leaves maximizing `tr(R^T M)`. Orthogonality of `U,V,D` gives `R_bar^T R_bar=I`, and determinant correction gives `det(R_bar)=+1`. This extends the course's SVD constrained least-squares idea; it is a chordal mean, not an intrinsic/geodesic mean or an Euler-angle average.
+- **Design decision:** leave `refine_marker_body` unimplemented for now. The special EE calibration body's local layout is exact (`a*_k=a_k`) and its frame is exactly `F_ee`, as stated in notebook Step 5 and [the calibration-body API](src/simulation/calibration_body.py). Re-estimating that known layout from noisy readings would introduce error. Refinement is relevant only if future designs add ordinary bodies with manufacturing uncertainty; repeated pose measurements can still reduce random observation noise for the exact body.
+
 ## Algorithm Implementation
 - [metrics.py](src/student/metrics.py): `frame_error` uses the relative Frame and quaternion-based principal rotation angle; `summarize_errors` reports `n`, separate RMS values, and maxima. Empty, malformed, nonfinite, or negative error data raise `ValueError`, so missing observations cannot appear to give perfect calibration.
+- [registration.py](src/student/registration.py): implements independent Arun/SVD point registration and projected chordal Frame averaging in the designated TODO bodies. Empty, nonfinite, and invalid-rotation frame inputs raise `ValueError`; no simulator solver or hidden geometry is used.
 
 ## Experimental Settings and Quantitative Results
 <!-- Record experiment seeds, pose/sample settings, accuracy and simulated-time metrics with units, and links to figures and tables. -->
@@ -54,6 +62,13 @@ Measured using the public nominal `fwd_kins` / `inv_kins` methods, without simul
 | Forward/inverse round trip | 100 poses, NumPy generator seed 0; linear joints across their full ranges, wrist joints 4–5 in `[-1.4,1.4]`, joint 6 in `[-pi,pi]`; original joints used as IK seed | Max `e_p=2.84e-14` mm; max `e_R=2.46e-16` rad. Max individual linear/wrist joint reconstruction errors: `1.14e-13` mm / `2.22e-16` rad |
 | Wrist singularity | `theta=(300,0,300,0.3,pi/2,0.2)`; compare reconstructed pose rather than Euler angles | `e_p=7.11e-15` mm; `e_R=3.05e-17` rad |
 
+### Step 5 registration and averaging validation
+
+- All four original TA registration/averaging tests pass unchanged. [Student numerical tests](tests/test_registration_student.py) add 25 passing cases: rank-two planar recovery at scales `1e-6,1,1e6`, reflected data, noisy least squares (seed 51, 30 points, `0.1 mm` Gaussian noise), degenerate/nonfinite inputs, angle wrapping, translation averaging, common-left-frame equivariance, and proper-rotation validation.
+- High-value reflection fixture: source points `(+/-6,0,0),(0,+/-3,0),(0,0,+/-1)` mm, reflected about x and translated by `(5,-2,4)` mm. The estimate is the proper rotation `diag(-1,1,-1)` with minimum squared residual `8 mm^2`; allowing a reflection would spuriously make the residual zero.
+- High-value averaging fixtures: z rotations `179 deg` and `-179 deg` average to `180 deg`; `0.1` and `0.5 rad` average to `0.3 rad`, with translations averaged independently. Even when three orthogonal half-turns yield an improper raw mean `-I/3`, the returned matrix has determinant `+1` and the correct minimum proper-rotation chordal cost `16`.
+- The unchanged notebook Step 5 sanity check recovers translation `(10,0,0)` mm. These checks validate the numerical helpers, not achieved robot calibration accuracy or reduction of systematic tracker bias.
+
 ### Student algorithm test criteria (pending implementation)
 
 The former skipped tests now contain executable assertions in [test_student.py](tests/test_student.py). Their algorithm assertions have **not passed** yet because the corresponding student functions remain unimplemented.
@@ -64,5 +79,6 @@ The former skipped tests now contain executable assertions in [test_student.py](
 
 ## Meaningful Limitations
 - Coverage bounds and plots use nominal kinematics and placement. They do not establish accuracy or coverage under the simulator's unknown base, axis, tool, and joint errors, nor do they establish a feasible calibration-time budget. The 3375-pose sweep is a geometry check, not a calibration acquisition plan.
-- Machine-precision consistency of the supplied nominal kinematics does not validate an error model or fitting procedure. Registration, workflow, and improved-kinematics tests remain blocked on their implementations in later notebook steps. Synthetic parameter recovery will test optimizer consistency within the chosen model family; simulator accuracy and generalization across robot seeds still require separate experiments.
+- Machine-precision consistency of the supplied nominal kinematics does not validate an error model or fitting procedure. Workflow, improved kinematics, and optional marker refinement remain unimplemented. Synthetic parameter recovery will test optimizer consistency within the chosen model family; simulator accuracy and generalization across robot seeds still require separate experiments.
 - Metric inputs are assumed to be valid rigid Frames. SciPy's matrix conversion can orthogonalize small rotation-matrix drift; this metric is not a substitute for independently checking the SO(3) validity of a future fitted model. The scalar angle does not supply a signed rotation axis at pi, which Step 4 does not require.
+- Registration numerical rank checks detect unobservable geometry, but do not guarantee good conditioning under measurement noise; spread-out markers remain important. The unweighted chordal frame mean assumes estimates of the same transform. Widely dispersed rotations can have nonunique means (SVD returns one minimizer); it does not account for unequal uncertainty or remove fixed systematic bias. Translation is averaged in the common target frame, independently of orientation, rather than with an SE(3) intrinsic mean.
