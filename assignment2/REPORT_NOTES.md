@@ -18,14 +18,31 @@ Maintain concise, topic-organized material for the final report. Update after si
 - Camera half-width is `h(z) = 500 + (z-1000)*500/1200` mm for `1000 <= z <= 2200`. At the envelope's nearest depth, `h=556.270` mm exceeds its maximum lateral magnitude by approximately 91.3 mm. Near/far depth margins are approximately 135.0 mm. Thus the entire nominal envelope is inside the frustum, including wrist rotations between sampled poses.
 - For kinematic round trips, compare `F_ref = FwdKins(theta)` with `F_rec = FwdKins(InvKins(F_ref))` using `e_p = ||p_ref-p_rec||` (mm) and `e_R = ||Log(R_ref^T R_rec)||` (rad). Near a wrist singularity, joint angles need not be unique: reconstruction of the pose is the appropriate correctness criterion.
 
+### Step 4: relative-frame error and angle extraction
+
+- **[COURSE]** Use the TA ordering `deltaF = F_a^-1 F_b`: `deltaR = R_a^T R_b`, `epsilon = R_a^T(p_b-p_a)`. Report the principal axis-angle magnitude `theta in [0,pi]` in radians and `||epsilon||` in millimeters. Since `R_a` is orthogonal, `||epsilon|| = ||p_b-p_a||`. This is the translation of the relative Frame, not the translational component of a full SE(3) logarithm.
+- **[COURSE]** Lecture 2, slide 45 defines the relative rotation and axis-angle error, with `deltaR ~= I + sk(alpha)` and `theta ~= ||alpha||` for small error. Its Cayley option uses `a = tan(theta/2)n`, so `theta = 2 atan(||a||)`; the Cayley vector is not the rotation vector `alpha=theta*n`.
+- **[DERIVED]** For the unit quaternion convention on Lecture 3, slide 20, `q=[w,v]=[cos(theta/2), n sin(theta/2)]`, the principal angle is `theta = 2 atan2(||v||, |w|)`. Slides 23–24 connect matrix-to-quaternion conversion with axis-angle extraction. The scalar/vector ratio printed in the local slide 24 appears reversed relative to slide 20's definition; the expression here satisfies the identity and 180-degree limits.
+- **[ENGINEERING]** Select the quaternion route using `Rotation.from_matrix(deltaR).magnitude()`, preserving the classroom error definition while evaluating the exact principal angle. Cayley requires solving with `I+deltaR`, which is singular at pi. The Rodrigues-derived trace formula `acos(clip((tr(deltaR)-1)/2,-1,1))` is mathematically correct but loses very small angles through cancellation. A first-order skew approximation alone returns `|sin(theta)|`, not the angle for general rotations.
+- For `N` error pairs, compute angular and positional RMS separately: `rms_angle=sqrt(sum(theta_i^2)/N)`, `rms_pos=sqrt(sum(d_i^2)/N)`, plus the respective maxima and sample count. Do not combine radians and millimeters into an unscaled 6D norm.
+
+Sources: [classroom-method reference](CIS_I_Assignment2_Classroom_Math_Methods.md), Lecture 2 slides 38/45 and Lecture 3 slides 20/23–24; [SciPy magnitude API](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.magnitude.html).
+
 ## Algorithm Implementation
-<!-- Explain implemented calibration, registration, forward/inverse kinematics, and estimation methods; link to relevant code in src/student/. -->
+- [metrics.py](src/student/metrics.py): `frame_error` uses the relative Frame and quaternion-based principal rotation angle; `summarize_errors` reports `n`, separate RMS values, and maxima. Empty, malformed, nonfinite, or negative error data raise `ValueError`, so missing observations cannot appear to give perfect calibration.
 
 ## Experimental Settings and Quantitative Results
 <!-- Record experiment seeds, pose/sample settings, accuracy and simulated-time metrics with units, and links to figures and tables. -->
 
 ## Algorithmic Validation
 - Scene geometry: the notebook's 81 corner/edge poses all keep every marker visible. A separate sweep of 3 values for each linear joint and 5 independently chosen values across each wrist joint's limits also passes: `3^3 * 5^3 = 3375/3375` nominal poses. No random robot realization or hidden truth was used to choose the placement.
+
+### Step 4 metric validation
+
+- All three original TA metric tests pass unchanged: known angular/translation errors, invariance to a common left transform, and RMS aggregation. The original notebook sanity example returns `(0.01 rad, 1.0 mm)`.
+- [Student-added metric tests](tests/test_metrics_student.py) contain 27 passing parameter cases covering identity, `1e-12`/`1e-9` rad, the `1e-3` rad target scale, negative rotations, near/exact pi, principal-angle wrapping, relative-transform ordering, separate rad/mm summaries, and invalid/missing data. The angle oracle constructs matrices from known axis-angle values using Rodrigues' formula, independently of quaternion angle extraction.
+- Additional deterministic sweep: 1064 known rotations, random axes from seed 42, with log-spaced angles near zero, a uniform interior range, and log-spaced distances from pi. Maximum absolute angle error: `8.88e-16` rad. For a known `1e-9` rad z rotation, direct trace/arccos returned `0`, while the selected method returned `1e-9` rad.
+- Aggregation example: `(0.3 rad,3 mm)` and `(0.4 rad,4 mm)` give `rms_angle=0.3535533906 rad`, `max_angle=0.4 rad`, `rms_pos=3.5355339059 mm`, `max_pos=4 mm`, `n=2`. These are synthetic metric checks, not measured robot calibration performance.
 
 ### Nominal kinematics reference checks
 
@@ -47,4 +64,5 @@ The former skipped tests now contain executable assertions in [test_student.py](
 
 ## Meaningful Limitations
 - Coverage bounds and plots use nominal kinematics and placement. They do not establish accuracy or coverage under the simulator's unknown base, axis, tool, and joint errors, nor do they establish a feasible calibration-time budget. The 3375-pose sweep is a geometry check, not a calibration acquisition plan.
-- Machine-precision consistency of the supplied nominal kinematics does not validate an error model or fitting procedure. Student metrics, registration, workflow, and improved-kinematics tests remain blocked on their implementations in later notebook steps. Synthetic parameter recovery will test optimizer consistency within the chosen model family; simulator accuracy and generalization across robot seeds still require separate experiments.
+- Machine-precision consistency of the supplied nominal kinematics does not validate an error model or fitting procedure. Registration, workflow, and improved-kinematics tests remain blocked on their implementations in later notebook steps. Synthetic parameter recovery will test optimizer consistency within the chosen model family; simulator accuracy and generalization across robot seeds still require separate experiments.
+- Metric inputs are assumed to be valid rigid Frames. SciPy's matrix conversion can orthogonalize small rotation-matrix drift; this metric is not a substitute for independently checking the SO(3) validity of a future fitted model. The scalar angle does not supply a signed rotation axis at pi, which Step 4 does not require.
