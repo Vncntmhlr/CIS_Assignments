@@ -46,7 +46,18 @@ def measure_home_offsets(rob: Robot, n_homings: int = 5) -> np.ndarray:
         n_homings - how many homings to average
     output: estimated delta_theta_sys at home, np.ndarray of 6
     """
-    raise NotImplementedError("TODO: implement measure_home_offsets")
+    if (isinstance(n_homings, (bool, np.bool_))
+            or not isinstance(n_homings, (int, np.integer)) or n_homings < 1):
+        raise ValueError("n_homings must be a positive integer")
+    readings = []
+    for _ in range(n_homings):
+        encoders = np.asarray(rob.home_robot(), dtype=np.float64)
+        if encoders.shape != (6,) or not np.all(np.isfinite(encoders)):
+            raise ValueError("home_robot must return 6 finite encoder values")
+        readings.append(encoders.copy())
+    # At physical home: 0 = theta_enc + delta_sys(home) + delta_rnd.
+    # This estimates the additive physical-joint correction, not theta_enc.
+    return -np.mean(readings, axis=0)
 
 
 # this should contain a desired accuracy which will affect the number of calibration poses
@@ -101,7 +112,35 @@ def collect_calibration_data(rob: Robot, trk: Tracker, mbee_placed: PlacedBody,
         repeats - readings per pose
     output: CalibrationData
     """
-    raise NotImplementedError("TODO: implement collect_calibration_data")
+    from copy import deepcopy
+    from .. import simulation
+
+    if (isinstance(repeats, (bool, np.bool_))
+            or not isinstance(repeats, (int, np.integer)) or repeats < 1):
+        raise ValueError("repeats must be a positive integer")
+    poses = [np.asarray(theta, dtype=np.float64).copy() for theta in thetas]
+    if any(theta.shape != (6,) or not np.all(np.isfinite(theta)) for theta in poses):
+        raise ValueError("each pose must contain 6 finite encoder commands")
+
+    data = CalibrationData()
+    started = simulation.clock.elapsed
+    for theta in poses:
+        rob.move_joints(theta)
+        for _ in range(repeats):
+            # The robot is settled; pair this snapshot with its reported
+            # encoders, not a requested command or hidden physical joints.
+            encoders = np.asarray(rob.state().theta, dtype=np.float64).copy()
+            if encoders.shape != (6,) or not np.all(np.isfinite(encoders)):
+                raise ValueError("robot state must contain 6 finite encoder values")
+            observation = simulation.sample_marker_bodies(trk).get(mbee_placed.body.name)
+            if observation is None:
+                # Never reuse a cached frame or add an unmatched theta.
+                # The failed snapshot still costs time; do not retry forever.
+                continue
+            data.thetas.append(encoders)
+            data.frames.append(deepcopy(observation.frame))
+    data.t_collect = float(simulation.clock.elapsed - started)
+    return data
 
 
 def estimate_base_frame(data: CalibrationData, kins: Robot) -> Frame:
@@ -119,4 +158,18 @@ def estimate_base_frame(data: CalibrationData, kins: Robot) -> Frame:
             ImprovedKinematics)
     output: F_X
     """
-    raise NotImplementedError("TODO: implement estimate_base_frame")
+    from . import registration
+
+    if len(data.thetas) == 0 or len(data.thetas) != len(data.frames):
+        raise ValueError("base estimation requires nonempty, paired theta/frame samples")
+    estimates = []
+    for theta, observed in zip(data.thetas, data.frames):
+        theta = np.asarray(theta, dtype=np.float64)
+        if theta.shape != (6,) or not np.all(np.isfinite(theta)):
+            raise ValueError("each sample must contain 6 finite encoder values")
+        if not isinstance(observed, Frame):
+            raise ValueError("each sample must contain an observed Frame")
+        # T_tracker_ee = T_tracker_base * T_base_ee(theta).
+        # Right-cancel the nominal EE pose; reversing these factors is wrong.
+        estimates.append(observed * kins.fwd_kins(theta).inv())
+    return registration.average_frames(estimates)

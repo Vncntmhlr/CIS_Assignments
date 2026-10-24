@@ -1,6 +1,6 @@
 # Assignment 2 — Report Notes
 
-Maintain concise, topic-organized material for the final report. Update after significant algorithm or experiment milestones; preserve links to relevant code, equations, figures, tables, and test results. Results below are nominal geometry and synthetic numerical checks; student calibration accuracy has not been evaluated.
+Maintain concise, topic-organized material for the final report. Update after significant algorithm or experiment milestones; preserve links to relevant code, equations, figures, tables, and test results. Results below cover nominal geometry, synthetic numerical checks, and the measured nominal-kinematics baseline; improved calibration accuracy has not been evaluated.
 
 ## Scope and Report Structure
 - Official brief: [2026_assignment_2.pdf](2026_assignment_2.pdf).
@@ -35,12 +35,24 @@ Sources: [classroom-method reference](CIS_I_Assignment2_Classroom_Math_Methods.m
 - **[DERIVED]** Equal-weight chordal frame mean: `p_bar=mean(p_i)`; project `M=mean(R_i)=U S V^T` onto `SO(3)` with `R_bar=U diag(1,1,sign(det(U V^T))) V^T`. This minimizes `sum ||R-R_i||_F^2`, since expanding the objective leaves maximizing `tr(R^T M)`. Orthogonality of `U,V,D` gives `R_bar^T R_bar=I`, and determinant correction gives `det(R_bar)=+1`. This extends the course's SVD constrained least-squares idea; it is a chordal mean, not an intrinsic/geodesic mean or an Euler-angle average.
 - **Design decision:** leave `refine_marker_body` unimplemented for now. The special EE calibration body's local layout is exact (`a*_k=a_k`) and its frame is exactly `F_ee`, as stated in notebook Step 5 and [the calibration-body API](src/simulation/calibration_body.py). Re-estimating that known layout from noisy readings would introduce error. Refinement is relevant only if future designs add ordinary bodies with manufacturing uncertainty; repeated pose measurements can still reduce random observation noise for the exact body.
 
+### Step 6: home offsets, synchronized data, and a baseline frame
+
+- **[COURSE/DERIVED]** At physical home, `0=theta_home+delta_sys(theta_home)+delta_rnd`. Estimate the additive joint correction as `home_offsets=-mean(theta_home)` (mm for joints 1–3; rad for 4–6). Averaging reduces zero-mean homing noise but does not identify distortion across the travel range. Keep measured encoder values uncorrected in the data and the nominal Step 6 baseline; a later improved model must apply the correction consistently, without counting it twice.
+- **Acquisition policy:** move once per requested pose, then take `repeats` snapshots without re-commanding. Pair each successful observation with a copy of the settled public `rob.state().theta` read immediately before sampling. Repeated samples at a fixed pose reduce tracker random noise but do not re-roll robot motion repeatability. Missing/occluded results add no theta/frame pair and trigger no automatic retry; all attempts still cost simulated time. An all-missing result is an empty data set, explicitly rejected by base estimation. `t_collect=clock_end-clock_start` includes motion, settling, and every snapshot, excluding earlier homing.
+- **[DERIVED from classroom frame composition, §1.1](CIS_I_Assignment2_Classroom_Math_Methods.md#11-frame-conventions-must-check-before-algebra):** `F_observed,j ~= F_X F_nominal(theta_j)` implies `F_X,j=F_observed,j F_nominal(theta_j)^-1`. Reuse the Step 5 projected chordal `average_frames` for these candidate base-to-tracker transforms; multiplication order must not be reversed. With imperfect nominal kinematics, the candidates differ across poses, so their average is a baseline fit, not an isolated measurement of the true base transform.
+
 ## Algorithm Implementation
 - [metrics.py](src/student/metrics.py): `frame_error` uses the relative Frame and quaternion-based principal rotation angle; `summarize_errors` reports `n`, separate RMS values, and maxima. Empty, malformed, nonfinite, or negative error data raise `ValueError`, so missing observations cannot appear to give perfect calibration.
 - [registration.py](src/student/registration.py): implements independent Arun/SVD point registration and projected chordal Frame averaging in the designated TODO bodies. Empty, nonfinite, and invalid-rotation frame inputs raise `ValueError`; no simulator solver or hidden geometry is used.
+- [workflow.py](src/student/workflow.py): implements only `measure_home_offsets`, `collect_calibration_data`, and `estimate_base_frame` for Step 6. Uses public homing, motion, state, sampling, and clock APIs; copies encoder/frame snapshots to preserve pairing. Invalid counts, nonfinite/malformed joint vectors, and empty/unpaired estimation data raise `ValueError`. Pose planning remains unimplemented.
 
 ## Experimental Settings and Quantitative Results
-<!-- Record experiment seeds, pose/sample settings, accuracy and simulated-time metrics with units, and links to figures and tables. -->
+
+### Step 6 nominal baseline (measured, not improved calibration)
+
+- Executed the unchanged [notebook Step 6 cell](notebooks/assignment2_template.ipynb) with its original prerequisite import/scene cells in a fresh kernel. Robot/tracker `SEED=1`; the external validation harness seeds NumPy's tracker-noise stream with `606` for reproducibility, without editing the notebook. Five homings; ten prescribed poses; one reading per pose; no missing observations.
+- Estimated home corrections: `(0.029854, 0.080338, -0.047422)` mm and `(0.00743695, 0.00857433, -0.00791935)` rad. Homing time `0.370837 s`; collection time `83.800467 s`; total `84.171304 s`.
+- Nominal predictions after baseline-frame fitting, scored against the same ten observations: RMS rotation `0.00768780 rad`, maximum rotation `0.01768049 rad`; RMS position `2.967432 mm`, maximum position `5.133756 mm`. These in-sample residuals exceed the `0.001 rad / 0.2 mm` targets and establish the baseline for later kinematic calibration, not held-out accuracy.
 
 ## Algorithmic Validation
 - Scene geometry: the notebook's 81 corner/edge poses all keep every marker visible. A separate sweep of 3 values for each linear joint and 5 independently chosen values across each wrist joint's limits also passes: `3^3 * 5^3 = 3375/3375` nominal poses. No random robot realization or hidden truth was used to choose the placement.
@@ -69,6 +81,12 @@ Measured using the public nominal `fwd_kins` / `inv_kins` methods, without simul
 - High-value averaging fixtures: z rotations `179 deg` and `-179 deg` average to `180 deg`; `0.1` and `0.5 rad` average to `0.3 rad`, with translations averaged independently. Even when three orthogonal half-turns yield an improper raw mean `-I/3`, the returned matrix has determinant `+1` and the correct minimum proper-rotation chordal cost `16`.
 - The unchanged notebook Step 5 sanity check recovers translation `(10,0,0)` mm. These checks validate the numerical helpers, not achieved robot calibration accuracy or reduction of systematic tracker bias.
 
+### Step 6 component validation
+
+- Both original TA Step 6 tests pass unchanged: encoder-home sign consistency and exact base-frame recovery on synthetic perfect kinematics. [Student workflow tests](tests/test_workflow_student.py) add 24 passing cases, including a noncommuting rotation/translation fixture that detects reversed composition and verifies reuse of `registration.average_frames`.
+- A public-interface-only acquisition fixture deliberately reports encoders different from requested commands and reuses mutable buffers. With two moves, six snapshot attempts, and three valid observations (one absent dictionary key and two `None` results), only the three matching encoder/frame pairs survive; all historical snapshots remain intact. Collection costs exactly `2*0.7+6*0.03=1.58 s`, excluding `7 s` of prior work.
+- Public simulator integration (robot/tracker seed 61, deterministic tracker-noise stream 61): two poses with two readings each produce four paired samples and the predicted sum of motion/sampling times. Detaching the body after a valid observation yields zero samples on the next collection, without reusing the cached pose; two failed readings still cost `0.05+2*0.03=0.11 s` including settling.
+
 ### Student algorithm test criteria (pending implementation)
 
 The former skipped tests now contain executable assertions in [test_student.py](tests/test_student.py). Their algorithm assertions have **not passed** yet because the corresponding student functions remain unimplemented.
@@ -79,6 +97,6 @@ The former skipped tests now contain executable assertions in [test_student.py](
 
 ## Meaningful Limitations
 - Coverage bounds and plots use nominal kinematics and placement. They do not establish accuracy or coverage under the simulator's unknown base, axis, tool, and joint errors, nor do they establish a feasible calibration-time budget. The 3375-pose sweep is a geometry check, not a calibration acquisition plan.
-- Machine-precision consistency of the supplied nominal kinematics does not validate an error model or fitting procedure. Workflow, improved kinematics, and optional marker refinement remain unimplemented. Synthetic parameter recovery will test optimizer consistency within the chosen model family; simulator accuracy and generalization across robot seeds still require separate experiments.
+- Machine-precision consistency of the supplied nominal kinematics does not validate an error model or fitting procedure. Pose planning, improved kinematics, and optional marker refinement remain unimplemented. Synthetic parameter recovery will test optimizer consistency within the chosen model family; simulator accuracy and generalization across robot seeds still require separate experiments.
 - Metric inputs are assumed to be valid rigid Frames. SciPy's matrix conversion can orthogonalize small rotation-matrix drift; this metric is not a substitute for independently checking the SO(3) validity of a future fitted model. The scalar angle does not supply a signed rotation axis at pi, which Step 4 does not require.
 - Registration numerical rank checks detect unobservable geometry, but do not guarantee good conditioning under measurement noise; spread-out markers remain important. The unweighted chordal frame mean assumes estimates of the same transform. Widely dispersed rotations can have nonunique means (SVD returns one minimizer); it does not account for unequal uncertainty or remove fixed systematic bias. Translation is averaged in the common target frame, independently of orientation, rather than with an SE(3) intrinsic mean.
