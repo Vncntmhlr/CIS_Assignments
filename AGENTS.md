@@ -11,7 +11,16 @@ JHU Computer Integrated Surgery I, Fall 2026; one repository for assignments 1â€
 - `assignment2/`: current work; brief: `2026_assignment_2.pdf`. `assignment3/` and `assignment4/` are placeholders. Keep each assignment's code and documentation in its own directory.
 - `.local_archive/` holds ignored local backups, including a course checkout; consult only as relevant reference, not as the active implementation.
 
+## Task profiles
+- Select the profile from the explicitly invoked skill or requested task. Common Sources and organization, Collaboration, and Report-Oriented Documentation instructions apply to both profiles.
+- **CIS Report Notes (cis-report-notes):** capture working notes and draft explanatory report material. The Development section below is inactive for this profile; do not run tests, change implementations, or execute notebooks merely to write notes. Read relevant source as needed to verify explanations. Read assignment2/WORKING_NOTES.md when present and assignment2/REPORT_NOTES.md before updating. Preserve Validation Approach, Final Results, and Conclusion unless the user explicitly requests an evidence-based edit there.
+- **CIS Report Stats (cis-report-stats):** apply Development for validation and quantitative analysis. Read working notes, report notes, relevant code, and saved evidence. Document the validation method under Validation Approach, verified measurements under Final Results, and evidence-supported interpretation and limitations under Conclusion in assignment2/REPORT_NOTES.md. Distinguish proposed validation from executed tests; a heading called Final Results does not imply unfinished work is complete.
+- Use Assignment 1's linked final report as a quality/structure reference for both profiles, not as Assignment 2 evidence. Keep all active outputs in Assignment 2 unless another assignment is explicitly requested.
+- A profile changes task scope, not permissions or scientific standards. Preserve source protections and existing user work. A stats invocation is not permission to modify unrelated algorithms or protected course code. For ordinary implementation work outside either skill, Development remains active.
+
 ## Development
+
+Applies to CIS Report Stats and ordinary implementation/validation work; inactive for CIS Report Notes.
 - Follow the relevant assignment README and brief. Assignment 1 uses Python 3.9+ and `assignment1/requirements.txt`; use an isolated environment.
 - Follow existing Python/NumPy conventions and naming. Preserve coordinate-frame meanings, units, array shapes, and numerical assumptions; explain non-obvious mathematics.
 - Preserve notebook relative imports: execute Assignment 1's final notebook with `assignment1/notebooks/` as the working directory.
