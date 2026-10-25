@@ -93,4 +93,6 @@ the normal constrained fit against the adopted model without acquiring data or
 overwriting archives. See [experiment guide](experiments/README.md) and
 [result index](results/README.md). Step 9 can be reproduced with
 `venv/bin/python experiments/step9_forward.py` using the saved seed-1 fit;
-Step 10 remains pending.
+Step 10 can be reproduced with `venv/bin/python experiments/step10_inverse.py`;
+its public-motion reconstruction time is recorded separately from testing.
+See the experiment guide for the unchanged target-selection protocol.

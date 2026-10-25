@@ -15,7 +15,7 @@ live/replay parity and the failure evidence. Earlier metric, registration,
 workflow and planning regressions are also here. `conftest.py` supplies the
 assignment import root; `../pytest.ini` discovers both official and student tests.
 
-Four experiment drivers are retained:
+Five experiment drivers are retained:
 
 - `step8_phase_d.py`: original acquisition provenance, historical unconstrained
   fit, sweep plots, and independent bound/covariance comparison (`--bounds`).
@@ -28,6 +28,11 @@ Four experiment drivers are retained:
   grid using the frozen saved seed-1 calibration. Reads the permitted pose
   oracle only for reporting; no motion, sampling, fitting or IK. Writes three
   `results/step9_forward_*` artifacts in the existing results folder.
+- `step10_inverse.py`: execute the actual Step 10 TODO with the fixed seed-0
+  selection of 40 reachable targets, nominal then improved per target. Reuses
+  frozen calibration, replays public calibration motions to restore robot
+  state/noise without sampling, and records replay time separately. Saves
+  errors, failures, commands and timing to `results/step10_inverse_*`.
 - `ik_robustness_diagnostic.py`: instrumented experimental IK ablations, not a
   replacement for the protected production inverse. It only reuses saved data.
 
@@ -47,4 +52,13 @@ venv/bin/python -m pytest experiments/test_calibration.py -k step9 -q
 The original TA test files remain under `tests/`. The full suite includes the
 pre-existing unimplemented marker-refinement failure; student tests retain three
 strict expected failures for the unchanged TA inverse. No original assertions
-have been weakened. Step 9 is now implemented separately; none of these commands runs Step 10.
+have been weakened. Step 10 is an explicit, separate evaluation:
+
+```bash
+venv/bin/python experiments/step10_inverse.py
+venv/bin/python -m pytest experiments/test_calibration.py -k step10 -q
+```
+
+The replay and actual test both advance simulated time. Run the normal notebook
+Step 10 cell directly when the calibrated robot is already in the live kernel;
+that cell performs no replay. No solver or model changes are made by evaluation.

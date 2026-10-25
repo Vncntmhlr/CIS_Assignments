@@ -35,5 +35,16 @@ seed 1; no motion, sampling or fitting occurs. Its outputs reuse this folder:
 - [step9_forward_errors.png](step9_forward_errors.png): error distributions
   versus the assignment targets. These artifacts must not be used for fitting.
 
-Step 10 remains pending. Historical Step 8 summaries above describe their
+Step 10 uses the same frozen fit on the original 40-target subset:
+
+- [step10_inverse_summary.json](step10_inverse_summary.json): physical error
+  statistics, all nominal/improved commands and seeds, exceptions, returned
+  model residuals, limit status and separate replay/testing times.
+- [step10_inverse_errors.npz](step10_inverse_errors.npz): 80 alternating
+  nominal/improved rows; errors are `(angle_rad, position_mm)`, with NaNs for
+  unavailable values if an attempt fails. Load with `allow_pickle=False`.
+
+All 40 improved attempts pass for this seed/noise sequence; the previously
+documented edge-case IK limitations remain. No additional calibration data
+are acquired and no model is changed. Historical Step 8 summaries describe their
 original measurement/analysis scope; the Step 9 oracle is a separate evaluation.

@@ -409,3 +409,134 @@ def test_step9_frozen_calibration_generalizes_without_acquisition_or_refitting(m
         assert np.array_equal(poses, saved['thetas'])
         assert np.allclose(nominal, saved['nominal_errors'], atol=1e-12, rtol=0)
         assert np.allclose(improved, saved['improved_errors'], atol=1e-12, rtol=0)
+
+
+@pytest.mark.parametrize('failure', ['ik_exception', 'outside_limits', 'inaccurate_return'])
+def test_step10_protocol_records_failures_and_executes_inaccurate_returns(monkeypatch, failure):
+    """Exercise the actual TODO with nonidentity frames and explicit failures."""
+    from types import SimpleNamespace
+    from experiments.step10_inverse import execute_step10, summarize_attempts
+    from src import Rot, vct3, simulation
+    from src.student import metrics
+
+    camera = Frame(Rot('z', .6), vct3(150, -200, 1700))
+    nominal_base = Frame(Rot('y', -.3), vct3(-400, 20, 800))
+    improved_base = Frame(Rot('x', .2), vct3(-390, 15, 810))
+    execution_delta = Frame(Rot('z', .0002), vct3(.02, 0, 0))
+    poses = [np.array([v, 0., 100., .2, .3, .4]) for v in [100., 200.]]
+    body = SimpleNamespace(actual_placement=Frame.eye())
+    command = np.zeros(6)
+    calls, improved_calls, oracle_calls = [], [], []
+
+    def reference(theta):
+        return Frame(Rot('x', theta[3])*Rot('y', theta[4]), vct3(theta[:3]))
+
+    def actual(theta):
+        oracle_calls.append(theta.copy())
+        return camera*reference(theta)
+
+    def nominal_inverse(goal, seed):
+        assert max(metrics.frame_error(goal, nominal_base.inv()*reference(seed))) < 1e-10
+        return seed.copy()
+
+    def improved_inverse(goal, seed):
+        assert max(metrics.frame_error(goal, improved_base.inv()*reference(seed))) < 1e-10
+        improved_calls.append(seed.copy())
+        if len(improved_calls) == 1:
+            if failure == 'ik_exception':
+                raise ValueError('inv_kins: no joint solution within limits')
+            if failure == 'outside_limits':
+                return np.full(6, 999.)
+            return seed+np.array([3., 0., 0., 0., 0., 0.])
+        return seed.copy()
+
+    def within(theta):
+        return bool(np.all(theta >= simulation.constants.THETA_MIN)
+                    and np.all(theta <= simulation.constants.THETA_MAX))
+
+    def move(theta):
+        nonlocal command
+        calls.append(theta.copy())
+        if not within(theta):
+            raise ValueError('joint command violates limits')
+        command = theta.copy()
+        simulation.clock.advance(2.)
+        body.actual_placement = camera*reference(theta)*execution_delta
+
+    def forbidden(*args, **kwargs):
+        pytest.fail('Step 10 must not collect tracker data or fit parameters')
+
+    robot = SimpleNamespace(state=lambda: SimpleNamespace(theta=command.copy()), within_limits=within,
+                            inv_kins=nominal_inverse, fwd_kins=lambda th: nominal_base.inv()*reference(th),
+                            actual_ee_pose=actual, move_joints=move)
+    improved = SimpleNamespace(base_frame=lambda: improved_base, inv_kins=improved_inverse,
+                               fwd_kins=lambda th: improved_base.inv()*reference(th))
+    namespace = dict(np=np, test_grid=poses, clock=simulation.clock, constants=simulation.constants,
+                     metrics=metrics, rob=robot, improved=improved, F_X_nom=nominal_base,
+                     F_trk=camera, mbee_placed=body)
+    monkeypatch.setattr(simulation, 'sample_marker_bodies', forbidden)
+    simulation.clock.reset()
+    simulation.clock.advance(17.5)
+    execute_step10(namespace)
+    rows = namespace['inv_diagnostics']
+    assert [r['model'] for r in rows] == ['nominal', 'improved']*2
+    assert len(oracle_calls) == 2  # Only target construction, never a replacement for executed placement.
+    assert np.array_equal(oracle_calls, namespace['targets'])
+    assert all(np.array_equal(r['seed'], r['target_theta']) for r in rows)
+    assert np.allclose(namespace['inv_err_nominal'], [.0002, .02], atol=1e-10, rtol=0)
+    assert rows[3]['status'] == 'moved'  # A failed earlier target must not abort the rest.
+    for i, row in enumerate(rows):
+        row.update(target_index=i//2, grid_index=i//2)
+    report = summarize_attempts(rows[1::2])
+    if failure == 'inaccurate_return':
+        assert report['returned_model_inconsistent'] == 1 and report['executed'] == 2
+        assert rows[1]['actual_error'][1] > 2.9 and len(calls) == 4
+        expected_time = 8.
+    else:
+        assert report['executed'] == 1 and len(namespace['inv_err_improved']) == 1
+        assert len(report['exception_cases']) == 1
+        assert report['attempts'] == 2  # Failure remains in the attempted denominator.
+        assert report['ik_exceptions'] == (failure == 'ik_exception')
+        assert report['move_exceptions'] == (failure == 'outside_limits')
+        assert report['returned_outside_limits'] == (failure == 'outside_limits')
+        expected_time = 6.
+    assert namespace['t_testing'] == expected_time
+    assert simulation.clock.elapsed == 17.5+expected_time
+
+
+def test_step10_saved_protocol_replays_public_motion_and_preserves_calibration(monkeypatch):
+    from experiments.step10_inverse import evaluate_saved
+    from src import simulation
+    from src.student.kinematics import ImprovedKinematics
+
+    def forbidden(*args, **kwargs):
+        pytest.fail('Saved-data Step 10 must not sample, fit or inspect hidden parameters')
+
+    original_move = simulation.RobotSim.move_joints
+    commands = []
+
+    def move(robot, theta):
+        commands.append(np.array(theta).copy())
+        return original_move(robot, theta)
+
+    monkeypatch.setattr(simulation.RobotSim, 'move_joints', move)
+    monkeypatch.setattr(simulation.RobotSim, 'ground_truth_parameters', forbidden)
+    monkeypatch.setattr(simulation, 'sample_marker_bodies', forbidden)
+    monkeypatch.setattr(ImprovedKinematics, 'fit', forbidden)
+    report = evaluate_saved()
+    assert report['n_targets'] == 40
+    assert report['preparation']['home_offsets_match'] and report['preparation']['tracker_samples'] == 0
+    assert not report['calibration_refitted'] and report['additional_tracker_samples'] == 0
+    assert len(commands) == 10+765+80
+    assert np.array_equal(commands[-80:], [r['command'] for r in report['attempts']])
+    archived = json.loads((Path(__file__).resolve().parents[1]/'results/step10_inverse_summary.json').read_text())
+    assert report['target_grid_indices'] == archived['target_grid_indices']
+    assert report['simulated_testing_time_s'] == pytest.approx(archived['simulated_testing_time_s'], abs=1e-9)
+    for label in ['nominal', 'improved']:
+        part = report[label]
+        assert part['attempts'] == part['executed'] == 40
+        assert part['ik_exceptions'] == part['move_exceptions'] == part['returned_outside_limits'] == 0
+        assert part['returned_model_inconsistent'] == 0
+        for metric in ['rms_angle', 'max_angle', 'rms_pos', 'max_pos']:
+            assert part['errors'][metric] == pytest.approx(archived[label]['errors'][metric], abs=1e-12)
+    assert report['improved']['both_pass'] == 40 and report['nominal']['both_pass'] == 0
