@@ -219,6 +219,13 @@ def test_fit_recovers_synthetic_parameters():
     rng = np.random.default_rng(13)
     generating = kinematics.ImprovedKinematics(rob, F_X)
     generating.params = generating.initial_params() + 1e-3 * rng.normal(size=generating.params.shape)
+    # Student TODO fixture: retain a nonzero model inside the known physical
+    # derivative bounds. The assertion tolerances and TA tests stay unchanged.
+    coefficients = generating.params[22:].reshape(6, 2)
+    scales = np.maximum(abs(rob.theta_min), abs(rob.theta_max))
+    worst_numerator = abs(coefficients[:, 0]) + 2 * abs(coefficients[:, 1])
+    coefficients *= np.minimum(1., .5 * simulation.constants.OMEGA_SYS * scales
+                                / worst_numerator)[:, None]
     data = workflow.CalibrationData()
     for _ in range(60):
         theta = random_theta(rng)

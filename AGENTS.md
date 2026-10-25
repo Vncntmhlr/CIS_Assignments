@@ -23,6 +23,7 @@ JHU Computer Integrated Surgery I, Fall 2026; one repository for assignments 1â€
 ## TA Starter Code and Template Protection
 
 - Treat all TA-provided starter files as read-only reference material by default.
+- Do not add student-created files inside TA-provided folders. For Assignment 2, keep helpers in the existing `vendor/functions/`, additional tests and essential experiment scripts in `experiments/`, and reusable datasets, fitted parameters and essential outputs in `results/`. Reuse these folders; preserve the original `src/student/` and `tests/` file lists.
 - In the assignment notebook, only modify code explicitly marked `TODO` or clearly designated for student implementation.
 - Never modify, rewrite, shorten, expand, or reorganize TA-provided Markdown cells, including the instructions above each code cell, unless explicitly requested by the user.
 - Do not modify non-TODO code cells, original equations, examples, evaluation procedures, or notebook structure without explicit permission.
