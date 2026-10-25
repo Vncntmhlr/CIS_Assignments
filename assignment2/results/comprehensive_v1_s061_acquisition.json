@@ -1,0 +1,37 @@
+{
+  "seed": 61,
+  "sensor_seed": 1661,
+  "public_robot_frame": [
+    [
+      1.0,
+      0.0,
+      0.0,
+      -800.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      1300.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "acquisition_wall_s": 0.4744980149989715,
+  "training": {
+    "simulated_total_including_step6_s": 554.0573809069456,
+    "rows": 765,
+    "distinct": 69
+  },
+  "tracker_samples": 775
+}

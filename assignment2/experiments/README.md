@@ -15,7 +15,7 @@ live/replay parity and the failure evidence. Earlier metric, registration,
 workflow and planning regressions are also here. `conftest.py` supplies the
 assignment import root; `../pytest.ini` discovers both official and student tests.
 
-Five experiment drivers are retained:
+The original experiment drivers are retained:
 
 - `step8_phase_d.py`: original acquisition provenance, historical unconstrained
   fit, sweep plots, and independent bound/covariance comparison (`--bounds`).
@@ -35,6 +35,11 @@ Five experiment drivers are retained:
   errors, failures, commands and timing to `results/step10_inverse_*`.
 - `ik_robustness_diagnostic.py`: instrumented experimental IK ablations, not a
   replacement for the protected production inverse. It only reuses saved data.
+- `comprehensive_evaluation.py`: frozen-model supplementary cohorts and a small
+  Seeds 1/7 pilot, with separate tracker/FK/numerical-IK/physical-IK statistics.
+  [Protocol and pilot costs](comprehensive_evaluation.md) document the exact
+  matrix and the explicit full-run approval gate. `comprehensive_figures.py`
+  generates five PDF/PNG groups from saved attempts. Original results are read-only.
 
 The superseded standalone bound-diagnostic driver and duplicate SLSQP solver
 were removed. `step8_phase_d.py --bounds` now delegates fitting to the production

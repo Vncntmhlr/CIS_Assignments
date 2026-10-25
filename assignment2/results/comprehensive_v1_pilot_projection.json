@@ -1,0 +1,26 @@
+{
+  "category_scaled": [
+    {
+      "seed": 1,
+      "estimated_full_evaluation_wall_s": 20.509713384017232,
+      "observed_slowest_call_scaled_wall_s": 25.178408973693877,
+      "estimated_full_evaluation_simulated_s": 9661.51216945819
+    },
+    {
+      "seed": 7,
+      "estimated_full_evaluation_wall_s": 20.30979478601239,
+      "observed_slowest_call_scaled_wall_s": 21.6070726898879,
+      "estimated_full_evaluation_simulated_s": 9149.98229506814
+    }
+  ],
+  "remaining_new_calibration_seed": 61,
+  "measured_seed7_fit_process_wall_s": 64.89822632199866,
+  "conservative_three_seed_evaluation_plus_remaining_fit_and_plot_wall_s": 171.42736647405036,
+  "slow_call_three_seed_evaluation_plus_remaining_fit_and_plot_wall_s": 185.4334532430803,
+  "remaining_new_fit_wall_timeout_s": 300,
+  "approximate_three_seed_simulated_evaluation_s": 28984.53650837457,
+  "seed61_calibration_additional_simulated_s": 554.1,
+  "note": "Linear pilot extrapolation is not a guarantee; tiny boundary samples/branch changes can alter time. Cached Seed 7 fit is reused. Replay/initialization overhead is additional and separately itemized. Full coverage remains 1320 FK, 140 physical IK targets/model/seed; no automatic coverage reduction.",
+  "review_gate": "STOP: full evaluation has not been run; user review required regardless of projected expense",
+  "actual_figure_generation_wall_s": 5.2565526340004
+}

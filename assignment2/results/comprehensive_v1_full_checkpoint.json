@@ -1,0 +1,10 @@
+{
+  "completed_seeds": [
+    1,
+    7,
+    61
+  ],
+  "pending_seeds": [],
+  "figures_complete": true,
+  "resume": "Rerun the same command. Completed seed results and frozen models are reused; an interrupted evaluation restarts only its unfinished seed."
+}
