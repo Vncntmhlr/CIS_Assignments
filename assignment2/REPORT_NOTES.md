@@ -1,6 +1,6 @@
 # Assignment 2 — Report Notes
 
-Maintain concise, topic-organized material for the final report. Update after significant algorithm or experiment milestones; preserve links to relevant code, equations, figures, tables, and test results. Results below cover nominal geometry, synthetic numerical checks, and the measured nominal-kinematics baseline; improved calibration accuracy has not been evaluated.
+Maintain concise, topic-organized material for the final report. Update after significant algorithm or experiment milestones; preserve links to relevant code, equations, figures, tables, and test results. Results cover the calibration design, synthetic checks, constrained fitting and the frozen-model Step 9 physical-FK evaluation; physical inverse evaluation remains pending.
 
 ## Scope and Report Structure
 - Official brief: [2026_assignment_2.pdf](2026_assignment_2.pdf).
@@ -275,6 +275,26 @@ Provided `inv_kins()` audit: strict consistency thresholds `1e-6 mm / 1e-8 rad`;
 - **Ordinary-pose check:** all 36 held-out ordinary configurations remain strict passes. The last diagnostic path gives maximum `8.91e-11 mm / 2.63e-12 rad` error; replay runtime `0.223 s` versus `0.908 s` for defaults. Timings include instrumentation, are single-run measurements, and are not production guarantees. Without a caller-seed start, the balanced bounded variant reaches only 76/78; weighted normal equations and weighted augmented LS both reach 78/78. Initialization and balanced residuals are material, not an increase in iterations alone.
 - **Proposed change, not applied:** [exact approval blueprint](results/ik_robustness_diagnostic/PROPOSED_CHANGE.md): use the caller seed first with validated early return and nominal fallbacks; balance residual/Jacobian units; keep trials feasible and encoder angles unwrapped; use the augmented damped solve; gate all final candidates by actual pose residual and limits; report numerical nonconvergence honestly. Retain signatures, existing parameters, default iteration budget and frame conventions. The prototype's success is finite evidence, not a global convergence proof. Editing the protected TA method awaits explicit approval; no Steps 9–10 work was performed.
 
+### Step 9: frozen-model physical forward accuracy
+
+- **Protocol [COURSE]:** execute the original Step 9 grid and nominal visibility filter, unchanged: `3^6=729` candidates, **729 visible**. Reuse the adopted [Step 8 constrained parameters](results/step8_phase_e/fit.npz), initial base estimate and measured home offsets. Reconstruct the original public scene with robot/tracker **seed 1**. All 729 mixed configurations are distinct from both the 69 training configurations and 36 tracker hold-out configurations; no re-fitting, measurement acquisition or truth-based tuning is performed.
+- **Frame convention:** `F_true = F_trk.inv() * rob.actual_ee_pose(theta)`; `E = F_true.inv() * prediction`, where the nominal prediction is `F_X_nom * rob.fwd_kins(theta)` and the improved prediction is `improved.predict_in_tracker(theta)`. Report the principal relative rotation angle in rad and `||E.p||` in mm via the existing metric. The allowed oracle ignores per-move repeatability noise, so this measures deterministic physical FK, not tracker prediction error or a noisy executed move.
+
+| Error statistic | Nominal | Improved constrained | Target |
+| --- | ---: | ---: | ---: |
+| Position RMS (mm) | 7.780897 | **0.064431** | 0.2 |
+| Position maximum (mm) | 16.964049 | **0.097061** | 0.2 |
+| Position 95th percentile (mm) | 12.695224 | **0.087328** | 0.2 |
+| Orientation RMS (rad) | 0.03289188 | **0.0000823443** | 0.001 |
+| Orientation maximum (rad) | 0.05574663 | **0.0001420404** | 0.001 |
+| Orientation 95th percentile (rad) | 0.05248171 | **0.0001317353** | 0.001 |
+| Both targets satisfied | 0 / 729 | **729 / 729** | Per-pose criteria |
+
+- **Worst configurations** (first three entries mm, last three rad): position at `(100,200,500,-1.3,0,2)` has `0.09706062 mm / 0.0000545048 rad`; orientation at `(100,-200,100,1.3,-1.3,-2)` has `0.0001420404 rad / 0.05699974 mm`. These are separate maxima.
+- **Time and evidence:** additional simulated acquisition/evaluation **0 s**; Step 9 cell **0.374 s wall-clock** on this run (scene construction, plotting and file output excluded). Robot command, calibration-body placement, model parameters, global NumPy RNG and input-archive hashes are unchanged. Historical calibration time remains **554.031 s**; the earlier independent tracker-validation acquisition **432.264 s** is a separate development cost, not free acquisition or Step 9 testing time. The PDF's 10-minute program-execution limit is distinct from the simulator clock; this isolated evaluation does not certify end-to-end runtime.
+- **Reproduce:** `venv/bin/python experiments/step9_forward.py` from `assignment2/`. [Full statistics and provenance](results/step9_forward_summary.json), [per-pose errors](results/step9_forward_errors.npz), and [error distributions](results/step9_forward_errors.png) are report-only evaluation outputs, not calibration inputs.
+- **Scope:** both targets are met at every sampled point for this frozen seed-1 model. This finite interior grid does not certify the continuous workspace, exact joint limits, different robot/noise seeds or inverse performance. Keep the quadratic model unchanged following this evaluation; the documented TA IK singularity/limit issues still require review before Step 10.
+
 ## Algorithmic Validation
 - Scene geometry: the notebook's 81 corner/edge poses all keep every marker visible. A separate sweep of 3 values for each linear joint and 5 independently chosen values across each wrist joint's limits also passes: `3^3 * 5^3 = 3375/3375` nominal poses. No random robot realization or hidden truth was used to choose the placement.
 
@@ -349,6 +369,10 @@ Measured using the public nominal `fwd_kins` / `inv_kins` methods, without simul
 
 Focused IK diagnostic checks: [12 student tests](experiments/test_ik_robustness.py) verify live/replay parity, all reachable witnesses, complete branch records, post-wrap pose corruption, nanometer boundary rejection, seed usage, final-gate behavior, analytic-Jacobian finite differences, singular ranks and unchanged production/data hashes. Together with Phase E and the unchanged original inverse test: **27 passes, 3 existing expected failures**. The expected failures continue to describe the unmodified production inverse, not the experimental alternatives.
 
+### Step 9 evaluation checks
+
+Three retained regression cases in [test_calibration.py](experiments/test_calibration.py) exercise the actual notebook cell: nonidentity tracker/base frames recover known right-frame errors; a restricted visibility fixture keeps exactly 486/729 fixed-grid poses in order; and the saved model reproduces the 729-pose physical results while motion, homing, sampling, fitting, parameter-oracle access and IK are replaced with failing sentinels. The cell preserves simulated time and the global RNG. These checks verify the measurement convention and isolation, not additional robot seeds.
+
 ### Student algorithm test criteria (pending implementation)
 
 The former skipped tests now contain executable assertions in [test_student.py](tests/test_student.py). Their algorithm assertions have **not passed** yet because the corresponding student functions remain unimplemented.
@@ -357,7 +381,7 @@ The former skipped tests now contain executable assertions in [test_student.py](
 
 ## Meaningful Limitations
 - Coverage bounds and plots use nominal kinematics and placement. They do not establish accuracy or coverage under the simulator's unknown base, axis, tool, and joint errors, nor do they establish a feasible calibration-time budget. The 3375-pose sweep is a geometry check, not a calibration acquisition plan.
-- Synthetic recovery, the rank audit and Phase D/E tracker validation concern one model/seed, not official physical accuracy or generalization across robot seeds. Physical parameter reporting is implemented and joint-map bounds are enforced by default. The provided IK retains the documented singularity/limit issues; official FK/IK evaluation and optional marker refinement remain pending. Phase C sensitivity gains use target weights, not a measured covariance model.
+- Synthetic recovery, the rank audit and Phase D/E tracker validation concern one model/seed, not official physical accuracy or generalization across robot seeds. Physical parameter reporting is implemented and joint-map bounds are enforced by default. The provided IK retains the documented singularity/limit issues; Step 9 physical FK passes its fixed seed-1 grid; physical IK evaluation and optional marker refinement remain pending. Phase C sensitivity gains use target weights, not a measured covariance model.
 - Metric inputs are assumed to be valid rigid Frames. SciPy's matrix conversion can orthogonalize small rotation-matrix drift; this metric is not a substitute for independently checking the SO(3) validity of a future fitted model. The scalar angle does not supply a signed rotation axis at pi, which Step 4 does not require.
 - Registration numerical rank checks detect unobservable geometry, but do not guarantee good conditioning under measurement noise; spread-out markers remain important. The unweighted chordal frame mean assumes estimates of the same transform. Widely dispersed rotations can have nonunique means (SVD returns one minimizer); it does not account for unequal uncertainty or remove fixed systematic bias. Translation is averaged in the common target frame, independently of orientation, rather than with an SE(3) intrinsic mean.
 - The 11-reading rule reduces independent random noise, not fixed tracker distortion or joint-model mismatch. For this centered tetrahedron, the tracker field's specified Lipschitz bound alone permits a **linearized** orientation-bias bound `omega_trk*sqrt(sum||a_i||^2/lambda_min(G)) = 9.19e-4 rad`; arbitrary independent bounded marker errors give a looser `1.89e-3 rad` bound. Translation bias can be as large as `0.1 mm`. Thus the supplied bounds plus this plan do not guarantee the complete `0.2 mm / 0.001 rad` requirement, particularly after parameter fitting and inverse execution. One-dimensional sweep profiles do not identify an arbitrary nonseparable 3-D tracker field; systematic-error sensitivity and held-out workspace tests remain necessary.

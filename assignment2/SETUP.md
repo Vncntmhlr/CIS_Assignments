@@ -91,4 +91,6 @@ do not alter original assertions to obtain a green summary.
 The verification command reuses saved calibration/held-out measurements and checks
 the normal constrained fit against the adopted model without acquiring data or
 overwriting archives. See [experiment guide](experiments/README.md) and
-[result index](results/README.md). Steps 9–10 remain pending.
+[result index](results/README.md). Step 9 can be reproduced with
+`venv/bin/python experiments/step9_forward.py` using the saved seed-1 fit;
+Step 10 remains pending.

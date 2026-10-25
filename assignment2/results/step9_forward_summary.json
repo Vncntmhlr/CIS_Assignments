@@ -1,0 +1,136 @@
+{
+  "seed": 1,
+  "candidate_poses": 729,
+  "visible_poses": 729,
+  "grid_levels": {
+    "0": [
+      100.0,
+      300.0,
+      500.0
+    ],
+    "1": [
+      -200.0,
+      0.0,
+      200.0
+    ],
+    "2": [
+      100.0,
+      300.0,
+      500.0
+    ],
+    "3": [
+      -1.3,
+      0.0,
+      1.3
+    ],
+    "4": [
+      -1.3,
+      0.0,
+      1.3
+    ],
+    "5": [
+      -2.0,
+      0.0,
+      2.0
+    ]
+  },
+  "nominal": {
+    "n": 729,
+    "rms_angle": 0.03289187544929751,
+    "max_angle": 0.055746630400688536,
+    "rms_pos": 7.780896532754949,
+    "max_pos": 16.964048539236106,
+    "median_angle": 0.030639930901434166,
+    "p95_angle": 0.05248170533909745,
+    "median_pos": 6.811590834806531,
+    "p95_pos": 12.69522412825659,
+    "orientation_pass": 0,
+    "position_pass": 0,
+    "both_pass": 0,
+    "all_poses_pass": false,
+    "worst_orientation": {
+      "index": 26,
+      "theta": [
+        100.0,
+        -200.0,
+        100.0,
+        1.3,
+        1.3,
+        2.0
+      ],
+      "angle_rad": 0.055746630400688536,
+      "position_mm": 5.034934311082654
+    },
+    "worst_position": {
+      "index": 728,
+      "theta": [
+        500.0,
+        200.0,
+        500.0,
+        1.3,
+        1.3,
+        2.0
+      ],
+      "angle_rad": 0.055746630400688536,
+      "position_mm": 16.964048539236106
+    }
+  },
+  "improved": {
+    "n": 729,
+    "rms_angle": 8.234425972862273e-05,
+    "max_angle": 0.00014204040856198022,
+    "rms_pos": 0.0644306995665898,
+    "max_pos": 0.09706061962686703,
+    "median_angle": 6.866079632267437e-05,
+    "p95_angle": 0.00013173526084518355,
+    "median_pos": 0.062215852026435134,
+    "p95_pos": 0.08732763287374923,
+    "orientation_pass": 729,
+    "position_pass": 729,
+    "both_pass": 729,
+    "all_poses_pass": true,
+    "worst_orientation": {
+      "index": 18,
+      "theta": [
+        100.0,
+        -200.0,
+        100.0,
+        1.3,
+        -1.3,
+        -2.0
+      ],
+      "angle_rad": 0.00014204040856198022,
+      "position_mm": 0.05699973812272181
+    },
+    "worst_position": {
+      "index": 221,
+      "theta": [
+        100.0,
+        200.0,
+        500.0,
+        -1.3,
+        0.0,
+        2.0
+      ],
+      "angle_rad": 5.4504803426631924e-05,
+      "position_mm": 0.09706061962686703
+    }
+  },
+  "target_pos_mm": 0.2,
+  "target_angle_rad": 0.001,
+  "training_configuration_overlap": 0,
+  "tracker_holdout_configuration_overlap": 0,
+  "additional_simulated_evaluation_time_s": 0.0,
+  "additional_simulated_acquisition_time_s": 0.0,
+  "evaluation_wall_time_s": 0.37442982499851496,
+  "historical_calibration_time_s": 554.0305690934507,
+  "historical_tracker_holdout_time_s": 432.2644365926783,
+  "calibration_archive_sha256": {
+    "results/step8_phase_d/calibration.npz": "d4d0b2f4c603e8c99f50361c44a982ac1d70416ac960d147de6ed2ac6a154760",
+    "results/step8_phase_d/holdout.npz": "3cda5e780732305dd3bca72faabc5eef37456448a90de3c83311e2cefa529f94",
+    "results/step8_phase_d/acquisition.json": "f36478cc623f752b887c04c38c3aa58d1588785c692bbbf0b9484e4428eb0e60",
+    "results/step8_phase_e/fit.npz": "72b24bd6282952084cef2920a326d83832132e78a368cb3a7d9ad721bd7e4894"
+  },
+  "fitted_parameters_changed": false,
+  "interpretation": "Deterministic physical FK oracle on the fixed visible TA grid, frozen seed-1 fit; not tracker residuals, random motion repeatability, continuous-volume or multi-seed certification"
+}

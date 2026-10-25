@@ -318,3 +318,94 @@ def test_saved_candidate_is_feasible_and_original_archives_unchanged():
     for bound in report['bounds_constrained']:
         assert bound['magnitude_ratio'] <= 1+1e-7
         assert bound['derivative_ratio'] <= 1+1e-7
+
+
+@pytest.mark.parametrize('visible_x,expected_count', [(None, 729), (400., 486)])
+def test_step9_nonidentity_frames_known_errors_and_fixed_visible_grid(monkeypatch, visible_x, expected_count):
+    """Known right-frame errors detect a reversed/missing tracker transform."""
+    from itertools import product
+    from types import SimpleNamespace
+    from experiments.step9_forward import execute_step9
+    from src import Rot, vct3, simulation
+    from src.student import metrics
+
+    def forbidden(*args, **kwargs):
+        pytest.fail('Step 9 must not move, sample, fit, or run inverse kinematics')
+
+    tracker_frame = Frame(Rot('z', .7)*Rot('y', -.3), vct3(120, -250, 1700))
+    nominal_base = Frame(Rot('x', -.2), vct3(-400, 30, 800))
+
+    def reference(theta):
+        return Frame(Rot('x', .4+.1*theta[3])*Rot('y', .2*theta[4]), vct3(theta[:3]))
+
+    nominal_delta = Frame(Rot('z', .015), vct3(.6, .8, 0))
+    improved_delta = Frame(Rot('x', .0007), vct3(.03, .04, 0))
+    oracle_calls = []
+
+    def actual(theta):
+        oracle_calls.append(theta.copy())
+        return tracker_frame*reference(theta)
+
+    robot = SimpleNamespace(actual_ee_pose=actual, fwd_kins=lambda th: nominal_base.inv()*reference(th)*nominal_delta,
+                            move_joints=forbidden, home_robot=forbidden)
+    tracker = SimpleNamespace(nominal_pose=lambda: tracker_frame,
+                              is_visible=lambda pts: visible_x is None or pts[0].vec[0, 0] < visible_x)
+    model = SimpleNamespace(predict_in_tracker=lambda th: reference(th)*improved_delta,
+                            fit=forbidden, inv_kins=forbidden)
+    namespace = dict(np=np, rob=robot, trk=tracker, improved=model, F_X_nom=nominal_base,
+                     metrics=metrics, constants=simulation.constants,
+                     mbee_markers_world=lambda th: [vct3(th[:3])])
+    simulation.clock.reset()
+    simulation.clock.advance(19.25)
+    monkeypatch.setattr(simulation.clock, 'advance', forbidden)
+    monkeypatch.setattr(simulation, 'sample_marker_bodies', forbidden)
+    before_random = np.random.get_state()
+    execute_step9(namespace)
+    expected = np.array(list(product([100., 300., 500.], [-200., 0., 200.], [100., 300., 500.],
+                                    [-1.3, 0., 1.3], [-1.3, 0., 1.3], [-2., 0., 2.])))
+    if visible_x is not None:
+        expected = expected[expected[:, 0] < visible_x]
+    assert len(expected) == expected_count
+    assert np.array_equal(namespace['test_grid'], expected)
+    assert np.array_equal(oracle_calls, expected)
+    assert np.allclose(namespace['fwd_err_nominal'], [.015, 1.], atol=1e-11, rtol=0)
+    assert np.allclose(namespace['fwd_err_improved'], [.0007, .05], atol=1e-11, rtol=0)
+    assert namespace['fwd_summary_improved']['n'] == expected_count
+    assert simulation.clock.elapsed == 19.25
+    after_random = np.random.get_state()
+    assert before_random[0] == after_random[0] and np.array_equal(before_random[1], after_random[1])
+    assert before_random[2:] == after_random[2:]
+
+
+def test_step9_frozen_calibration_generalizes_without_acquisition_or_refitting(monkeypatch):
+    from experiments.step9_forward import evaluate_saved
+    from src import simulation
+    from src.student.kinematics import ImprovedKinematics
+
+    def forbidden(*args, **kwargs):
+        pytest.fail('Step 9 may only read the deterministic pose oracle')
+
+    monkeypatch.setattr(simulation.RobotSim, 'move_joints', forbidden)
+    monkeypatch.setattr(simulation.RobotSim, 'home_robot', forbidden)
+    monkeypatch.setattr(simulation.RobotSim, 'ground_truth_parameters', forbidden)
+    monkeypatch.setattr(simulation, 'sample_marker_bodies', forbidden)
+    monkeypatch.setattr(ImprovedKinematics, 'fit', forbidden)
+    monkeypatch.setattr(ImprovedKinematics, 'inv_kins', forbidden)
+    report, poses, nominal, improved = evaluate_saved()
+    assert report['candidate_poses'] == report['visible_poses'] == len(poses) == 729
+    assert report['training_configuration_overlap'] == report['tracker_holdout_configuration_overlap'] == 0
+    assert report['additional_simulated_evaluation_time_s'] == 0
+    assert report['additional_simulated_acquisition_time_s'] == 0
+    assert not report['fitted_parameters_changed']
+    assert report['improved']['rms_pos'] < report['nominal']['rms_pos']*.1
+    assert report['improved']['rms_angle'] < report['nominal']['rms_angle']*.1
+    assert np.max(improved[:, 0]) < simulation.constants.TARGET_ANG_ERR_RAD
+    assert np.max(improved[:, 1]) < simulation.constants.TARGET_POS_ERR_MM
+    archived = json.loads((Path(__file__).resolve().parents[1]/'results/step9_forward_summary.json').read_text())
+    for label in ['nominal', 'improved']:
+        for key in ['rms_pos', 'max_pos', 'rms_angle', 'max_angle']:
+            assert report[label][key] == pytest.approx(archived[label][key], abs=1e-12)
+    with np.load(Path(__file__).resolve().parents[1]/'results/step9_forward_errors.npz', allow_pickle=False) as saved:
+        assert np.array_equal(poses, saved['thetas'])
+        assert np.allclose(nominal, saved['nominal_errors'], atol=1e-12, rtol=0)
+        assert np.allclose(improved, saved['improved_errors'], atol=1e-12, rtol=0)
