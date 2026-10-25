@@ -124,7 +124,7 @@ N_i=\left\lceil
 A pointwise bound also bounds RMS, but a target RMS by itself does not provide a derivative bound. Axis-tilt magnitude and correction-slope bound are distinct quantities.
 
 ### Proposed accuracy budget
-For wrist spacing, the discussion proposed $\varepsilon_i=0.5\,\texttt{desired_accuracy}/3$, allocating half the orientation target conservatively across three wrist correction functions. This is a tunable planning allocation, not an assignment requirement or a guarantee of total pose accuracy. It assumes the remaining errors can fit the remaining budget.
+For wrist spacing, the discussion proposed $\varepsilon_i=0.5\,\texttt{desired\_accuracy}/3$, allocating half the orientation target conservatively across three wrist correction functions. This is a tunable planning allocation, not an assignment requirement or a guarantee of total pose accuracy. It assumes the remaining errors can fit the remaining budget.
 
 Linear joints require a separate position allowance in mm. The analogous proposed allocation is one half of a position target divided among three linear joints. Wrist errors also affect tool position through the tool lever arm; the two budgets alone do not establish a full position-error guarantee.
 
@@ -162,7 +162,7 @@ Each correction depends on one joint coordinate. Jointly optimizing all coeffici
 
 ### Pose planning and collection discussed
 - Use N_i evenly spaced coordinates for each sweep; hold the other coordinates at the reference.
-- Keep `samples_per_joint` as a minimum via $N_i=\max(\texttt{samples_per_joint},N_{i,\mathrm{required}})$.
+- Keep `samples_per_joint` as a minimum via $N_i=\max(\texttt{samples\_per\_joint},N_{i,\mathrm{required}})$.
 - This counts distinct planned positions along a joint, not repeated observations at each position.
 - Reducing the allocated error reduces the maximum spacing, but integer rounding and the minimum count can hide changes in the final count.
 - Apply the orientation allowance only to wrist joints (Python indices 3–5); separately size linear joints (indices 0–2) from a position allowance.
