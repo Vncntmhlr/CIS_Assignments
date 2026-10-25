@@ -1,0 +1,4 @@
+interface:
+  display_name: CIS Report Stats
+  short_description: Validate evidence and write report results
+  default_prompt: Use $cis-report-stats for my Assignment 2 work on dev/ahmed.
