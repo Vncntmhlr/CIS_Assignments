@@ -34,7 +34,7 @@ Require joint limits and tracker visibility of every marker. Nominal visibility 
 ## Mathematical Derivations and Key Equations
 
 ### Frames, coordinates, and units
-A transform ${}^AF_B=[R,p]$ maps coordinates from frame B to frame A:
+A transform $`{}^AF_B=[R,p]`$ maps coordinates from frame B to frame A:
 
 ```math
 {}^Ap=R\,{}^Bp+p,\qquad
@@ -65,7 +65,7 @@ R_{ee}=R_wR_{we},\qquad
 p_{ee}=\sum_{i=1}^3\theta_i d_i+p_{cw}+R_wp_{we}.
 ```
 
-Nominal offsets discussed: $p_{cw}=(500,0,0)^T$ mm and $p_{we}=(100,0,0)^T$ mm.
+Nominal offsets discussed: $`p_{cw}=(500,0,0)^T`$ mm and $`p_{we}=(100,0,0)^T`$ mm.
 
 Tracker observations and predictions must be compared in the same frame:
 
@@ -81,21 +81,21 @@ F_{X,\mathrm{approx}}
 =({}^0F_\mathrm{trk})^{-1}{}^0F_\mathrm{rob}.
 ```
 
-A per-observation initialization is $F_{X,j}\approx F_{ee,j,\mathrm{meas}}[F_{ee,\mathrm{est}}(\boldsymbol\theta_j)]^{-1}$.
+A per-observation initialization is $`F_{X,j}\approx F_{ee,j,\mathrm{meas}}[F_{ee,\mathrm{est}}(\boldsymbol\theta_j)]^{-1}`$.
 Rotation-aware averaging is required when consolidating rigid transforms.
 
 ### Joint-coordinate correction convention
-- $\theta_{i,\mathrm{cmd}}$: command/encoder coordinate.
-- $\theta_{i,\mathrm{est}}$: uncalibrated model's joint-coordinate estimate; initially equal to the command.
-- $\theta_{i,\mathrm{meas}}$: joint coordinate inferred from tracker-observed tool motion, when such inference is available.
-- $\Delta\theta_i=\theta_{i,\mathrm{meas}}-\theta_{i,\mathrm{est}}$.
-- $\theta_{i,\mathrm{cal}}=\theta_{i,\mathrm{est}}+ \widehat{\Delta\theta}_i(\theta_{i,\mathrm{cmd}})$.
+- $`\theta_{i,\mathrm{cmd}}`$: command/encoder coordinate.
+- $`\theta_{i,\mathrm{est}}`$: uncalibrated model's joint-coordinate estimate; initially equal to the command.
+- $`\theta_{i,\mathrm{meas}}`$: joint coordinate inferred from tracker-observed tool motion, when such inference is available.
+- $`\Delta\theta_i=\theta_{i,\mathrm{meas}}-\theta_{i,\mathrm{est}}`$.
+- $`\theta_{i,\mathrm{cal}}=\theta_{i,\mathrm{est}}+ \widehat{\Delta\theta}_i(\theta_{i,\mathrm{cmd}})`$.
 
 The tracker observes a tool pose, not joint angles directly. Isolated sweeps can support geometric joint-coordinate inference; a joint model can also be fitted directly against tool-pose residuals without constructing measured joint angles for every observation. Updating the prediction does not alter the original robot command.
 
 ### Linear interpolation and sample spacing
-For adjacent commanded coordinates a and b, let $h_i=b-a$ and
-$\lambda=(\theta_{i,\mathrm{cmd}}-a)/h_i$:
+For adjacent commanded coordinates a and b, let $`h_i=b-a`$ and
+$`\lambda=(\theta_{i,\mathrm{cmd}}-a)/h_i`$:
 
 ```math
 \widehat{\Delta\theta}_i
@@ -104,7 +104,7 @@ $\lambda=(\theta_{i,\mathrm{cmd}}-a)/h_i$:
 
 The horizontal graph axis is commanded coordinate; the vertical axis is measured-minus-estimated correction. Both are in mm for a linear joint and radians for a wrist joint.
 
-If $|d\Delta\theta_i/d\theta_i|\le\omega_{\mathrm{sys},i}$, then, for exact endpoint corrections,
+If $`|d\Delta\theta_i/d\theta_i|\le\omega_{\mathrm{sys},i}`$, then, for exact endpoint corrections,
 
 ```math
 |\Delta\theta_i-\widehat{\Delta\theta}_i|
@@ -112,7 +112,7 @@ If $|d\Delta\theta_i/d\theta_i|\le\omega_{\mathrm{sys},i}$, then, for exact endp
 \le\frac{\omega_{\mathrm{sys},i}h_i}{2}.
 ```
 
-An allocated per-joint interpolation allowance $\varepsilon_i$ gives:
+An allocated per-joint interpolation allowance $`\varepsilon_i`$ gives:
 
 ```math
 h_{i,\max}=\frac{2\varepsilon_i}{\omega_{\mathrm{sys},i}},\qquad
@@ -124,7 +124,7 @@ N_i=\left\lceil
 A pointwise bound also bounds RMS, but a target RMS by itself does not provide a derivative bound. Axis-tilt magnitude and correction-slope bound are distinct quantities.
 
 ### Proposed accuracy budget
-For wrist spacing, the discussion proposed $\varepsilon_i=0.5\,\texttt{desired\_accuracy}/3$, allocating half the orientation target conservatively across three wrist correction functions. This is a tunable planning allocation, not an assignment requirement or a guarantee of total pose accuracy. It assumes the remaining errors can fit the remaining budget.
+For wrist spacing, the discussion proposed $`\varepsilon_i=0.5\,\texttt{desired\_accuracy}/3`$, allocating half the orientation target conservatively across three wrist correction functions. This is a tunable planning allocation, not an assignment requirement or a guarantee of total pose accuracy. It assumes the remaining errors can fit the remaining budget.
 
 Linear joints require a separate position allowance in mm. The analogous proposed allocation is one half of a position target divided among three linear joints. Wrist errors also affect tool position through the tool lever arm; the two budgets alone do not establish a full position-error guarantee.
 
@@ -139,7 +139,7 @@ The suggested layout in [kinematics.py](src/student/kinematics.py) is:
 | params[16:22] | Fixed tool-transform correction | 6 |
 | params[22:] | Per-joint polynomial coefficients | 6 * n_poly |
 
-The proposed initializer returns a 1D floating array of length $22+6n_\mathrm{poly}$. For degree two it has 34 entries, shape (34,), not a square matrix. Zero values mean zero additional correction about the initial geometry; separately stored measured home offsets remain applied.
+The proposed initializer returns a 1D floating array of length $`22+6n_\mathrm{poly}`$. For degree two it has 34 entries, shape (34,), not a square matrix. Zero values mean zero additional correction about the initial geometry; separately stored measured home offsets remain applied.
 
 Each axis direction has two independent tilt parameters perpendicular to its nominal direction. Rotation about the direction itself does not change that direction. Joint 1's direction is fixed by the assignment model. A linear joint still has one motion coordinate; its two calibration parameters describe the rail direction, not two additional motions.
 
@@ -162,7 +162,7 @@ Each correction depends on one joint coordinate. Jointly optimizing all coeffici
 
 ### Pose planning and collection discussed
 - Use N_i evenly spaced coordinates for each sweep; hold the other coordinates at the reference.
-- Keep `samples_per_joint` as a minimum via $N_i=\max(\texttt{samples\_per\_joint},N_{i,\mathrm{required}})$.
+- Keep `samples_per_joint` as a minimum via $`N_i=\max(\texttt{samples\_per\_joint},N_{i,\mathrm{required}})`$.
 - This counts distinct planned positions along a joint, not repeated observations at each position.
 - Reducing the allocated error reduces the maximum spacing, but integer rounding and the minimum count can hide changes in the final count.
 - Apply the orientation allowance only to wrist joints (Python indices 3–5); separately size linear joints (indices 0–2) from a position allowance.
