@@ -55,8 +55,8 @@ R(\hat n_6,\theta_{6,\mathrm{cal}}),0\right].
 The fixed tool mounting has its own six-parameter SE(3) correction \(\xi_{we}\), independent of joint distortion:
 
 ```math
-\hat F_{we}=F_{we}\operatorname{Exp}_{SE(3)}(\xi_{we}),\qquad
-\hat F_X=F_{X,\mathrm{init}}\operatorname{Exp}_{SE(3)}(\xi_X).
+\hat F_{we}=F_{we}\mathrm{Exp}_{SE(3)}(\xi_{we}),\qquad
+\hat F_X=F_{X,\mathrm{init}}\mathrm{Exp}_{SE(3)}(\xi_X).
 ```
 Each transform correction has three rotational and three translational degrees of freedom. The translational twist coordinates are converted by the SE(3) exponential; they are not generally the resulting translation column directly.
 
