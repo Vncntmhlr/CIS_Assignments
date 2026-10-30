@@ -151,7 +151,7 @@ r_j=
 \epsilon_j/(0.2\ \mathrm{mm})
 \end{bmatrix},\qquad
 r(p)=\begin{bmatrix}r_1\\ \vdots\\ r_N\end{bmatrix},\qquad
-\hat p=\underset{p}{\operatorname{argmin}}\ \|r(p)\|^2.
+\hat p=\underset{p}{\mathrm{argmin}}\ \|r(p)\|^2.
 ```
 
 Here p is the flat correction-parameter vector, not a transform translation, and N counts observed poses. The denominators balance rad/mm using assignment targets, not assumed noise standard deviations.
@@ -211,7 +211,7 @@ Each axis direction has two independent tilt parameters perpendicular to its nom
 The tool correction is a fixed mounting transform:
 
 ```math
-F_{we,\mathrm{cal}}=F_{we}\operatorname{Exp}(\xi_{we}).
+F_{we,\mathrm{cal}}=F_{we}\mathrm{Exp}(\xi_{we}).
 ```
 
 Its six parameters describe three rotational and three translational degrees of freedom. They are distinct from wrist-joint coordinate corrections and axis tilts. An entire frame needs three orientation parameters because rotation about one frame axis changes the other two axes. For an SE(3) exponential, the translational twist coordinates and the resulting translation column are related through the exponential map, rather than always being identical.
