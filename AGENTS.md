@@ -46,3 +46,76 @@ JHU Computer Integrated Surgery I, Fall 2026; one repository for assignments 1�
 - Update notes after significant milestones, not every interaction or minor code change. Organize by topic, consolidate superseded material, and avoid repetitive activity logs. Preserve links to relevant code, figures, tables, and test results; distinguish measured evidence from planned work.
 - Target approximately 20 pages for the final report, following the general quality and structure of Assignment 1's report while avoiding unnecessary length; official assignment requirements take precedence.
 - Focus the report's unit-test discussion on approximately 2–4 high-value tests, especially kinematics tests. Still implement and run all officially required tests; the discussion limit does not reduce testing requirements.
+
+## Assignment 2 — Continuous Report Version and Change Tracking
+
+Maintain `assignment2/report/REPORT_UPDATE_LOG.md` as the persistent source of truth for report versions and report-relevant changes.
+
+### 1. Current Report Version
+
+The log must always identify:
+
+- `current_report_version`: latest user-approved report version (v1, v2, v3, ...).
+- `report_baseline_commit`: Git commit associated with that version.
+- `report_baseline_hash`: SHA-256 hash of its `main.tex`.
+- `report_status`: whether the latest version is locally approved or also confirmed synchronized to Overleaf.
+- `next_report_version`: proposed next version.
+- `pending_changes`: changes not yet incorporated into the approved report.
+
+Initialize these values from the actual report state. Never assume an unverified version or Overleaf synchronization.
+
+### 2. Track Changes Against the Correct Version
+
+After each substantive report-relevant code, algorithm, mathematical, experimental, or documentation change, append a concise entry containing:
+
+- Unique change ID (CHG-001, CHG-002, ...).
+- `based_on_report_version`: the current approved version at the time of the change.
+- Previous versus new behavior and the reason for modification.
+- Exact affected source files and functions.
+- Verified tests, measurements, and result-file references.
+- Affected report chapters, equations, tables, and figures.
+- Status: `PENDING`, `INCORPORATED`, or `SUPERSEDED`.
+- `incorporated_in_version`, once applicable.
+
+Multiple development changes may accumulate against the same report version.
+
+Do not increment the report version after individual code modifications.
+
+### 3. Generate the Next Report Version
+
+When explicitly requested to update the report:
+
+1. Read the current report version and all pending changes.
+2. Audit Git changes since the current report baseline, including uncommitted and untracked files.
+3. Reconcile missing or superseded changes.
+4. Verify relevant mathematical claims and experimental results against current sources.
+5. Update only affected report sections while preserving the approved report structure and formatting.
+6. Compile and validate the revised LaTeX project where possible.
+7. Present the proposed new version for user review.
+
+Do not mark the new version as approved before explicit user confirmation.
+
+### 4. Finalize and Advance the Version
+
+After the user approves the revised report:
+
+- Advance `current_report_version` from vN to vN+1.
+- Record the new report baseline commit and source hashes, or mark any missing commit/hash as pending.
+- Record the previous version as the parent version.
+- Mark incorporated changes with `incorporated_in_version: vN+1`.
+- Preserve the historical version record and previous change entries.
+- Begin recording subsequent modifications against vN+1.
+
+Preserve an identifiable snapshot of each approved report using Git history or archived LaTeX source.
+
+Overleaf synchronization must be confirmed separately. Do not assume that a local Git commit has updated the Overleaf project.
+
+### 5. Efficiency and Safety
+
+- Keep the change log concise and organized by report version.
+- Never delete historical changes.
+- Do not repeatedly analyze changes already incorporated in earlier approved versions.
+- Use links to code and result files instead of duplicating large logs or datasets.
+- Read only relevant supporting documentation when possible.
+- Do not modify TA-provided source code.
+- Do not commit, push, or change report versions without the required user authorization.
