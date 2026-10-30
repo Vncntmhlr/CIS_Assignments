@@ -1,6 +1,6 @@
 # Assignment 2 — Report Notes
 
-Report-oriented synthesis of the calibration discussion through 2026-10-25. These notes distinguish proposed methods from verified repository implementation. No experimental accuracy or timing results are established here.
+Report-oriented synthesis of the calibration discussion through 2026-10-30. These notes synthesize [WORKING_NOTES.md](WORKING_NOTES.md) and the current discussion, distinguishing proposed methods from verified repository implementation. No experimental accuracy or timing results are established here.
 
 ## Scope and Report Structure
 - Official brief: [2026_assignment_2.pdf](2026_assignment_2.pdf).
@@ -93,6 +93,71 @@ Rotation-aware averaging is required when consolidating rigid transforms.
 
 The tracker observes a tool pose, not joint angles directly. Isolated sweeps can support geometric joint-coordinate inference; a joint model can also be fitted directly against tool-pose residuals without constructing measured joint angles for every observation. Updating the prediction does not alter the original robot command.
 
+### Calibrated coordinates, axes, and transform chain
+**Proposed model; not a claim of implemented or validated behavior.** Use i for joint index, j for observation index, and m for polynomial power. With stored offsets o_i, fixed positive normalization scales s_i, and degree n = n_poly:
+```math
+u_i=\theta_{i,\mathrm{cmd}}/s_i,\qquad
+\widehat{\Delta\theta}_i=o_i+\sum_{m=1}^{n}c_{i,m}u_i^m,\qquad
+\theta_{i,\mathrm{cal}}=\theta_{i,\mathrm{cmd}}+\widehat{\Delta\theta}_i.
+```
+
+Offsets plus distortion correct how far a joint moves or how much it rotates; axis tilts correct its direction. For each nominal axis a_i (d_i for linear joints, n_i for wrist joints), choose two fixed orthonormal vectors b_i,1 and b_i,2 perpendicular to it:
+```math
+\phi_i=t_{i,1}b_{i,1}+t_{i,2}b_{i,2},\qquad
+\hat a_i=\exp([\phi_i]_\times)a_i,\quad i=2,\ldots,6,\qquad
+\hat d_1=d_1.
+```
+
+The brackets denote the skew matrix of a rotation vector. Rotation about an axis itself leaves its direction unchanged, so only two tilt parameters are needed. A nominal z-axis can use x and y as its perpendicular basis. An entire tool frame needs three orientation parameters because rotation about z rotates its x/y axes.
+
+With R(a,theta) denoting rotation about a unit axis:
+```math
+F_{c,\mathrm{cal}}(\theta_{1,\mathrm{cmd}},\theta_{2,\mathrm{cmd}},\theta_{3,\mathrm{cmd}})
+=\left[I,\sum_{i=1}^3\theta_{i,\mathrm{cal}}\hat d_i\right],
+```
+```math
+F_{w,\mathrm{cal}}(\theta_{4,\mathrm{cmd}},\theta_{5,\mathrm{cmd}},\theta_{6,\mathrm{cmd}})
+=\left[R(\hat n_4,\theta_{4,\mathrm{cal}})
+R(\hat n_5,\theta_{5,\mathrm{cal}})
+R(\hat n_6,\theta_{6,\mathrm{cal}}),0\right],
+```
+```math
+F_{ee,\mathrm{cal}}^\mathrm{rob}(\boldsymbol\theta_{\mathrm{cmd}})
+=F_{c,\mathrm{cal}}F_{cw}F_{w,\mathrm{cal}}\hat F_{we},
+\qquad
+F_{ee,\mathrm{pred}}^\mathrm{trk}(\boldsymbol\theta_{\mathrm{cmd}})
+=\hat F_XF_{ee,\mathrm{cal}}^\mathrm{rob}(\boldsymbol\theta_{\mathrm{cmd}}).
+```
+
+Commands remain unchanged. Joint distortion affects the tool pose through Fc/Fw; the separate fixed mounting correction applies to Fwe.
+
+### Pose residual convention and fitting objective
+**Decision from the latest discussion:** use prediction-inverse times observation, both in tracker coordinates:
+```math
+\Delta F_j=
+\left(F_{ee,j,\mathrm{pred}}^\mathrm{trk}\right)^{-1}
+F_{ee,j,\mathrm{meas}}^\mathrm{trk}
+=[R_{\mathrm{err},j},p_{\mathrm{err},j}],
+\qquad
+F_{ee,j,\mathrm{meas}}^\mathrm{trk}
+=F_{ee,j,\mathrm{pred}}^\mathrm{trk}\Delta F_j.
+```
+
+Let alpha_j be the three-component rotation vector log_SO(3)(R_err,j), and epsilon_j = p_err,j be the three-component translation expressed in the predicted tool frame. This uses a rotation log plus a translation column, not the full SE(3) logarithm:
+```math
+r_j=
+\begin{bmatrix}
+\alpha_j/(10^{-3}\ \mathrm{rad})\\
+\epsilon_j/(0.2\ \mathrm{mm})
+\end{bmatrix},\qquad
+r(p)=\begin{bmatrix}r_1\\ \vdots\\ r_N\end{bmatrix},\qquad
+\hat p=\underset{p}{\operatorname{argmin}}\ \|r(p)\|^2.
+```
+
+Here p is the flat correction-parameter vector, not a transform translation, and N counts observed poses. The denominators balance rad/mm using assignment targets, not assumed noise standard deviations.
+
+Observation-inverse times prediction is the inverse error and is also valid, but the latest residual snippet uses the convention above. Reversing a transform generally rotates as well as negates its translation. The freshly read working notes still show the older order in pipeline step 6; this paragraph supersedes that convention without altering the working-notes input.
+
 ### Linear interpolation and sample spacing
 For adjacent commanded coordinates a and b, let $`h_i=b-a`$ and
 $`\lambda=(\theta_{i,\mathrm{cmd}}-a)/h_i`$:
@@ -155,7 +220,7 @@ The suggested polynomial model is:
 
 ```math
 \Delta\theta_i(\theta_i)=\mathrm{offset}_i+
-\sum_{j=1}^{n_\mathrm{poly}}c_{i,j}(\theta_i/\mathrm{scale}_i)^j.
+\sum_{m=1}^{n_\mathrm{poly}}c_{i,m}(\theta_i/\mathrm{scale}_i)^m.
 ```
 
 Each correction depends on one joint coordinate. Jointly optimizing all coefficients and geometric parameters is a multivariable optimization, but does not make these correction functions multidimensional. Polynomial least squares is curve fitting and need not pass through each sample. The linear-interpolation spacing bound does not automatically bound a polynomial fit's approximation error.
@@ -172,8 +237,34 @@ Each correction depends on one joint coordinate. Jointly optimizing all coeffici
 ### Repeated observations
 Holding the robot still and rereading reduces random tracker noise. Re-commanding the same vector before reading also resamples the simulator's positioning variation. Under independent, zero-mean noise, averaging N observations reduces standard deviation from sigma to sigma/sqrt(N). It does not eliminate systematic bias. Average positions arithmetically and orientations using a rotation-aware method.
 
+### Forward-model and estimation sequence
+**Proposed implementation, synthesized from working notes and chat:**
+1. Place robot/tracker frames and markers; check nominal visibility.
+2. Repeat physical homing to estimate offsets; retain the actual home encoder reference.
+3. Plan visible individual-axis sweeps with sufficient travel and wrist rotations; collect aligned command/observed-Frame pairs.
+4. In fwd_kins(theta, params), select supplied parameters or self.params. Reshape params[22:] into six coefficient rows, evaluate the polynomials, and add separately stored home offsets.
+5. Use params[6:10] for d2/d3 tilts and params[10:16] for n4/n5/n6 tilts. Rotate directions rather than adding tilt slices to theta. Form Fc and Fw using corrected coordinates and axes.
+6. Correct Fwe using params[16:22]; compose Fc * Fcw * Fw * corrected_Fwe. Return a robot-base-relative pose. base_frame() separately uses params[0:6]; predict_in_tracker() applies it.
+7. Stack residuals and optimize correction parameters while commands and observations remain fixed; inspect identifiability and later evaluate unseen configurations.
+
+For n_poly = 2, joints 1–6 use distortion slices [22:24], [24:26], [26:28], [28:30], [30:32], and [32:34]. The power loop adds a linear, quadratic, etc. term to all six joints simultaneously. Use identical scales, basis choices and coefficient ordering in prediction and reporting.
+
+### Residual Jacobian and local identifiability
+**Explanation of the user-supplied central-difference/SVD routine; execution not verified.** Each pose supplies three rotation and three position residual entries. With N poses and P parameters:
+```math
+J=\frac{\partial r}{\partial p}\in\mathbb R^{6N\times P},\qquad
+J_{:,k}\approx\frac{r(p+h_ke_k)-r(p-h_ke_k)}{2h_k},\qquad
+h_k=10^{-6}\max(1,|p_k|).
+```
+
+Here e_k selects parameter k. Each column changes only that parameter and reevaluates the residuals against unchanged observations. This is sensitivity analysis, not another measurement or a parameter fit.
+
+For J = U Sigma V^T, the routine uses tolerance tau = 10^-6 * sigma_max, rank = count(sigma > tau), and nullity = P - rank. Large singular values indicate sensitive parameter combinations; small values indicate weak sensitivity. Rows Vt[rank:] give poorly determined combinations in parameter-vector order, not necessarily individual unobservable parameters. A full right-singular basis when 6N < P retains nullspace directions missing from a reduced decomposition.
+
+Example dimensions only: 10 poses and 34 parameters yield shape (60,34). A hypothetical rank of 30 implies four weak/null combinations; this is not a measured result. Rank is local and depends on units, scaling, finite-difference accuracy and threshold. Full rank alone does not guarantee reliable estimation.
+
 ### Verified implementation status
-On 2026-10-25, the branch's modular [kinematics.py](src/student/kinematics.py) and [workflow.py](src/student/workflow.py) still contained TODO/NotImplementedError bodies for the principal student calibration functions, including fit and the pose planner. The snippets discussed in chat are proposals or user-supplied working code; they have not been established as implementations in those modules. This check does not establish the implementation status of separate draft notebooks. No source code was modified as part of this notes update.
+On 2026-10-25, the branch's modular [kinematics.py](src/student/kinematics.py) and [workflow.py](src/student/workflow.py) still contained TODO/NotImplementedError bodies for the principal student calibration functions, including fit and the pose planner. The snippets discussed in chat are proposals or user-supplied working code; they have not been established as implementations in those modules. This check does not establish the implementation status of separate draft notebooks. A fresh read on 2026-10-30 still showed TODO bodies for fwd_kins, residuals, fit and jacobian_rank_report in the branch's kinematics.py. The residual and Jacobian snippets discussed in chat are not verified as repository implementations. No source code was modified as part of this notes update.
 
 ## Experimental Settings and Quantitative Results
 No calibration run, seed, measured RMS error, or simulated-time result was verified in this discussion. The scene coordinates and error-budget fractions above are illustrative/planned settings, not experimental findings.
@@ -193,3 +284,5 @@ Report position errors in mm and orientation errors in radians separately. Recor
 - Joint-interpolation bounds assume bounded correction slope and exact endpoint values. Noisy inferred corrections require an additional uncertainty budget.
 - More samples cannot alone guarantee the target RMS: geometry estimation, model mismatch, marker layout, tracker systematic error, and pose visibility also matter.
 - Sampling bounds must match the correction representation actually implemented. A per-joint model cannot represent arbitrary dependence on all six joint coordinates.
+
+- Home-offset anchoring remains unresolved: physical homing anchors the correction at the actual home encoder coordinate, which need not be zero. Center the polynomial or adjust its intercept consistently before treating the offsets as exact anchors.
