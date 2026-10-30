@@ -119,3 +119,43 @@ Overleaf synchronization must be confirmed separately. Do not assume that a loca
 - Read only relevant supporting documentation when possible.
 - Do not modify TA-provided source code.
 - Do not commit, push, or change report versions without the required user authorization.
+
+## Assignment 2 — Report Ownership and Incremental Updates
+
+### Version 2 Transition
+
+The upcoming Report v2 is a transition version. It may incorporate all verified pending changes since Report v1, including changes affecting Chapters 1–4.
+
+After Report v2 is explicitly approved, the following ownership restrictions apply permanently.
+
+### Report Ownership After v2
+
+- My responsibility is limited to Chapter 5 (Experimental Results and Evaluation), Chapter 6 (Discussion), Chapter 7 (Conclusion), and explicitly assigned related appendices.
+- Chapters 1–4 belong to my teammate and must not be modified by my Codex workflows.
+- Do not rewrite, reformat, or silently correct Chapters 1–4 during subsequent report updates.
+- If a new code modification affects Chapters 1–4, flag it as a cross-chapter issue for my teammate rather than modifying those chapters.
+- After v2, maintain detailed pending change records only for changes affecting my assigned report sections. Preserve earlier version history and incorporated entries.
+- These restrictions apply to all subsequent report versions unless I explicitly change them.
+
+### Incremental LaTeX Updates
+
+For future report updates, prefer minimal replacement snippets rather than regenerating the entire LaTeX document.
+
+For each required modification:
+1. Identify the exact chapter, subsection, and original text or unique LaTeX anchor.
+2. Provide the complete replacement LaTeX snippet.
+3. Explain briefly why the modification is required and which verified change-log entries it incorporates.
+4. Include only necessary equations, tables, citations, and figure references.
+5. Avoid changing unrelated text, formatting, labels, or document structure.
+
+Do not output the entire `main.tex` unless explicitly requested.
+
+### Version Management
+
+- Generate each proposed version from the latest approved report, not from the original v1 template.
+- Do not advance the current report version merely because replacement snippets were generated.
+- Advance to vN+1 only after I confirm the changes have been incorporated and approved.
+- After approval, record the new baseline and associate incorporated change-log entries with vN+1.
+- Preserve historical version information and keep subsequent changes associated with the newly approved version.
+- If the actual Overleaf report differs from the local source, identify the discrepancy before generating replacements.
+- Do not commit or push without explicit authorization.
