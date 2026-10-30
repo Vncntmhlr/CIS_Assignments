@@ -1,14 +1,5 @@
-% ================================================================
-% CIS I — Assignment 2: Kinematic Calibration of a Cartesian Robot
-% Overleaf-ready report skeleton. Compile with pdfLaTeX + Biber.
-%
-% EDITING GUIDE
-%   (1) Replace all \placeholder{...} text with verified content.
-%   (2) Insert real figures into figures/ and use \includegraphics.
-%   (3) Cite the precise lecture / handout / literature source.
-%   (4) Keep methods, implementation/unit tests, and results distinct.
-%   (5) Never replace missing measurements with invented numbers.
-% ================================================================
+% CIS I Assignment 2 report. Compile with pdfLaTeX + BibTeX.
+% Author identity, team contributions and Claude Code disclosure are left blank for the authors.
 \documentclass[11pt,letterpaper]{article}
 
 % ---------- Typography and page geometry ----------
@@ -18,9 +9,10 @@
 \usepackage{newtxtext,newtxmath}
 \usepackage{microtype}
 \usepackage{setspace}
-\setstretch{1.11}
+\setstretch{1.06}
 \usepackage{parskip}
-\setlength{\parskip}{5pt}
+\setlength{\parskip}{4pt}
+\setlength{\emergencystretch}{2em}
 
 % ---------- Mathematics, figures and tables ----------
 \usepackage{amsmath,mathtools,bm}
@@ -30,6 +22,11 @@
 \usepackage{siunitx}
 \sisetup{detect-all,per-mode=symbol}
 \usepackage{float}
+\usepackage{needspace}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.75}
 \usepackage{caption}
 \captionsetup{font=small,labelfont=bf}
 \usepackage{subcaption}
@@ -42,7 +39,7 @@
 \usepackage{lastpage}
 
 % ---------- Citations and cross references ----------
-\usepackage[backend=biber,style=numeric,sorting=none,maxbibnames=8]{biblatex}
+\usepackage[backend=bibtex,style=numeric,sorting=none,maxbibnames=8]{biblatex}
 \addbibresource{references.bib}
 \usepackage[colorlinks=true,linkcolor=darkblue,citecolor=darkblue,urlcolor=darkblue]{hyperref}
 \usepackage[nameinlink,noabbrev]{cleveref}
@@ -72,8 +69,8 @@
 \newcommand{\coursename}{EN.601.455/655 Computer Integrated Surgery I}
 \newcommand{\reporttitle}{Kinematic Calibration of a Cartesian Robot}
 \newcommand{\reportsubtitle}{Assignment 2: Design, Mathematical Methods, and Experimental Evaluation}
-\newcommand{\teammemberone}{Student 1 Name \quad | \quad JHED ID: \underline{\hspace{1.25in}}}
-\newcommand{\teammembertwo}{Student 2 Name \quad | \quad JHED ID: \underline{\hspace{1.25in}}}
+\newcommand{\teammemberone}{Name: \underline{\hspace{1.5in}} \quad | \quad JHED ID: \underline{\hspace{1.25in}}}
+\newcommand{\teammembertwo}{Name: \underline{\hspace{1.5in}} \quad | \quad JHED ID: \underline{\hspace{1.25in}}}
 
 % ---------- Notation and reusable placeholders ----------
 \newcommand{\R}{\mathbb{R}}
@@ -84,13 +81,6 @@
 \newcommand{\epsv}{\bm{\epsilon}}
 \newcommand{\alphav}{\bm{\alpha}}
 \newcommand{\Fhat}{\widehat{F}}
-\newcommand{\placeholder}[1]{{\color{placeholdergray}\itshape [To complete: #1]}}
-\newcommand{\figureplaceholder}[3]{%
-  \begin{figure}[htbp]\centering
-  \fcolorbox{slate!45}{pale}{\parbox[c][1.35in][c]{0.83\linewidth}{\centering
-  \small\color{slate} Figure placeholder\\[4pt]\emph{#1}}}
-  \caption{#2}\label{#3}
-  \end{figure}}
 
 \begin{document}
 \hypersetup{pageanchor=false}
@@ -130,21 +120,23 @@
 \setcounter{page}{1}
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
-\placeholder{A concise summary of the design problem, methodology, calibration-data budget, independent FK/IK results, total time, and primary limitations. Write this last.}
+A tracker-based calibration workflow is developed for a Cartesian robot with a spherical wrist. A tetrahedral marker body and nominal visibility envelope guide scene design. Five homings and 765 observations across 69 single-axis configurations initialize a 34-parameter geometric and quadratic joint-distortion model. A fixed gauge leaves 33 optimized parameters; full-interval magnitude and derivative constraints enforce known joint-error bounds. Independent calibrations of seeds 1, 7, and 61 each require approximately 554 s simulated acquisition and 64 s wall-clock fitting. The preserved Seed 1 protocols pass 729/729 FK configurations and 40/40 physical IK targets. Supplementary testing passes 3960/3960 physical FK configurations and 240/240 random executed IK targets, with respective overall maxima of 0.12485 mm / $4.98\times10^{-4}$ rad and 0.13286 mm / $7.98\times10^{-4}$ rad. Stress tests expose substantial limitations of the unchanged provided inverse: only 90/180 targets pass both accuracy criteria. Tracker noise, gauge-dependent parameter recovery, and finite workspace coverage remain explicit limitations.
 
+\setcounter{tocdepth}{1}
 \tableofcontents
 \clearpage
 \hypersetup{pageanchor=true}
 \pagenumbering{arabic}
 
 % ================================================================
+\Needspace{6\baselineskip}
 \section{Introduction}\label{sec:introduction}
 \subsection{Background and Problem Statement}
 Accurate robot positioning requires a kinematic model that accounts for departures from nominal geometry and encoder readings. This assignment calibrates a Cartesian robot with three prismatic joints and a three-axis spherical wrist, using an optical tracker and an end-effector calibration body. Base-placement error, axis misalignment, tool-frame error, and systematic joint distortion cause the physical robot to depart from its nominal model. External tracker observations provide the measurements needed to estimate these corrections.
 
 \subsection{Objectives and Performance Requirements}
 The assignment asks for improved forward and inverse kinematics over the work volume, with the performance requirements summarized in \cref{tab:requirements} \parencite{cisi_assignment2}.
-\begin{table}[htbp]\centering
+\begin{table}[!htbp]\centering
 \caption{Accuracy and execution requirements from the Assignment 2 handout.}\label{tab:requirements}
 \begin{tabular}{@{}lll@{}}\toprule
 Criterion & Required bound & Evaluation note\\\midrule
@@ -159,10 +151,11 @@ RMS and maximum position/orientation errors are reported separately, together wi
 We follow the recommended parameter-estimation route (Method~1): repeated homing establishes joint offsets, individual joint sweeps supply calibration observations, and physically constrained nonlinear least squares fits a corrected geometric model with smooth joint-distortion terms. This avoids a dense six-dimensional calibration grid. Evaluation distinguishes tracker prediction, physical FK accuracy, numerical FK/IK consistency, and executed physical IK accuracy. Seeds 1, 7, and 61 are calibrated independently, with ordinary-workspace and stress-test results kept separate. Hidden simulator values are used only for evaluation; the provided inverse solver is retained so its numerical limitations can be distinguished from forward-model accuracy.
 
 % ================================================================
+\Needspace{6\baselineskip}
 \section{System Design and Calibration Setup}\label{sec:design}
 \subsection{Robot and Optical Tracker}
 The first three joints translate the wrist center along the nominal base axes; the final three rotate a spherical wrist. The joint ranges and speed limits are listed in \cref{tab:joint_limits}. Motion time includes acceleration-limited travel and \SI{0.05}{\second} settling, making wrist travel particularly expensive.
-\begin{table}[htbp]\centering
+\begin{table}[!htbp]\centering
 \caption{Joint limits and maximum speeds used in calibration.}\label{tab:joint_limits}
 \begin{tabular}{@{}lll@{}}\toprule
 Joints & Permitted range & Maximum speed\\\midrule
@@ -190,7 +183,7 @@ The estimated base-to-tracker transform is applied once on the left; the nominal
 
 \subsection{Calibration Marker Body Design}
 Four markers form a regular tetrahedron centered at the end-effector origin, with coordinates given in \cref{tab:markers}. Each marker has radius $37.5\sqrt{3}=\SI{64.95}{\milli\metre}$, below the \SI{75}{\milli\metre} limit. This symmetric, noncoplanar layout spreads the observations in three dimensions and avoids favoring one rotational direction. The special calibration body's geometry is exact under the TA API, and its frame coincides with $E$. Therefore, no marker-manufacturing refinement or separate marker-to-tool transform is estimated.
-\begin{table}[htbp]\centering
+\begin{table}[!htbp]\centering
 \caption{Calibration marker coordinates in the end-effector frame.}\label{tab:markers}
 \begin{tabular}{@{}cccc@{}}\toprule
 Marker & $x$ (mm) & $y$ (mm) & $z$ (mm)\\\midrule
@@ -226,156 +219,464 @@ Design checks require all markers to satisfy the radius constraint, the centered
 The acquisition setup uses five homings, ten mixed baseline observations, and 765 calibration observations across 69 distinct single-axis configurations. Eleven re-commanded readings per configuration, plus return-reference readings, renew both tracker and robot repeatability noise. Each valid tracker frame is paired with its settled encoder reading; missing observations are not replaced by stale data. The same design is applied independently to each seed, costing approximately \SIrange{554.03}{554.06}{\second} simulated time including homing and baseline measurements. Sampling-density, repetition, and estimator derivations are developed in \cref{sec:math}.
 
 % ================================================================
+
+% ================================================================
+\Needspace{6\baselineskip}
 \section{Mathematical Methods}\label{sec:math}
 \subsection{Rigid Frames and Pose-Error Metrics}
-\placeholder{Derive rigid-frame composition and inversion and define the signed orientation/position residual. Cite the exact relevant lecture pages.}
-A general relative-pose error may be written as
+A rigid frame $F=(R,p)$ acts on a point as $Rx+p$. Composition and inversion follow
+\begin{equation}
+(R_1,p_1)(R_2,p_2)=(R_1R_2,R_1p_2+p_1),\qquad
+F^{-1}=(R^T,-R^Tp).
+\end{equation}
+Following the classroom relative-frame convention \parencite[slides~38,45]{cisi_frames}, define
 \begin{equation}\label{eq:pose_error}
-\Delta F=F_{\mathrm{reference}}^{-1}F_{\mathrm{prediction}}.
+\Delta F=F_{\mathrm{ref}}^{-1}F_{\mathrm{pred}}=(\Delta R,\Delta p),\qquad
+e_R=\|\operatorname{Log}_{SO(3)}(\Delta R)\|_2,\quad e_p=\|\Delta p\|_2.
 \end{equation}
-\placeholder{Explain the axis--angle / rotation-logarithm representation and the translation-error metric, including units and frame convention.}
+The principal rotation angle is in radians and translation error is in millimeters. Since $\Delta p=R_{\mathrm{ref}}^T(p_{\mathrm{pred}}-p_{\mathrm{ref}})$, its norm equals Euclidean position error. This is the translation of the relative frame, not the translational part of an $SE(3)$ logarithm. Quaternion-based angle extraction avoids the small-angle cancellation of a trace--arccos formula. For $N$ scored poses, RMS is $\sqrt{N^{-1}\sum_i e_i^2}$, separately for each unit; maxima and percentiles are also retained.
 
-\subsection{Point Registration and Averaging of Frames}
-\placeholder{Present the least-squares rigid-registration objective, rotation constraint, and your frame-averaging method. Explain the relationship to the class material.}
+\subsection{Rigid Registration and Averaging of Frames}
+Given corresponding local and measured marker points $a_k,b_k$, Arun/SVD registration minimizes $\sum_k\|Ra_k+t-b_k\|^2$ over $R\in\SO$ \parencite[slide~17]{cisi_registration}. With centered row-coordinate matrices $A_c,B_c$,
+\begin{equation}
+H=A_c^TB_c=U\Sigma V^T,\quad
+R=V\operatorname{diag}(1,1,\det(VU^T))U^T,\quad t=\bar b-R\bar a.
+\end{equation}
+The determinant correction excludes reflections. At least three noncollinear correspondences are required; numerical rank below two is rejected. Coplanar noncollinear points can still determine a proper rigid transform.
 
-\subsection{Homing and Estimation of the Base Frame}
-\placeholder{Derive the sign of the repeated-home encoder correction, its random-noise reduction, and the base transform estimate from observed versus nominal end-effector poses.}
+To average repeated frames, translations are averaged in their common target frame. For $M=N^{-1}\sum_jR_j=U\Sigma V^T$, use
+\begin{equation}
+\bar R=U\operatorname{diag}(1,1,\det(UV^T))V^T.
+\end{equation}
+This is the least-squares projection of the matrix mean onto $SO(3)$: orthogonality is preserved and the determinant is $+1$. It is a chordal rotation mean, not an average of Euler angles or an intrinsic $SE(3)$ mean. Equal weighting does not remove fixed tracker bias.
 
-\subsection{Calibration Sampling Density and Measurement Uncertainty}
-\placeholder{Derive the combined robot-distortion/tracker-gradient slope, the 1D sweep interpolation bound, wrist spacing, repeated-reading estimate, and assumptions/limitations. Distinguish hard specification bounds from chosen error allocations.}
+\subsection{Homing and Base-Frame Initialization}
+At physical home, $0=\theta_{\mathrm{home},k}+\delta_{\mathrm{sys},k}+\delta_{\mathrm{rnd},k}$. The additive correction is therefore
+\begin{equation}
+ o_k=-\frac{1}{5}\sum_{i=1}^{5}\theta_{\mathrm{home},i,k}.
+\end{equation}
+The negative sign is essential. This correction is applied once in the improved joint map; stored encoder observations remain unchanged. For each paired observation, right-cancel nominal FK:
+\begin{equation}
+ F_{X,j}=F_{\mathrm{obs},j}\big[F_{BE}^{\mathrm{nom}}(\thv_j)\big]^{-1},
+ \qquad F_{X,0}=\operatorname{AverageFrames}\{F_{X,j}\}.
+\end{equation}
+This preserves the order $F_{TE}=F_XF_{BE}$. With imperfect nominal kinematics, $F_{X,0}$ is a baseline alignment rather than an isolated measurement of the physical base pose. The ten initial mixed poses are diagnostic; the final initialization uses the 765 main calibration pairs.
+
+\subsection{Sampling Density and Repeated Measurements}
+The classroom interpolation bound for a one-dimensional error profile with $\|e'\|\leq L$ is \parencite{cisi_interpolation}
 \begin{equation}\label{eq:interp}
-\big\|e_{\mathrm{interp}}\big\|\le \frac{Lh}{2}.
+ \|e_{\mathrm{interp}}\|\leq Lh/2.
 \end{equation}
-\placeholder{Explain why this is a one-dimensional bound along each single-joint sweep rather than a global 3D guarantee.}
-
-\subsection{Parameterization of the Improved Kinematic Model}
-\placeholder{Define the 34-parameter representation: base-frame correction, axis tilts, tool correction, and joint distortion. Define scales, signs, home anchoring, and gauge choice.}
-
-\subsection{Constrained Nonlinear Least Squares}
-\placeholder{Derive the six-dimensional signed residual, units/weights, least-squares objective, parameter scaling, and full-interval physical distortion constraints. Describe solver selection and convergence criteria.}
-\begin{equation}\label{eq:least_squares}
-\widehat{\betav}=\underset{\betav\in\mathcal C}{\operatorname{argmin}}
-\sum_{j=1}^{N}\left\|\bm r_j(\betav)\right\|_2^2,
+For a fixed-wrist linear sweep, a conservative combined robot/tracker slope is
+\begin{equation}
+L=\omega_{\mathrm{rob}}+\omega_{\mathrm{trk}}(1+\omega_{\mathrm{rob}})
+=0.001250375\ \mathrm{mm/mm}.
 \end{equation}
-where $\mathcal C$ denotes the admissible parameter set.
+An engineering allocation of 0.025 mm per profile gives $h\leq39.99$ mm; 17 levels over 600 mm provide 37.5 mm spacing. For wrist joint distortion, $\omega_{\mathrm{rob}}=5\times10^{-5}$ rad/rad and a $0.001/24$ rad allocation permits $h\leq1.667$ rad. A tighter $\pi/4$ observability cap supplies several angular levels: 7, 7, and 9 for joints 4--6. These are profile-spacing arguments, not a proof of global pose accuracy; in particular, a global quadratic does not inherit a piecewise-linear interpolation guarantee.
 
-\subsection{Jacobian Rank and Parameter Identifiability}
-\placeholder{Explain numerical differentiation, SVD, the redundant base-axis gauge, and weak but non-null parameter directions; clearly separate identifiability from prediction quality.}
+For centered markers define $G=\sum_k(\|a_k\|^2I-a_ka_k^T)$. The tetrahedron gives $G=11250I$ mm$^2$. Linearized independent marker noise implies $\operatorname{Cov}(\alphav)\simeq\sigma_b^2G^{-1}$. Adding nominal independent wrist repeatability gives an angular RMS estimate
+\begin{equation}
+\sigma_R\simeq\sqrt{3(0.1)^2/11250+3(10^{-4})^2}=0.001642\ \mathrm{rad}.
+\end{equation}
+Allocating half the angular target to random RMS yields $n=\lceil(0.001642/0.0005)^2\rceil=11$ re-commanded readings. The plan has 69 unique configurations, 11 observations each, and six reference returns: $69\times11+6=765$. Re-commanding renews robot noise, unlike repeated snapshots after a single move. Independence and small-error linearization are engineering approximations; systematic error and model mismatch do not average away.
 
-\subsection{Inverse Kinematics and Numerical Limitations}
-\placeholder{Summarize the provided numerical IK formulation, its use of improved FK, and known singularity, joint-limit, and angle-wrapping limitations. State explicitly if the original TA implementation was retained.}
-
-% ================================================================
-\section{Algorithmic Approach and Implementation}\label{sec:implementation}
-\subsection{System Architecture and End-to-End Workflow}
-\placeholder{Describe module responsibilities and the caller--callee/data-flow relationships from marker design through evaluation. Do not copy implementation source line-by-line.}
-\figureplaceholder{Program/module call hierarchy or calibration pipeline}{Major data and control flow through the calibration program.}{fig:pipeline}
-
-\subsection{Error Metrics, Registration, and Frame Reduction}
-\subsubsection{Implementation}
-\placeholder{Give concise pseudocode and input/output shapes for core Step 4--5 operations, including corner cases.}
-\subsubsection{Unit Tests}
-\placeholder{Describe synthetic known-value tests, numerical tolerance and regression outcomes for metrics and registration.}
-
-\subsection{Homing, Pose Planning, and Data Collection}
-\subsubsection{Implementation and Pseudocode}
-\placeholder{Explain repeated homing, ordered one-axis sweeps, tracker visibility checks, pairing of encoder/Frame observations, repeated commands, and simulated-time accounting.}
-\begin{algorithm}[htbp]
-\caption{Calibration-data acquisition: algorithmic outline only}\label{alg:acquisition}
-\begin{algorithmic}[1]
-  \State $\mathcal D\gets\emptyset$
-  \State $\mathcal P\gets\Call{PlanCalibrationPoses}{\text{robot, tracker, target accuracy}}$
-  \For{each commanded configuration $\thv$ in $\mathcal P$}
-    \State \Call{MoveJoints}{$\thv$}
-    \State Acquire encoder state and tracker observation
-    \If{a valid marker-body observation exists}
-      \State Append paired encoder/observed-frame record to $\mathcal D$
-    \EndIf
-  \EndFor
-  \State \Return $\mathcal D$ and measured simulated acquisition time
-\end{algorithmic}
-\end{algorithm}
-\subsubsection{Unit Tests}
-\placeholder{Describe visibility, limits, excitation, time accounting, missing observations, and home-sign tests.}
-
-\subsection{Improved Kinematics and Parameter Fitting}
-\subsubsection{Implementation and Pseudocode}
-\placeholder{Describe parameter initialization, forward model, gauge handling, constrained optimization, checkpointing, and parameter report.}
-\subsubsection{Unit Tests}
-\placeholder{Describe nominal recovery, perturbation tests, synthetic noiseless parameter fitting, SVD-rank checks, physical-bound checks, and held-out prediction tests.}
-
-\subsection{Forward and Inverse Kinematics Evaluation}
-\subsubsection{Implementation}
-\placeholder{Distinguish the fixed Step 9 grid, physical Step 10 move-based tests, tracker measurement residuals, and ground-truth reporting-only oracle.}
-\subsubsection{Unit Tests and Numerical Edge Cases}
-\placeholder{Include FK/IK round trips, limit/singularity cases, documented exceptions or expected failures, and non-TODO TA test outcomes. Avoid claiming that expected failures passed.}
-
-\subsection{Reproducibility and Execution Procedure}
-\placeholder{Specify environment, random seeds, saved data, experiment commands, implementation versions, and how to reproduce figures without accidentally rerunning expensive acquisition.}
-
-% ================================================================
-\section{Experimental Results and Evaluation}\label{sec:results}
-\subsection{Protocols, Metrics, and Random Seeds}
-\placeholder{Define training vs held-out configurations, official vs supplemental tests, individual-move results vs averaged tracker observations, and calibration independence across seeds.}
-
-\subsection{Calibration Baseline and Estimated Parameters}
-\placeholder{Present the pre-calibration baseline, after-fit residuals, parameter angles/offsets/scales and full-range bound compliance. State which parameters depend on gauge.}
-\begin{table}[htbp]\centering
-\caption{Template for nominal and calibrated performance. Fill only from final verified results.}\label{tab:main_accuracy}
-\begin{tabular}{@{}lcccc@{}}\toprule
-& \multicolumn{2}{c}{Position (mm)} & \multicolumn{2}{c}{Orientation (rad)}\\
-\cmidrule(lr){2-3}\cmidrule(l){4-5}
-Method & RMS & Maximum & RMS & Maximum\\\midrule
-Nominal FK & --- & --- & --- & ---\\
-Improved FK & --- & --- & --- & ---\\
-Nominal IK & --- & --- & --- & ---\\
-Improved IK & --- & --- & --- & ---\\\bottomrule
+\subsection{Corrected Kinematic Model}
+The stored vector retains 34 parameters, summarized in \cref{tab:parameter_layout}. Each imperfect axis has two perpendicular tilt components; rotation along its own axis is excluded. The first prismatic axis remains exact. Exact rotation exponentials preserve $SO(3)$ rather than treating $I+\operatorname{sk}(\phi)$ as a finite rotation.
+\begin{table}[!htbp]\centering\small
+\caption{Parameter layout for the quadratic model.}\label{tab:parameter_layout}
+\begin{tabular}{@{}lll@{}}\toprule
+Indices (zero-based) & Meaning & Count\\\midrule
+$0{:}6$ & Base correction twist, rotation then translation & 6\\
+$6{:}16$ & Two perpendicular tilts for axes 2--6 & 10\\
+$16{:}22$ & Wrist-to-tool correction twist & 6\\
+$22{:}34$ & Linear/quadratic coefficients for six joints & 12\\\bottomrule
 \end{tabular}
 \end{table}
+With fixed home correction $o_k$, normalization $s_k=\max(|\theta_{\min,k}|,|\theta_{\max,k}|)$, and $x_k=(\theta_k+o_k)/s_k$,
+\begin{equation}\label{eq:joint_map}
+\delta_k(\theta_k)=o_k+c_{k1}x_k+c_{k2}x_k^2,\qquad
+q_k=\theta_k+\delta_k(\theta_k).
+\end{equation}
+The variable polynomial terms vanish at the measured home encoder $\theta_k=-o_k$, giving $q_k(-o_k)=0$; home offsets are not counted twice. Coefficients have the joint's units. The transform chain is
+\begin{align}
+F_{BE}(\thv)&=\operatorname{Trans}\!\left(\sum_{k=1}^{3}q_kd'_k\right)F_{cw}
+ \prod_{k=4}^{6}\operatorname{Rot}(n'_k,q_k)\,F_{we}\operatorname{Exp}_{SE(3)}(\xi_{we}),\\
+F_X&=F_{X,0}\operatorname{Exp}_{SE(3)}(\xi_X).
+\end{align}
+Axis tilts rotate the nominal axes. Base/tool twists use rotation-first ordering; their actual translations are $J(\alpha)\epsilon$, not simply the translational twist coordinates.
 
-\subsection{Forward Kinematics Accuracy}
-\placeholder{Report fixed grid, per-pose pass rate, RMS/max/percentiles, comparisons, and genuinely held-out analysis. Do not confuse pose accuracy with model-fit residuals.}
-\figureplaceholder{FK position and orientation error CDFs with target lines}{Cumulative FK-error distributions for nominal and improved models.}{fig:fk_cdf}
+\subsection{Physically Constrained Nonlinear Fitting}
+For each observed/predicted pair, retain signed components:
+\begin{equation}\label{eq:least_squares}
+r_j(\betav)=\begin{bmatrix}
+\operatorname{Log}_{SO(3)}(\Delta R_j)/0.001\\
+\Delta p_j/0.2
+\end{bmatrix},\qquad
+\widehat\betav=\arg\min_{\betav\in\mathcal C}\frac12\sum_{j=1}^{765}\|r_j(\betav)\|^2.
+\end{equation}
+These target-based weights are dimensionless, not covariance whitening. Scalar error magnitudes alone would discard directional information. All 765 observations enter the objective individually; no averaging or truth-based tuning is used in fitting.
 
-\subsection{Inverse Kinematics Accuracy}
-\placeholder{Report how target poses were selected, commanded joint solutions, executed-move errors, failure counts, and per-target time. Distinguish model consistency from physical placement.}
-\figureplaceholder{IK position and orientation error distributions with target lines}{Physical IK accuracy over the evaluation target set.}{fig:ik_cdf}
+Joint-error specifications impose, throughout each permitted encoder interval,
+\begin{equation}\label{eq:physical_constraints}
+ |\delta_k(\theta)|\leq D_k,\qquad
+ |\delta'_k(\theta)|\leq\Omega_k,
+\end{equation}
+For joints 1--3, $D_k=0.2$ mm and $\Omega_k=5\times10^{-4}$; for joints 4--6, $D_k=0.01$ rad and $\Omega_k=5\times10^{-5}$. Quadratic magnitude extrema occur at interval endpoints or an interior stationary point; the derivative is linear, so its extrema occur at the endpoints. Constraints are therefore checked over the full interval analytically, including the home anchor.
 
-\subsection{Random Workspace and Multi-Seed Testing}
-\placeholder{Report new continuous configurations and independent re-calibrations for other seeds only if actually performed; state seed count and sample counts.}
-\figureplaceholder{Error versus position in the work volume}{Spatial distribution of independent end-effector position errors.}{fig:workspace_error}
+Following the classroom parameter-estimation framework \parencite{cisi_calibration,cisi_leastsquares}, optimization uses dimensionless parameter scales: 0.01 rad for angular corrections, 1 mm for base translation, 0.5 mm for tool translation, and 0.2 mm / 0.01 rad for linear/angular distortion coefficients. An initial residual-Jacobian SVD further preconditions the 33 free coordinates. Scaled SLSQP uses $\mathrm{ftol}=10^{-10}$ and a 100-evaluation/iteration budget, with central numerical residual derivatives and analytic constraint gradients. Dividing the objective by sample count changes scaling, not its minimizer. The parameter vector is updated only after successful, finite, physically feasible optimization. Historical unconstrained trust-region fits remain separate comparisons.
 
-\subsection{Joint Limits and Wrist Singularities}
-\placeholder{Present separate stress-test statistics, numerical IK limitations, and qualitative failure classification. Distinguish these from the official test protocol.}
+\subsection{Identifiability and Gauge Freedom}
+The actual signed weighted residual Jacobian is differentiated at scaled steps $10^{-4}\max(1,|\beta_i/S_i|)$ and twice that step. SVD rank uses a relative cutoff together with finite-difference disagreement. In the nonzero model audit using the 69 Step 7 configurations, the full Jacobian has rank 33/34. Fixing parameter 0 (base-twist $x$ rotation) gives rank 33/33, singular extrema 305.125 and 0.361120, and condition number 844.94. The full numerical null singular value is $3.96\times10^{-8}$, below the $3.05\times10^{-5}$ rank threshold.
 
-\subsection{Runtime and Measurement Efficiency}
-\placeholder{Report robot-motion time, tracker sampling time, fitting wall-clock time, complete program wall-clock time, and evaluation simulated time. Explain whether a repeated test is included.}
-\figureplaceholder{Calibration and evaluation time breakdown}{Time cost of calibration and independent testing; show distinct simulated and wall-clock measures.}{fig:timing}
+Physically, a base rotation about the exact first axis can be counteracted by rotating the other axes and tool frame, leaving tracker-frame predictions unchanged. Fixing one coordinate selects a gauge; it does not measure true base roll. The weakest observable modes mix the linear and quadratic joint-1 and joint-3 coefficients, especially because their travel intervals are positive-only. Thus full reduced numerical rank does not imply precise physical parameter recovery under noise.
+
+Repeating the same configuration stacks equivalent Jacobian blocks: singular values increase as $\sqrt n$, but rank and missing excitation do not improve. Single-axis sweeps collectively excite the selected model after gauge fixing; their adequacy is tested further on mixed configurations. This local audit is not a proof of global uniqueness or identifiability of arbitrary distortion functions.
+
+\subsection{Provided Inverse Kinematics}
+The unchanged inverse uses nominal wrist branches as initial guesses, finite-difference Jacobians, and damped Gauss--Newton updates for at most 50 iterations. It accepts in-limit candidates and chooses the one nearest the caller's seed. The seed guides selection rather than necessarily providing an optimization start. Residuals mix raw radians and millimeters, and a returned candidate is not independently gated by a final pose-accuracy check.
+
+Near wrist poles, the joint-to-pose Jacobian loses rank. Exact limits also expose numerical feasibility sensitivity. Furthermore, post-solve angle wrapping can alter FK because the calibrated polynomial is nonperiodic:
+\begin{equation}
+q_k(\theta+2\pi)-q_k(\theta)=2\pi+\delta_k(\theta+2\pi)-\delta_k(\theta).
+\end{equation}
+These issues are evaluated honestly, without replacing the provided solver.
 
 % ================================================================
-\section{Discussion}\label{sec:discussion}
-\subsection{Accuracy, Observability, and Physical Plausibility}
-\placeholder{Interpret the improvements and remaining error floor; discuss systematic tracker bias, repeatability, parameter coupling, and model mismatch.}
-\subsection{Design Trade-offs and Limitations}
-\placeholder{Explain the measurement-time-versus-accuracy trade-off, polynomial versus interpolation mismatch, numerical IK limitations, and limits on generalization.}
-\subsection{Possible Improvements}
-\placeholder{Only suggest modifications supported by an observed limitation or a reasoned analysis.}
+\Needspace{6\baselineskip}
+\section{Algorithmic Approach and Implementation}\label{sec:implementation}
+\subsection{Workflow and Module Responsibilities}
+The notebook orchestrates the public robot/tracker APIs. \texttt{metrics.py} computes relative-frame errors; \path{registration.py} supplies rigid registration and proper frame means; \texttt{workflow.py} handles homing, pose planning, paired observations, and base initialization. \path{kinematics.py} implements corrected FK, residuals, fitting, rank analysis, and physical parameter reports. Full-interval constraints live in the student-owned \path{vendor/functions/_fit_constraints.py}. Supplementary scripts/tests are in \texttt{experiments/}; data, fits, and results are in \texttt{results/}. Protected TA simulation, assertions, and inverse code are unchanged.
 
+\begin{algorithm}[!htbp]
+\caption{Calibration and frozen-model evaluation}\label{alg:acquisition}
+\begin{algorithmic}[1]
+\State Build the nominal scene and exact calibration marker body.
+\State Estimate additive home offsets from five homings.
+\State Acquire ten baseline observations for diagnostic alignment.
+\State Plan and execute the 765-command single-axis trajectory.
+\For{each commanded configuration}
+ \State Copy settled public encoder values and acquire one tracker snapshot.
+ \If{the calibration-body observation is available}
+  \State Store a copied encoder/frame pair.
+ \EndIf
+\EndFor
+\State Average $F_{\mathrm{obs}}F_{\mathrm{nom}}^{-1}$ for base initialization.
+\State Fit the constrained model with one gauge coordinate fixed.
+\State Save and freeze parameters/data hashes before new truth evaluation.
+\State Evaluate tracker prediction, physical FK, own-model consistency, and executed IK separately.
+\end{algorithmic}
+\end{algorithm}
+
+Missing observations produce no unmatched pair or cached substitute, but their sampling/motion time remains charged. Reference returns are encoder-zero commands, not additional physical homings. The measurement plan repeats commands, while the collector's \texttt{repeats} option alone repeats snapshots after one move; this distinction matters for robot repeatability noise.
+
+\subsection{Focused Unit Tests and Regression Evidence}
+Four high-value test groups are emphasized; other required component tests are still run.
+\begin{enumerate}[leftmargin=*,itemsep=2pt]
+\item \textbf{Forward-model geometry.} Zero corrections recover nominal FK; noncommuting base/tool perturbations detect multiplication-order mistakes, known tilts check geometry, and random nonzero models maintain $R^TR=I$ and $\det R=1$.
+\item \textbf{Fitting and held-out recovery.} Noiseless model-generated data use nonzero parameters, 24 training poses, and 40 new poses. Historical equation-level recovery reaches roughly $10^{-13}$ mm / $10^{-16}$ rad, while feasible constrained fixtures and archived fits verify physical bounds. Tests require meaningful improvement over the initial model, not only a solver success flag. This is numerical consistency, not simulator accuracy.
+\item \textbf{Rank, constraints, and acquisition integrity.} Central-difference/SVD checks verify the 33/34 gauge, 33/33 reduced rank, and repetition invariance. Independent polynomial-extremum checks validate complete-interval constraints. Workflow fixtures test home-offset sign, copied synchronized measurements, missing observations, limits, visibility, and exact clock accounting.
+\item \textbf{Inverse edge cases and failure accounting.} Own-FK targets provide reachable witnesses for nominal, mixed-wrist, near-pole, and boundary round trips. Strict $10^{-6}$ mm / $10^{-8}$ rad tolerances expose wrapping/convergence failures. Executed-IK fixtures ensure inaccurate returns are still executed/scored and exceptions remain in denominators.
+\end{enumerate}
+The full regression run for this report produced \textbf{252 passed, 3 expected failures, and 1 failure} in 31.06 s. The three strict expected failures document retained inverse limitations. The remaining failure is \path{test_refine_marker_body_reduces_layout_error}: optional manufacturing-layout refinement remains unimplemented because the selected special body has exact coordinates. This exception is disclosed; the suite is not described as entirely passing.
+
+\subsection{Reproducibility}
+Frozen datasets/models and saved per-attempt records permit report generation without reacquisition. Each seed uses its own calibration data and parameters. Geometry uses \path{SeedSequence([20261025, robot seed, category])}; calibration sensor streams are 606, 1607, and 1661, and evaluation streams are 3101, 3107, and 3161. Robot repeatability uses the public seed-specific stream after calibration. Cached scenes replay only the original homing/calibration motions to reconstruct public state and stream position, with replay time reported separately. No artificial 500-command burn-in or private RNG reseeding is performed.
+
+Seed 1 is a historical development robot; new configurations do not make its model development blind. Full evaluation extends the prespecified design, including pilot FK configurations, rather than claiming a new independent noise realization for every repeated development run. Models are frozen before new ground-truth evaluation, and no model is refitted or selected from those errors.
+
+From \texttt{assignment2/}, the full supplementary entry point is
+\begin{quote}\small\ttfamily
+venv/bin/python experiments/comprehensive\_evaluation.py\\
+\hspace*{1em}--stage full --approve-full
+\end{quote}
+Completed seed checkpoints reuse saved results; new seeds calibrate independently. Compact summaries, detailed attempts, and figures are stored separately. The original Step 9/10 archives remain authoritative for their fixed protocols. The implementation and course sources are available in the project/course repositories \parencite{cis_project,cis_course}.
+
+% ================================================================
+\Needspace{6\baselineskip}
+\section{Experimental Results and Evaluation}\label{sec:results}
+\subsection{Protocols and Statistical Interpretation}
+The original Seed 1 Step 9 grid contains 729 visible configurations: three levels of each joint, unchanged from the TA notebook. Step 10 uses the original seed-0 selection of 40 distinct grid targets, with nominal then improved execution per target. Supplementary testing uses the matrix in \cref{tab:test_matrix}, separately for each robot/tracker seed.
+\begin{table}[!htbp]\centering\small
+\caption{Prespecified supplementary test counts per robot seed.}\label{tab:test_matrix}
+\begin{tabular}{@{}lrr@{}}\toprule
+Category & Physical FK poses & Executed IK targets/model\\\midrule
+Continuous full-range random & 1000 & 80\\
+Joint limits & 120 & 20\\
+Workspace boundary & 104 & 20\\
+Wrist singularities & 96 & 20\\\midrule
+Total & 1320 & 140\\\bottomrule
+\end{tabular}
+\end{table}
+Random samples use continuous joint values, not new selections from the fixed grid. Limit tests cover exact endpoints and small inward offsets. Boundary FK combines 26 stage-boundary points with four wrist configurations. Singularity FK includes predicted fitted poles, offsets from $10^{-4}$ to $10^{-2}$ rad, and nominal poles. These are stage/workspace and wrist stress designs, not exhaustive end-effector-envelope coverage. All supplementary configurations are held out from calibration.
+
+Ordinary subsets are tagged before seeing errors, using 5 mm / 0.05 rad limit margins and 0.05 rad clearance from nominal/fitted wrist poles. Full-range random tables retain all random poses, including those near difficult regions; designed stress tests are separate. Each seed also has 100 single-observation tracker tests and 140 own-model consistency poses/model, plus 64 alternative-initialization numerical cases/model.
+
+Physical FK compares the model with the deterministic permitted pose oracle, without moving or sampling. Tracker prediction compares against one noisy observed frame after commanding a new pose. Numerical consistency uses each model's own FK target. Physical IK constructs reachable physical targets with the permitted oracle, passes the target into inverse kinematics, commands every returned solution, and scores actual end-effector placement. Preselected generating design vectors are supplied as caller seeds, as in Step 10; this is favorable branch guidance, not arbitrary-start robustness. Nominal/improved moves use successive noise draws, not an identical realized perturbation.
+
+Every attempted target contributes to the simultaneous-pass denominator, including exceptions and limit failures. RMS, maximum, median, and P95 condition on finite scored errors; no fabricated infinite errors are inserted. CDFs retain the attempted denominator, so unavailable targets leave missing mass. Counts and individual failures must be read alongside conditional error statistics.
+
+\subsection{Convergence, Fit Residuals, and Physical Parameters}
+\begin{table}[!htbp]\centering\small
+\caption{Independent cold-start constrained fits; cost is the unnormalized target-weighted sum of squares divided by two.}\label{tab:fits}
+\begin{tabular}{@{}rrrrrr@{}}\toprule
+Seed & Initial cost & Final cost & Iterations & Residual calls & Wall (s)\\\midrule
+1 & 253200.6 & 1102.385 & 5 & 335 & 64.173\\
+7 & 432760.1 & 1134.716 & 5 & 335 & 64.415\\
+61 & 284889.4 & 1083.997 & 5 & 335 & 64.081\\
+\bottomrule\end{tabular}
+\end{table}
+All three constrained fits terminate successfully in five SLSQP iterations, with five objective/five Jacobian evaluations and 335 residual calls including numerical differentiation. Joint-bound margins are feasible to roundoff (minimum approximately $-8.44\times10^{-15}$ for Seed 1). Convergence is evidence of minimizing the chosen objective, not unique recovery of every physical parameter.
+
+Seed 1 raw training tracker RMS is 0.09010 mm / 0.001637 rad; raw maxima are 0.22914 mm / 0.004085 rad. A separate 36-configuration tracker holdout has 11 re-commanded readings per configuration. Its raw RMS is 0.09162 mm / 0.001667 rad; errors against configuration-mean frames reduce to RMS 0.03744 mm / 0.0005484 rad and maxima 0.06926 mm / 0.0009596 rad. These averaged tracker diagnostics are explicitly separate from single-observation testing and physical accuracy.
+
+The historical unconstrained Seed 1 fit has cost 1101.923 but a joint-5 derivative reaching 4.151 times the physical bound. Constraints raise cost only to 1102.385 (about 0.042\%) and improve held-out mean-frame position RMS from 0.03815 to 0.03744 mm; the maximum mean-frame angular error changes slightly from 0.0009542 to 0.0009596 rad. This small accuracy trade-off justifies adopting the physically constrained model. Noise, parameter coupling, and quadratic model mismatch can produce implausible unconstrained slopes. Changing the base-roll gauge cannot repair a scalar joint-map derivative, which is gauge invariant.
+
+\begin{table}[!htbp]\centering\small
+\caption{Seed 1 scalar joint-map estimates. Offset denotes $\delta_k(0)$; scale denotes $dq_k/d	heta_k$ at encoder zero. The distortion maximum includes the fixed home correction.}\label{tab:parameters}
+\begin{tabular}{@{}rlrrrr@{}}\toprule
+Joint & Unit & Offset & Local scale & $\max|\delta_k|$ & $\max|\delta_k^\prime|$\\\midrule
+1 & mm & 0.0298427 & 0.999622931 & 0.1199098 & 3.771e-04\\
+2 & mm & 0.0803237 & 0.999816974 & 0.1311684 & 2.101e-04\\
+3 & mm & -0.0474089 & 0.999716516 & 0.1897601 & 2.835e-04\\
+4 & rad & 0.0074367 & 0.999966184 & 0.0074973 & 5.000e-05\\
+5 & rad & 0.0085745 & 1.000018898 & 0.0085880 & 5.000e-05\\
+6 & rad & -0.0079191 & 0.999968681 & 0.0080468 & 5.000e-05\\
+\bottomrule\end{tabular}
+\end{table}
+For Seed 1, the derivative bounds are $5\times10^{-4}$ for joints 1--3 and $5\times10^{-5}$ for joints 4--6; all reported complete-interval magnitudes and slopes comply. The physical report also gives axis directions (\cref{tab:axes}) and inter-axis angles (\cref{tab:angles}). The latter match a post-freeze public ground-truth diagnostic within 0.0076 degrees. This truth read is reporting-only and consumes no motion/sampling time.
+
+Base and tool corrections are reported below as rotation vectors and actual transform translations, not translational twist coordinates:
+\begin{center}\small
+\begin{tabular}{@{}lcc@{}}\toprule
+Correction & Rotation vector (rad) & Translation (mm)\\\midrule
+Base & $(0,-0.002564,0.006758)$ & $(0.42894,-5.60732,-0.87128)$\\
+Tool & $(-0.005793,-0.004813,-0.001129)$ & $(0.05964,-0.21271,-0.23614)$\\\bottomrule
+\end{tabular}
+\end{center}
+These are gauge-dependent corrections to reference frames, not independently measured simulator placement errors. Inter-axis angles and tracker-frame predictions are invariant; raw tilt/twist agreement is not an identifiability claim.
+
+\subsection{Preserved Fixed-Protocol Results}
+\begin{table}[!htbp]\centering\small
+\caption{Original Seed 1 protocols: 729 fixed FK configurations and 40 physically executed IK targets. Units: mm and rad.}\label{tab:official}
+\begin{tabular}{@{}lrrrrr@{}}\toprule
+Model & $e_p$ RMS & $e_p$ max & $e_R$ RMS & $e_R$ max & Both pass\\\midrule
+Nominal FK & 7.78090 & 16.96405 & 3.289e-02 & 5.575e-02 & 0/729\\
+Improved FK & 0.06443 & 0.09706 & 8.234e-05 & 1.420e-04 & 729/729\\
+Nominal physical IK & 8.14062 & 14.20584 & 3.447e-02 & 5.567e-02 & 0/40\\
+Improved physical IK & 0.06962 & 0.09994 & 2.000e-04 & 4.403e-04 & 40/40\\
+\bottomrule\end{tabular}
+\end{table}
+Both targets are satisfied at every original improved-model test pose. FK uses no additional simulated time; its archived cell wall time is 0.374 s. The 80 actual nominal/improved IK moves consume 1058.696 s simulated time and 0.856 s cell wall time, excluding scene reconstruction. The per-model motion-time attribution is order-dependent: nominal typically travels to the next target, then improved corrects that target. It is not a fair model-speed comparison.
+
+These results demonstrate accuracy on the original interior grid and target selection, not at all joint limits or singularities. The supplementary tests below broaden coverage without changing the fixed protocols.
+
+\subsection{Continuous Random Workspace Accuracy}
+\begin{table}[!htbp]\centering\small
+\caption{Physical FK at 1000 continuous full-range random configurations per seed. Position errors are in mm and orientation errors in rad.}\label{tab:random_fk}
+\begin{tabular}{@{}rlrrrr@{}}\toprule
+Seed & Model & $e_p$ RMS & $e_p$ max & $e_R$ RMS & $e_R$ max\\\midrule
+1 & Nominal & 8.37636 & 18.27554 & 3.990e-02 & 7.528e-02\\
+1 & Improved & 0.07096 & 0.10966 & 8.213e-05 & 1.599e-04\\
+7 & Nominal & 10.22787 & 22.03891 & 3.759e-02 & 7.577e-02\\
+7 & Improved & 0.06242 & 0.10054 & 1.715e-04 & 3.153e-04\\
+61 & Nominal & 7.95485 & 16.72207 & 4.349e-02 & 8.258e-02\\
+61 & Improved & 0.07056 & 0.12485 & 2.240e-04 & 4.978e-04\\
+\bottomrule\end{tabular}
+\end{table}
+Every improved FK random test passes both targets (3000/3000). Adding the designed stress sets gives 3960/3960 FK passes, with overall maxima 0.12485 mm and $4.9784\times10^{-4}$ rad. The improvement over nominal is substantial across all three robots. A finite set of joint-uniform configurations is not a proof of continuous-workspace worst-case accuracy; its Cartesian sampling density is not uniform.
+
+\begin{table}[!htbp]\centering\small
+\caption{Executed improved IK at 80 continuous random targets per seed. All attempts are retained. Units: mm and rad.}\label{tab:random_ik}
+\begin{tabular}{@{}rrrrrr@{}}\toprule
+Seed & $e_p$ RMS & $e_p$ max & $e_R$ RMS & $e_R$ max & Both pass\\\midrule
+1 & 0.07698 & 0.11766 & 1.954e-04 & 4.120e-04 & 80/80\\
+7 & 0.06536 & 0.10138 & 2.322e-04 & 4.467e-04 & 80/80\\
+61 & 0.07261 & 0.13286 & 2.865e-04 & 7.977e-04 & 80/80\\
+\bottomrule\end{tabular}
+\end{table}
+All 240 random executed improved-IK targets pass, including individual move-repeatability noise. Nominal random physical IK passes 0/240; three attempts raise exceptions. The achieved random-target maxima are 0.13286 mm and $7.9769\times10^{-4}$ rad. Medians/P95 appear in \cref{tab:percentiles}. Even within random tests, strict own-model numerical consistency differs from physical target passage: Seed 1 has 77/80 strict round trips, while seeds 7/61 each have 80/80. All 202 ordinary-subset round trips pass strictly; the remaining Seed 1 discrepancies lie in more difficult full-range random poses.
+
+\begin{figure}[!htbp]\centering
+\includegraphics[width=\linewidth,height=0.77\textheight,keepaspectratio]{evaluation_cdfs.pdf}
+\caption{Saved full-evaluation FK and executed-IK CDFs, pooled across seeds. Solid curves use the prespecified ordinary subset of random configurations; dashed curves use designed stress sets. Position/orientation targets are dotted. Attempted denominators preserve solver failures as missing mass. Per-seed tables retain differences hidden by pooling.}\label{fig:accuracy_cdf}
+\end{figure}
+
+\subsection{Joint-Limit, Boundary, and Singularity Results}
+\begin{table}[!htbp]\centering\small
+\caption{Improved physical FK at all designed stress configurations. Units: mm and rad.}\label{tab:stress_fk}
+\begin{tabular}{@{}rlrrrr@{}}\toprule
+Seed & Category & Poses & $e_p$ max & $e_R$ max & Both pass\\\midrule
+1 & Joint limits & 120 & 0.09752 & 1.107e-04 & 120/120\\
+1 & Boundary & 104 & 0.11787 & 6.716e-05 & 104/104\\
+1 & Singularity & 96 & 0.06966 & 1.167e-04 & 96/96\\
+7 & Joint limits & 120 & 0.09755 & 2.281e-04 & 120/120\\
+7 & Boundary & 104 & 0.07896 & 1.485e-04 & 104/104\\
+7 & Singularity & 96 & 0.09150 & 2.522e-04 & 96/96\\
+61 & Joint limits & 120 & 0.10460 & 3.124e-04 & 120/120\\
+61 & Boundary & 104 & 0.11760 & 1.864e-04 & 104/104\\
+61 & Singularity & 96 & 0.09360 & 2.394e-04 & 96/96\\
+\bottomrule\end{tabular}
+\end{table}
+Forward accuracy remains within both targets in all stress categories. The inverse solver is much less robust:
+\begin{table}[!htbp]\centering\small
+\caption{Executed improved IK stress tests. Maxima condition on executed targets; pass rates include every attempted target. Units: mm and rad.}\label{tab:stress_ik}
+\begin{tabular}{@{}rlrrrrr@{}}\toprule
+Seed & Category & Executed & Both pass & Exceptions & $e_p$ max & $e_R$ max\\\midrule
+1 & Joint limits & 12/20 & 12/20 & 8 & 0.10551 & 2.541e-04\\
+1 & Boundary & 3/20 & 3/20 & 17 & 0.11974 & 2.768e-04\\
+1 & Singularity & 20/20 & 9/20 & 0 & 0.08696 & 8.317e-03\\
+7 & Joint limits & 13/20 & 13/20 & 7 & 0.08327 & 3.428e-04\\
+7 & Boundary & 6/20 & 6/20 & 14 & 0.07994 & 2.788e-04\\
+7 & Singularity & 20/20 & 18/20 & 0 & 0.10284 & 5.218e-03\\
+61 & Joint limits & 12/20 & 12/20 & 8 & 0.10115 & 4.612e-04\\
+61 & Boundary & 4/20 & 4/20 & 16 & 0.08499 & 2.846e-04\\
+61 & Singularity & 20/20 & 13/20 & 0 & 0.09791 & 4.588e-03\\
+\bottomrule\end{tabular}
+\end{table}
+Across seeds, simultaneous physical-IK passes are 37/60 at limits, 13/60 at boundaries, and 40/60 near singularities. Overall, 330/420 supplementary improved-IK attempts pass: 240 random and 90 stress. The 70 exceptions all occur at limits/boundaries; another 20 singularity executions exceed orientation tolerance. No returned command is recorded outside limits, but rejection/no-candidate exceptions still count as failed targets. The largest executed orientation error is 0.008317 rad. Maxima alone cannot describe boundary robustness when most targets are unavailable.
+
+Own-model targets prove that many numerical failures are not mathematical unreachability: the generating command is an in-limit solution of that same model. In a separate 78-case diagnostic, defaults pass only 59 strict round trips. Fifteen selected candidates reach the iteration cap without a final accuracy gate, three accurate solutions are spoiled by encoder wrapping, and one boundary candidate is rejected for a roughly $2.4\times10^{-9}$ mm overrun. More iterations improve some cases but cannot repair post-solve wrapping. Physical targets generated from the actual robot can additionally lie outside the fitted model's exact bounded reachable set, especially at stage corners; those exceptions should not all be attributed to the same numerical cause.
+
+
+
+\subsection{Single-Observation Tracker Prediction}
+\begin{table}[!htbp]\centering\small
+\caption{Single-observation tracker prediction: 100 independent commanded configurations per seed, with no observation averaging. Units: mm and rad.}\label{tab:tracker}
+\begin{tabular}{@{}rrrrrr@{}}\toprule
+Seed & $e_p$ RMS & $e_p$ max & $e_R$ RMS & $e_R$ max & Both pass\\\midrule
+1 & 0.09364 & 0.18803 & 1.607e-03 & 3.694e-03 & 27/100\\
+7 & 0.09411 & 0.18773 & 1.646e-03 & 3.032e-03 & 22/100\\
+61 & 0.09715 & 0.19288 & 1.582e-03 & 2.996e-03 & 26/100\\
+\bottomrule\end{tabular}
+\end{table}
+Despite good physical FK, only 27/100, 22/100, and 26/100 single tracker observations meet both thresholds. Their orientation RMS values near 0.0016 rad are consistent with the marker-noise scale estimated earlier. The tracker is a noisy calibration sensor, not an exact per-snapshot reference at the $10^{-3}$ rad level. Averaged tracker-frame holdouts therefore must not be substituted for single-observation results or independent physical truth.
+
+\subsection{Runtime and Measurement Efficiency}
+\begin{table}[!htbp]\centering\small
+\caption{Acquisition and testing costs. The calibration column is each model's original acquisition cost; replay and tests are from the full evaluation run.}\label{tab:time}
+\begin{tabular}{@{}rrrrrr@{}}\toprule
+Seed & Calib. (sim s) & Replay (sim s) & Tracker (sim s) & IK (sim s) & Eval. (wall s)\\\midrule
+1 & 554.031 & 530.781 & 2948.127 & 6316.091 & 19.865\\
+7 & 554.046 & 530.796 & 3066.162 & 5955.715 & 18.270\\
+61 & 554.057 & 0.000 & 2982.082 & 5976.786 & 18.828\\
+\bottomrule\end{tabular}
+\end{table}
+Each new robot requires 775 tracker snapshots (10 baseline plus 765 main) and five homings. For Seed 1, Step 7 contributes 446.909 s motion/settling and 22.950 s sampling, or 469.859 s; adding home/baseline steps gives 554.031 s. The same design gives 554.046/554.057 s for seeds 7/61.
+
+The full run reuses Seed 1/7 calibration archives and acquires only Seed 61. Replay costs 530.781/530.796 s simulated for the cached robots; it is not free calibration and omits their original tracker readings. Across seeds, supplementary evaluation costs 27244.963 s (7.568 h) simulated, including tracker re-commands and actual nominal/improved IK testing. Additional replay plus new Seed 61 acquisition gives 28860.597 s total simulated work in that full run. Numerical own-model checks and deterministic physical FK cost no simulated motion time.
+
+Measured supplementary evaluation wall times sum to 56.962 s. Seed 61 preparation, including its fit subprocess, takes 65.018 s; archived Seed 1/7 preparation is under 0.1 s each. Summing recorded preparation/evaluation stages gives about 122.13 s, excluding plotting, process startup, and final file output. Cold fitting each seed takes about 64 s. These costs indicate practical efficiency on the development machine but are not a measured end-to-end grading runtime or a guarantee for other seeds/hardware. Extensive robustness experiments remain separate from normal notebook execution.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{evaluation_timing.pdf}
+\caption{Current full-run time breakdown, drawn from saved stage timings. Historical Seed 1/7 calibration acquisition is excluded here and reported separately in the table. Initialization includes a new fit only for Seed 61; simulated time and wall-clock time are not interchangeable.}\label{fig:timing}
+\end{figure}
+
+% ================================================================
+\Needspace{6\baselineskip}
+\section{Discussion}\label{sec:discussion}
+\subsection{Accuracy and Physical Plausibility}
+The model generalizes from single-axis calibration to mixed continuous poses, meeting FK targets in every tested category and physical IK targets at all random targets. Constraining joint distortion improves plausibility with negligible loss of prediction accuracy. The gauge audit explains why useful predictions do not imply unique base/tool coordinates or precise individual polynomial coefficients. Residual error can combine quadratic approximation error, systematic tracker bias, and robot repeatability; these effects are not uniquely separated by the available data.
+
+\subsection{Design Trade-offs and Limitations}
+The 69-configuration trajectory excites the selected gauge-fixed model efficiently. Repetitions lower independent noise but neither add rank nor remove bias. The quadratic is compact, yet does not inherit the classroom interpolation bound for sinusoidal distortion. Three finite robot realizations cannot certify arbitrary-seed or continuous worst-case performance, and Seed 1 remains historical development evidence. Good FK or random-target IK accuracy also does not establish strict numerical consistency: the unchanged inverse still fails substantially at limits, boundaries, and poles. Averaged tracker diagnostics must not replace noisy single-observation or physical-placement tests.
+
+\subsection{Smallest Justified Next Improvements}
+The first priority is inverse-solver handling: start from the supplied seed with nominal fallbacks, balance angular/translation units, keep iterates feasible and encoders unwrapped, and validate the final FK residual before selecting a solution. These are supported recommendations, not changes applied to the reported solver. If systematic profile residuals later dominate, bounded one-dimensional piecewise-linear corrections would match the classroom interpolation argument. Any extension should use permitted tracker data and new held-out configurations, without tuning to the ground-truth test errors. Noise-aware weighting likewise requires covariance estimation rather than treating accuracy targets as standard deviations.
+
+\Needspace{6\baselineskip}
 \section{Conclusion}\label{sec:conclusion}
-\placeholder{Summarize the final independently verified accuracy, calibration cost, central technical contributions, and key limitations.}
+A visible tetrahedral-marker setup and approximately 554 s simulated acquisition identify a physically constrained, gauge-fixed kinematic model. Independent calibrations of three robots pass all 3960 supplementary FK configurations and all 240 continuous random executed-IK targets, while preserving the original Seed 1 fixed-protocol successes. Maximum random executed errors are 0.13286 mm and $7.98\times10^{-4}$ rad. However, only 90/180 stress IK targets pass; failures of the unchanged inverse prevent a claim of reliable full-workspace inverse performance. The report therefore separates calibration prediction quality, noisy tracker observations, numerical consistency, and actual placement, and retains the unresolved solver and model limitations.
 
 % ================================================================
 \clearpage
 \printbibliography[heading=bibintoc,title={References}]
 
 \appendix
-\section{AI Tools and Development Assistance}\label{app:ai}
-\placeholder{Identify every AI/development tool used, the purpose and scope of its contribution, how its output was reviewed, and the prompts used. Include the exact prompts or an appropriately organized prompt log as required by the course policies. Do not invent tool use.}
+\Needspace{6\baselineskip}
+\section{Additional Quantitative Evidence}\label{app:additional}
+To keep the main report concise, the complete per-category distributions and joint-position plots are supplied separately as \path{figures/evaluation_categories.pdf} and \path{figures/evaluation_joints.pdf}. Both use the same saved full-evaluation records as the tables and CDFs; no failed attempt is removed from the success denominators.
+\begin{table}[H]\centering\small
+\caption{Improved-model median and 95th-percentile errors on full-range random tests. FK uses 1000 poses/seed; executed IK uses 80 targets/seed.}\label{tab:percentiles}
+\begin{tabular}{@{}lrrrrr@{}}\toprule
+Test & Seed & $e_p$ median & $e_p$ P95 & $e_R$ median & $e_R$ P95\\\midrule
+FK & 1 & 0.06903 & 0.09283 & 7.422e-05 & 1.290e-04\\
+FK & 7 & 0.05990 & 0.08511 & 1.618e-04 & 2.574e-04\\
+FK & 61 & 0.06796 & 0.09642 & 1.812e-04 & 4.007e-04\\
+Physical IK & 1 & 0.07287 & 0.10857 & 1.744e-04 & 3.204e-04\\
+Physical IK & 7 & 0.06338 & 0.08849 & 2.065e-04 & 3.984e-04\\
+Physical IK & 61 & 0.06928 & 0.09643 & 2.333e-04 & 4.424e-04\\
+\bottomrule\end{tabular}
+\end{table}
+\begin{table}[H]\centering\small
+\caption{Own-model FK/IK round trips with generating design vectors supplied as caller seeds. Strict tolerances are $10^{-6}$ mm and $10^{-8}$ rad; unavailable attempts remain in denominators.}\label{tab:consistency}
+\begin{tabular}{@{}rlrrrr@{}}\toprule
+Seed & Category & Strict pass & Exceptions & $e_p$ max & $e_R$ max\\\midrule
+1 & Random & 77/80 & 0 & 2.275e-02 & 2.273e-04\\
+1 & Joint limits & 17/20 & 2 & 1.969e-02 & 1.968e-04\\
+1 & Boundary & 9/20 & 11 & 1.664e-11 & 9.826e-11\\
+1 & Singularity & 4/20 & 0 & 1.670e-02 & 8.360e-03\\
+7 & Random & 80/80 & 0 & 3.863e-10 & 1.259e-10\\
+7 & Joint limits & 20/20 & 0 & 2.551e-11 & 1.560e-11\\
+7 & Boundary & 11/20 & 9 & 1.171e-11 & 4.689e-11\\
+7 & Singularity & 4/20 & 0 & 1.383e-04 & 5.215e-03\\
+61 & Random & 80/80 & 0 & 7.232e-11 & 9.853e-11\\
+61 & Joint limits & 18/20 & 2 & 9.223e-12 & 5.171e-11\\
+61 & Boundary & 11/20 & 9 & 2.562e-11 & 7.569e-11\\
+61 & Singularity & 3/20 & 0 & 2.926e-03 & 4.537e-03\\
+\bottomrule\end{tabular}
+\end{table}
+\begin{table}[H]\centering\small
+\caption{Estimated Seed 1 unit axes at zero preceding wrist rotations, expressed in the selected base-frame gauge.}\label{tab:axes}
+\begin{tabular}{@{}rrrr@{}}\toprule
+Axis & $x$ & $y$ & $z$\\\midrule
+1 & 1.0000000 & 0.0000000 & 0.0000000\\
+2 & -0.0011342 & 0.9999532 & 0.0096102\\
+3 & -0.0030070 & 0.0199480 & 0.9997965\\
+4 & 0.9999211 & -0.0117540 & 0.0044329\\
+5 & -0.0198797 & 0.9997867 & -0.0055953\\
+6 & -0.0072290 & 0.0161775 & 0.9998430\\
+\bottomrule\end{tabular}
+\end{table}
+\begin{table}[H]\centering\small
+\caption{Seed 1 gauge-invariant inter-axis angles. Hidden angles are read only after freezing the model, for reporting; none are used by calibration.}\label{tab:angles}
+\begin{tabular}{@{}rrrr@{}}\toprule
+Axis pair & Estimated (deg) & Physical truth (deg) & Difference (deg)\\\midrule
+1-2 & 90.06498 & 90.06850 & -0.00351\\
+1-3 & 90.17229 & 90.17987 & -0.00758\\
+2-3 & 88.30616 & 88.30803 & -0.00187\\
+4-5 & 91.81397 & 91.81223 & 0.00174\\
+4-6 & 90.17111 & 90.17194 & -0.00084\\
+5-6 & 89.38559 & 89.38443 & 0.00116\\
+\bottomrule\end{tabular}
+\end{table}
 
-\section{Team Contributions}\label{app:team}
-\placeholder{State who designed, implemented, tested, wrote and reviewed each component; name both collaborators accurately.}
+\begin{figure}[!htbp]\centering
+\includegraphics[width=\linewidth,height=0.84\textheight,keepaspectratio]{evaluation_workspace.pdf}
+\caption{Improved physical FK errors across the workspace, separately for seeds 1, 7, and 61. All 1320 configurations/seed are represented. Common color scales include the accuracy thresholds; views do not overlay different robots or imply uniform Cartesian sampling.}\label{fig:workspace_error}
+\end{figure}
 
-\section{Additional Tables, Tests, and Derivations}\label{app:additional}
-\placeholder{Place detailed per-seed tables, extended test matrices, full parameter lists, or longer mathematical derivations here only when they add evidence without interrupting the main narrative.}
+
+\clearpage
+\section{AI Tools and Team Contributions}\label{app:ai}
+OpenAI Codex assisted with mathematical explanations, student-TODO implementation, unit tests, fitting and IK diagnostics, evaluation infrastructure, data extraction, and this report. Outputs were checked using TA/student tests and saved-data comparisons. Failed tests and retained solver limitations are disclosed in the technical sections.
+
+Representative verbatim user prompts from the recorded development conversation include:
+\begin{quote}\small
+``First implement \path{register_points()} using Lecture 3's Arun/SVD rigid registration method, including proper rotation handling and degenerate-input checks.''
+
+``Implement only \texttt{residuals()} and \texttt{fit()}.''
+
+``Report all attempted targets, including solver failures, without hiding them from success-rate denominators.''
+\end{quote}
+These selected prompts are not a full export; the development conversation retains the phase-by-phase requests and approvals.
+
+\subsection*{Claude Code Disclosure}
+% To be completed by the authors.
+\vspace{2\baselineskip}
+
+\subsection*{Team Contributions}\label{app:team}
+% To be completed by the authors.
+\vspace{2\baselineskip}
 
 \end{document}

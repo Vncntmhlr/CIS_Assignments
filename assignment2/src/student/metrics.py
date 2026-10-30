@@ -23,13 +23,19 @@ def frame_error(F_a: Frame, F_b: Frame) -> Tuple[float, float]:
         (angle_rad, dist_mm) - ||alpha|| (the rotation angle of dF.R) and
             ||epsilon|| (the norm of dF.p)
     """
-    from scipy.spatial.transform import Rotation
-
-    # Lecture 2, slide 45: relative rotation followed by its axis-angle size.
-    # Quaternion extraction (Lecture 3, slides 23-24) remains well-defined at pi,
-    # unlike Cayley, and avoids the small-angle cancellation in arccos(trace).
     delta = F_a.inv() * F_b
-    angle = Rotation.from_matrix(delta.R.matrix).magnitude()
+    R = delta.R.matrix
+
+    sin_axis = 0.5 * np.array([
+        R[2, 1] - R[1, 2],
+        R[0, 2] - R[2, 0],
+        R[1, 0] - R[0, 1],
+    ])
+    
+    sin_angle = np.linalg.norm(sin_axis)
+    cos_angle = np.clip((np.trace(R) - 1.0) / 2.0, -1.0, 1.0)
+    
+    angle = np.arctan2(sin_angle, cos_angle)
     return float(angle), float(delta.p.norm())
 
 

@@ -31,6 +31,22 @@ def test_frame_error_uses_reference_inverse_times_comparison():
     np.testing.assert_allclose(frame_error(comparison, reference), (0.2, 13), atol=1e-12)
 
 
+def test_rotation_angle_across_random_axes_and_endpoint_scales():
+    rng = np.random.default_rng(42)
+    angles = np.concatenate([
+        np.logspace(-14, -3, 32),
+        rng.uniform(0.0, np.pi, 1000),
+        np.pi - np.logspace(-14, -3, 32),
+    ])
+    for angle in angles:
+        axis = rng.normal(size=3)
+        x, y, z = axis / np.linalg.norm(axis)
+        K = np.array([[0, -z, y], [z, 0, -x], [-y, x, 0]])
+        matrix = np.eye(3) + np.sin(angle) * K + (1 - np.cos(angle)) * (K @ K)
+        measured, _ = frame_error(Frame.eye(), Frame(Rot(matrix), vct3()))
+        assert abs(measured - angle) < 2e-15
+
+
 @pytest.mark.parametrize("errors, expected", [
     ([(0.3, 3), (0.4, 4)], (2, np.sqrt(0.125), 0.4, np.sqrt(12.5), 4)),
     ([(0.1, 2)], (1, 0.1, 0.1, 2, 2)),
