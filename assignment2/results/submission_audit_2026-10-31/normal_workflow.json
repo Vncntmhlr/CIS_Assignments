@@ -1,0 +1,208 @@
+{
+  "seed": 1,
+  "calibration_samples": 765,
+  "distinct_calibration_configurations": 69,
+  "t_calibration": 554.0305690934507,
+  "t_testing": 1058.715910205085,
+  "baseline_time": 83.80046709344737,
+  "step7_time": 469.85926535897903,
+  "fit_success": true,
+  "fit_wall": 67.6102648820015,
+  "max_distortion_ratio": 0.8987834025473342,
+  "max_derivative_ratio": 1.0000000000000324,
+  "minimum_normalized_margin": -3.241851231905457e-14,
+  "performance_rows": [
+    [
+      "FK",
+      "Nominal",
+      "729/729",
+      "7.79289 / 16.98731",
+      "3.290e-02 / 5.574e-02",
+      "0/729 (0.0%)"
+    ],
+    [
+      "FK",
+      "Improved",
+      "729/729",
+      "0.06218 / 0.08707",
+      "1.048e-04 / 1.829e-04",
+      "729/729 (100.0%)"
+    ],
+    [
+      "Physical IK",
+      "Nominal",
+      "40/40",
+      "8.15412 / 14.22965",
+      "3.447e-02 / 5.568e-02",
+      "0/40 (0.0%)"
+    ],
+    [
+      "Physical IK",
+      "Improved",
+      "40/40",
+      "0.06976 / 0.10632",
+      "2.220e-04 / 4.859e-04",
+      "40/40 (100.0%)"
+    ]
+  ],
+  "failure_rows": [
+    [
+      "Nominal",
+      40,
+      0,
+      0,
+      40,
+      0
+    ],
+    [
+      "Improved",
+      40,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "summary_markdown": "| Evaluation | Model | Scored/attempted | Position RMS/max (mm) | Orientation RMS/max (rad) | Both pass |\n| --- | --- | --- | --- | --- | --- |\n| FK | Nominal | 729/729 | 7.79289 / 16.98731 | 3.290e-02 / 5.574e-02 | 0/729 (0.0%) |\n| FK | Improved | 729/729 | 0.06218 / 0.08707 | 1.048e-04 / 1.829e-04 | 729/729 (100.0%) |\n| Physical IK | Nominal | 40/40 | 8.15412 / 14.22965 | 3.447e-02 / 5.568e-02 | 0/40 (0.0%) |\n| Physical IK | Improved | 40/40 | 0.06976 / 0.10632 | 2.220e-04 / 4.859e-04 | 40/40 (100.0%) |",
+  "completed": true,
+  "wall_clock_normal_workflow_s": 103.98331515099926,
+  "cell_timings": [
+    {
+      "cell": 0,
+      "type": "markdown",
+      "wall_s": 0.00017640199985180516
+    },
+    {
+      "cell": 1,
+      "type": "code",
+      "wall_s": 0.24121813800047676
+    },
+    {
+      "cell": 2,
+      "type": "markdown",
+      "wall_s": 3.062599898839835e-05
+    },
+    {
+      "cell": 3,
+      "type": "code",
+      "wall_s": 0.0037227709999569925
+    },
+    {
+      "cell": 4,
+      "type": "markdown",
+      "wall_s": 3.667000055429526e-05
+    },
+    {
+      "cell": 5,
+      "type": "code",
+      "wall_s": 0.029331400999581092
+    },
+    {
+      "cell": 6,
+      "type": "code",
+      "wall_s": 0.7973316890002025
+    },
+    {
+      "cell": 7,
+      "type": "markdown",
+      "wall_s": 3.016800110344775e-05
+    },
+    {
+      "cell": 8,
+      "type": "code",
+      "wall_s": 0.009566654998707236
+    },
+    {
+      "cell": 9,
+      "type": "markdown",
+      "wall_s": 2.1000998458475806e-05
+    },
+    {
+      "cell": 10,
+      "type": "code",
+      "wall_s": 5.235762784001054
+    },
+    {
+      "cell": 11,
+      "type": "markdown",
+      "wall_s": 6.955400021979585e-05
+    },
+    {
+      "cell": 12,
+      "type": "code",
+      "wall_s": 0.01138736000029894
+    },
+    {
+      "cell": 13,
+      "type": "markdown",
+      "wall_s": 5.4299998737405986e-05
+    },
+    {
+      "cell": 14,
+      "type": "code",
+      "wall_s": 0.017479930000263266
+    },
+    {
+      "cell": 15,
+      "type": "markdown",
+      "wall_s": 5.6134000260499306e-05
+    },
+    {
+      "cell": 16,
+      "type": "code",
+      "wall_s": 0.020752026999616646
+    },
+    {
+      "cell": 17,
+      "type": "markdown",
+      "wall_s": 2.4670000129844993e-05
+    },
+    {
+      "cell": 18,
+      "type": "code",
+      "wall_s": 0.48576093799965747
+    },
+    {
+      "cell": 19,
+      "type": "markdown",
+      "wall_s": 2.7429001420387067e-05
+    },
+    {
+      "cell": 20,
+      "type": "code",
+      "wall_s": 95.02642018999904
+    },
+    {
+      "cell": 21,
+      "type": "markdown",
+      "wall_s": 5.476499973156024e-05
+    },
+    {
+      "cell": 22,
+      "type": "code",
+      "wall_s": 0.36732271000073524
+    },
+    {
+      "cell": 23,
+      "type": "markdown",
+      "wall_s": 2.5432000256842002e-05
+    },
+    {
+      "cell": 24,
+      "type": "code",
+      "wall_s": 0.8088207679993502
+    },
+    {
+      "cell": 25,
+      "type": "markdown",
+      "wall_s": 2.7774000045610592e-05
+    },
+    {
+      "cell": 26,
+      "type": "code",
+      "wall_s": 0.009088352999242488
+    }
+  ],
+  "includes_tests_and_plotting": true,
+  "wall_clock_including_cleanup_s": 104.31437852699855
+}

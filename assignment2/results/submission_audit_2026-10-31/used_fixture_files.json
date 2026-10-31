@@ -1,0 +1,23 @@
+[
+  "results",
+  "results/comprehensive_v1_s001_freeze.json",
+  "results/comprehensive_v1_s001_model.npz",
+  "results/comprehensive_v1_s001_pilot.json",
+  "results/comprehensive_v1_s007_calibration.npz",
+  "results/comprehensive_v1_s007_freeze.json",
+  "results/comprehensive_v1_s007_model.npz",
+  "results/comprehensive_v1_s007_pilot.json",
+  "results/ik_robustness_diagnostic/summary.json",
+  "results/ik_robustness_diagnostic/traces.json.gz",
+  "results/step10_inverse_summary.json",
+  "results/step8_bound_diagnostic/summary.json",
+  "results/step8_phase_d/acquisition.json",
+  "results/step8_phase_d/calibration.npz",
+  "results/step8_phase_d/fit.npz",
+  "results/step8_phase_d/holdout.npz",
+  "results/step8_phase_d/summary.json",
+  "results/step8_phase_e/fit.npz",
+  "results/step8_phase_e/summary.json",
+  "results/step9_forward_errors.npz",
+  "results/step9_forward_summary.json"
+]

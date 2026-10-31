@@ -1,0 +1,12 @@
+{
+  "TA files": {
+    "passed": 36,
+    "failed": 1,
+    "xfailed": 0
+  },
+  "student regressions": {
+    "passed": 219,
+    "failed": 0,
+    "xfailed": 3
+  }
+}

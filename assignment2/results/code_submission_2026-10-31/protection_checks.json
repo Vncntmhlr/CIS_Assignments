@@ -1,0 +1,19 @@
+{
+  "src/__init__.py": true,
+  "src/robot.py": true,
+  "src/simulation/constants.py": true,
+  "src/simulation/__init__.py": true,
+  "src/simulation/robot.py": true,
+  "src/simulation/marker_body.py": true,
+  "src/simulation/calibration_body.py": true,
+  "src/simulation/tracker.py": true,
+  "src/simulation/clock.py": true,
+  "requirements.txt": true,
+  "tests/test_simulation.py": true,
+  "provided inverse unchanged": true,
+  "TA Markdown unchanged": true,
+  "nonTODO cells unchanged": true,
+  "src/student file list preserved": true,
+  "tests file list preserved": true,
+  "original assertions retained": true
+}

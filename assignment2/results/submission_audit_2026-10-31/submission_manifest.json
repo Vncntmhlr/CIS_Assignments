@@ -1,0 +1,598 @@
+{
+  "ready_for_submission": false,
+  "head": "603d02af32e9a69a416c9c0b58938240a6ceb443",
+  "root": "CIS_Assignment2_CANDIDATE",
+  "included": [
+    {
+      "path": "assignment2/configure_environment.py",
+      "source": "assignment2/configure_environment.py",
+      "bytes": 1537,
+      "sha256": "a9b1ee0f64b4ecf8726e8bd2d36f9297e2cc8e8eabc2d9d3215ffcac982eb078"
+    },
+    {
+      "path": "assignment2/experiments/comprehensive_evaluation.py",
+      "source": "assignment2/experiments/comprehensive_evaluation.py",
+      "bytes": 32697,
+      "sha256": "ece04a5c19269a4bd96a4ec787ea1d757a1ce9cbd24a38d04e004511dec63358"
+    },
+    {
+      "path": "assignment2/experiments/comprehensive_figures.py",
+      "source": "assignment2/experiments/comprehensive_figures.py",
+      "bytes": 8765,
+      "sha256": "2032cce2000b1d7b03a062eb3bec923c0653a209fb0aa8983e76c80698db5072"
+    },
+    {
+      "path": "assignment2/experiments/conftest.py",
+      "source": "assignment2/experiments/conftest.py",
+      "bytes": 175,
+      "sha256": "1e3cc3a25e58c009ff6d8164e5ebe32ca3403d0eb217cf5ba6800bf0b8eedb2c"
+    },
+    {
+      "path": "assignment2/experiments/ik_robustness_diagnostic.py",
+      "source": "assignment2/experiments/ik_robustness_diagnostic.py",
+      "bytes": 21484,
+      "sha256": "440ba7b0edfe0d058f03478a0a9bd66b789103095b9fe28a25adab00cc21ed9a"
+    },
+    {
+      "path": "assignment2/experiments/step10_inverse.py",
+      "source": "assignment2/experiments/step10_inverse.py",
+      "bytes": 9336,
+      "sha256": "20297f2e7c651bfe684457c821a8210381b5299dd6b11cae4a05233e274f48d9"
+    },
+    {
+      "path": "assignment2/experiments/step8_phase_d.py",
+      "source": "assignment2/experiments/step8_phase_d.py",
+      "bytes": 28505,
+      "sha256": "c40110d85501884227b7faebc7054eced70b8361f1f0fe1726d1aa334e7fc5a4"
+    },
+    {
+      "path": "assignment2/experiments/step8_phase_e.py",
+      "source": "assignment2/experiments/step8_phase_e.py",
+      "bytes": 12657,
+      "sha256": "0470e3507d91ea8b0709b179180225b6da697dc097b91189ba3670eb46481cad"
+    },
+    {
+      "path": "assignment2/experiments/step9_forward.py",
+      "source": "assignment2/experiments/step9_forward.py",
+      "bytes": 8507,
+      "sha256": "835e9a58b7cb4b773abe8786f6341afc5d0569452589baa6a851b172af24e1c3"
+    },
+    {
+      "path": "assignment2/experiments/test_calibration.py",
+      "source": "assignment2/experiments/test_calibration.py",
+      "bytes": 27449,
+      "sha256": "882361113ca0c4fd9481bf534e9068e49de9d647a13ae085e7bdfab6fdedd1bd"
+    },
+    {
+      "path": "assignment2/experiments/test_comprehensive_evaluation.py",
+      "source": "assignment2/experiments/test_comprehensive_evaluation.py",
+      "bytes": 9131,
+      "sha256": "3bc93229c86939b072f7d944264e95b68353445b34b0c384f2854a435e38178c"
+    },
+    {
+      "path": "assignment2/experiments/test_ik_robustness.py",
+      "source": "assignment2/experiments/test_ik_robustness.py",
+      "bytes": 6098,
+      "sha256": "f446fed8559dc4a663918388003177664ff223a50ca6e02f168ded19f62e21c3"
+    },
+    {
+      "path": "assignment2/experiments/test_kinematics.py",
+      "source": "assignment2/experiments/test_kinematics.py",
+      "bytes": 28761,
+      "sha256": "65f70a34944bd882b3acefc4a499aae8b00266b031cb02895f5323d6b086a10d"
+    },
+    {
+      "path": "assignment2/experiments/test_metrics.py",
+      "source": "assignment2/experiments/test_metrics.py",
+      "bytes": 2795,
+      "sha256": "2a2de7c958b9e0047afafd88be94544e7d69cd92ef57b4734bfdb374008fab71"
+    },
+    {
+      "path": "assignment2/experiments/test_planning.py",
+      "source": "assignment2/experiments/test_planning.py",
+      "bytes": 8568,
+      "sha256": "c2c85497f49c74fcdc976afee6ccfcee1a7911690dedc5d75e074e78bb2a9db4"
+    },
+    {
+      "path": "assignment2/experiments/test_registration.py",
+      "source": "assignment2/experiments/test_registration.py",
+      "bytes": 5775,
+      "sha256": "cbc7ad18703bcb7b4b30f7010a097d659bdcd41d84305fd7fede63c9db33a92a"
+    },
+    {
+      "path": "assignment2/experiments/test_workflow.py",
+      "source": "assignment2/experiments/test_workflow.py",
+      "bytes": 9004,
+      "sha256": "ef66c420116b29df85e4b3def00e3366d29c689a2cc6a92c1596038f49f6f653"
+    },
+    {
+      "path": "assignment2/notebooks/assignment2_template.ipynb",
+      "source": "assignment2/results/submission_audit_2026-10-31/executed_assignment2_template.ipynb",
+      "bytes": 504783,
+      "sha256": "c7ea1d47d4f5585150c473af83fa69591f5401baa9c7d616cb03e2e23fc4e92d"
+    },
+    {
+      "path": "assignment2/pytest.ini",
+      "source": "assignment2/pytest.ini",
+      "bytes": 227,
+      "sha256": "ccdcde03d9bf42199a63d948c9fae4c314f43a71367be350319ca4d09bf3bc28"
+    },
+    {
+      "path": "assignment2/requirements-lock.txt",
+      "source": "assignment2/requirements-lock.txt",
+      "bytes": 1967,
+      "sha256": "23ba0607f76b90eaef2a3978b2b6b95e6ed3162b28879e2b957d99731c84acc4"
+    },
+    {
+      "path": "assignment2/requirements.txt",
+      "source": "assignment2/requirements.txt",
+      "bytes": 49,
+      "sha256": "d5e11db9e20743af622058d6616c7b1c3c21d56599dea350e4cf838b7999562e"
+    },
+    {
+      "path": "assignment2/results/comprehensive_v1_full_summary.json",
+      "source": "assignment2/results/comprehensive_v1_full_summary.json",
+      "bytes": 103056,
+      "sha256": "d3affb2741d2f5608b7f63cd534d14a260ec8492c093392f877750bf8a6a7ea3"
+    },
+    {
+      "path": "assignment2/results/comprehensive_v1_s001_freeze.json",
+      "source": "assignment2/results/comprehensive_v1_s001_freeze.json",
+      "bytes": 3284,
+      "sha256": "626a93798dd09d9ab4c4ae8b2da23c2fdba5743c06eccf19a02af5ac65f07c4c"
+    },
+    {
+      "path": "assignment2/results/comprehensive_v1_s001_model.npz",
+      "source": "assignment2/results/comprehensive_v1_s001_model.npz",
+      "bytes": 1039,
+      "sha256": "14460283c10bf4d5e203dbd51654a70f13b157c9210fe47bf375fb294022537c"
+    },
+    {
+      "path": "assignment2/results/comprehensive_v1_s001_pilot.json",
+      "source": "assignment2/results/comprehensive_v1_s001_pilot.json",
+      "bytes": 287149,
+      "sha256": "f4cbc0c1f603c4199d24de9093640b188c8bccd174322b7242d5b0ea8a4a5794"
+    },
+    {
+      "path": "assignment2/results/comprehensive_v1_s007_calibration.npz",
+      "source": "assignment2/results/comprehensive_v1_s007_calibration.npz",
+      "bytes": 71550,
+      "sha256": "1e939aad566fd8ff310a1ab0cf01895d9e07bd6b10ac1624c19721b1ce0c9ee0"
+    },
+    {
+      "path": "assignment2/results/comprehensive_v1_s007_freeze.json",
+      "source": "assignment2/results/comprehensive_v1_s007_freeze.json",
+      "bytes": 3158,
+      "sha256": "5b523c6697fc146ce7ac10ef1185ad35b432e6919cc00022100a2a15e9f22242"
+    },
+    {
+      "path": "assignment2/results/comprehensive_v1_s007_model.npz",
+      "source": "assignment2/results/comprehensive_v1_s007_model.npz",
+      "bytes": 1031,
+      "sha256": "63119d65c189a6107f2830a7b57fbdafec68bb91d0fca7bf356e7c0a9c1c4f75"
+    },
+    {
+      "path": "assignment2/results/comprehensive_v1_s007_pilot.json",
+      "source": "assignment2/results/comprehensive_v1_s007_pilot.json",
+      "bytes": 287402,
+      "sha256": "78b85d4a3ee18ddbf79a79a514fb75a79955ae7ade63dae1de5285f5e3c436a8"
+    },
+    {
+      "path": "assignment2/results/ik_robustness_diagnostic/summary.json",
+      "source": "assignment2/results/ik_robustness_diagnostic/summary.json",
+      "bytes": 24575,
+      "sha256": "37d8444ce58dcdbfe335ef20f768a7a4875891d223eea0f92e817b2f6acd0084"
+    },
+    {
+      "path": "assignment2/results/ik_robustness_diagnostic/traces.json.gz",
+      "source": "assignment2/results/ik_robustness_diagnostic/traces.json.gz",
+      "bytes": 572803,
+      "sha256": "007909ee1f289b26ba4df6640b40364a9b6b762097d44871b33030b52a66b020"
+    },
+    {
+      "path": "assignment2/results/step10_inverse_errors.npz",
+      "source": "assignment2/results/step10_inverse_errors.npz",
+      "bytes": 8178,
+      "sha256": "0bb8fc2fd45f9a009c01be3fa709cf242888fec13f4868f42288391c109f44c3"
+    },
+    {
+      "path": "assignment2/results/step10_inverse_summary.json",
+      "source": "assignment2/results/step10_inverse_summary.json",
+      "bytes": 129560,
+      "sha256": "4e3899d91c4c062a7aca86739441b35ec5c16de867a2fbf2b900433f96e421be"
+    },
+    {
+      "path": "assignment2/results/step8_bound_diagnostic/summary.json",
+      "source": "assignment2/results/step8_bound_diagnostic/summary.json",
+      "bytes": 17022,
+      "sha256": "8453ccd2b99ac7593cadd95a94fd574b09d042d20bf25bdc47cd75bf7aeca04a"
+    },
+    {
+      "path": "assignment2/results/step8_phase_d/acquisition.json",
+      "source": "assignment2/results/step8_phase_d/acquisition.json",
+      "bytes": 652,
+      "sha256": "f36478cc623f752b887c04c38c3aa58d1588785c692bbbf0b9484e4428eb0e60"
+    },
+    {
+      "path": "assignment2/results/step8_phase_d/calibration.npz",
+      "source": "assignment2/results/step8_phase_d/calibration.npz",
+      "bytes": 70194,
+      "sha256": "d4d0b2f4c603e8c99f50361c44a982ac1d70416ac960d147de6ed2ac6a154760"
+    },
+    {
+      "path": "assignment2/results/step8_phase_d/fit.npz",
+      "source": "assignment2/results/step8_phase_d/fit.npz",
+      "bytes": 710,
+      "sha256": "f7010ab49b0352030f68280615fb89ca458b9c2272c17a5e3575188cc448e3a3"
+    },
+    {
+      "path": "assignment2/results/step8_phase_d/holdout.npz",
+      "source": "assignment2/results/step8_phase_d/holdout.npz",
+      "bytes": 37872,
+      "sha256": "3cda5e780732305dd3bca72faabc5eef37456448a90de3c83311e2cefa529f94"
+    },
+    {
+      "path": "assignment2/results/step8_phase_d/summary.json",
+      "source": "assignment2/results/step8_phase_d/summary.json",
+      "bytes": 14554,
+      "sha256": "cc970e029d63b3ed445b58172a527b5b8d5c82ef86c288e0926248e689302642"
+    },
+    {
+      "path": "assignment2/results/step8_phase_e/fit.npz",
+      "source": "assignment2/results/step8_phase_e/fit.npz",
+      "bytes": 1475,
+      "sha256": "72b24bd6282952084cef2920a326d83832132e78a368cb3a7d9ad721bd7e4894"
+    },
+    {
+      "path": "assignment2/results/step8_phase_e/parameters.json",
+      "source": "assignment2/results/step8_phase_e/parameters.json",
+      "bytes": 9858,
+      "sha256": "c533766625dea7b0e605a952e300f6b59865e3ea9c01051766fc08967ed8247f"
+    },
+    {
+      "path": "assignment2/results/step8_phase_e/summary.json",
+      "source": "assignment2/results/step8_phase_e/summary.json",
+      "bytes": 63918,
+      "sha256": "d90dff57839c8e3df8f3251e88440086284a3ca1e9f50c177d27f7a8387156d1"
+    },
+    {
+      "path": "assignment2/results/step9_forward_errors.npz",
+      "source": "assignment2/results/step9_forward_errors.npz",
+      "bytes": 15700,
+      "sha256": "96075e149599b6725ea7604290777ba823bf50b25e7d05ad18231c6b2c6c6a3e"
+    },
+    {
+      "path": "assignment2/results/step9_forward_summary.json",
+      "source": "assignment2/results/step9_forward_summary.json",
+      "bytes": 3386,
+      "sha256": "97f4fcae71c5cb3bf66b676df1f36d57e6ca78668da60db69d25a4ce59f997aa"
+    },
+    {
+      "path": "assignment2/src/__init__.py",
+      "source": "assignment2/src/__init__.py",
+      "bytes": 948,
+      "sha256": "78537e925a0b07bcbb4f8117d5364344522f96ac3d1cbc2e2d84bd7108f2a21e"
+    },
+    {
+      "path": "assignment2/src/robot.py",
+      "source": "assignment2/src/robot.py",
+      "bytes": 6541,
+      "sha256": "77783991d160767335b129d89b1a3823d4f3076f1fe875ac00d21d3516474ed2"
+    },
+    {
+      "path": "assignment2/src/simulation/__init__.py",
+      "source": "assignment2/src/simulation/__init__.py",
+      "bytes": 1436,
+      "sha256": "049d3def1c43f7ea5172dec47b73c319b16dd712c68829d0c0cd05b983be1874"
+    },
+    {
+      "path": "assignment2/src/simulation/calibration_body.py",
+      "source": "assignment2/src/simulation/calibration_body.py",
+      "bytes": 2644,
+      "sha256": "aae0d6f4af52a93cc79586b327cbf49a912ee29371e8ff7e575ff3c77815bb86"
+    },
+    {
+      "path": "assignment2/src/simulation/clock.py",
+      "source": "assignment2/src/simulation/clock.py",
+      "bytes": 605,
+      "sha256": "c9ff3bd0b384639478782de9749999e06599defa2fa3caac5694e25df303f1e4"
+    },
+    {
+      "path": "assignment2/src/simulation/constants.py",
+      "source": "assignment2/src/simulation/constants.py",
+      "bytes": 5828,
+      "sha256": "5c0367b2d5541104bb5df4500f7e3f9b8ef8535ee242767ed3b649b36b62136a"
+    },
+    {
+      "path": "assignment2/src/simulation/marker_body.py",
+      "source": "assignment2/src/simulation/marker_body.py",
+      "bytes": 2521,
+      "sha256": "f462e79dce9f5fa149879e395aac2125d2c626acb3f4e7b5c86896c6a019e53a"
+    },
+    {
+      "path": "assignment2/src/simulation/robot.py",
+      "source": "assignment2/src/simulation/robot.py",
+      "bytes": 10765,
+      "sha256": "9e1986f364458c93c85b34d0f821c525a6d449f4dc8cda3dbff9546bad4eca2b"
+    },
+    {
+      "path": "assignment2/src/simulation/tracker.py",
+      "source": "assignment2/src/simulation/tracker.py",
+      "bytes": 4544,
+      "sha256": "95241ad61a0f0b1d3cfcfbef1ee03752b4c74d7fba1b7107433319b781b90bc4"
+    },
+    {
+      "path": "assignment2/src/student/__init__.py",
+      "source": "assignment2/src/student/__init__.py",
+      "bytes": 426,
+      "sha256": "43468cacd7fb0b305a3ff3f728cffaab5a19722149c8b49d61213b363b7c6d38"
+    },
+    {
+      "path": "assignment2/src/student/kinematics.py",
+      "source": "assignment2/src/student/kinematics.py",
+      "bytes": 33564,
+      "sha256": "c9074ee3f200c16f8ab0ddf65375eccf9a3084f4dfa7604248db503873d0b4bc"
+    },
+    {
+      "path": "assignment2/src/student/metrics.py",
+      "source": "assignment2/src/student/metrics.py",
+      "bytes": 1960,
+      "sha256": "dbe5cef3dc632c0f1efe3e5808219b00801b2319ca764cfc800806d5ae8a18c0"
+    },
+    {
+      "path": "assignment2/src/student/registration.py",
+      "source": "assignment2/src/student/registration.py",
+      "bytes": 4794,
+      "sha256": "385b03b9c24e7e30a23bc675c237d7a3ea58762a6ec0651d02c804b6de6340ae"
+    },
+    {
+      "path": "assignment2/src/student/workflow.py",
+      "source": "assignment2/src/student/workflow.py",
+      "bytes": 12835,
+      "sha256": "c08ab014dc323ae609c8ac9030ff7af3cedfac723fd2f395e85c3fe16c43f3cf"
+    },
+    {
+      "path": "assignment2/tests/conftest.py",
+      "source": "assignment2/tests/conftest.py",
+      "bytes": 194,
+      "sha256": "42ab3f30102bbb879a405ab0d4dbfa8db557a6095f3999951b855e9f2ebd799b"
+    },
+    {
+      "path": "assignment2/tests/test_simulation.py",
+      "source": "assignment2/tests/test_simulation.py",
+      "bytes": 12033,
+      "sha256": "729a462ee89c5475e0a24bd3ee210d67c114be9f9cfb1cb5e7fc6b33c756fbf1"
+    },
+    {
+      "path": "assignment2/tests/test_student.py",
+      "source": "assignment2/tests/test_student.py",
+      "bytes": 11189,
+      "sha256": "3a4d585e1cf5862cfc604c6daa517cb03af41718332a371194ef3a168866b375"
+    },
+    {
+      "path": "assignment2/vendor/PROVENANCE.md",
+      "source": "assignment2/vendor/PROVENANCE.md",
+      "bytes": 877,
+      "sha256": "f4f86a8bba1e4d4a7edb75f3d84941e752862e4062df4b470448cc07038bbba3"
+    },
+    {
+      "path": "assignment2/vendor/SHA256SUMS.json",
+      "source": "assignment2/vendor/SHA256SUMS.json",
+      "bytes": 2967,
+      "sha256": "bb78b359cc70f6f38073f267e2c68af2e7a056e2d56aa9d8edb6582af3106035"
+    },
+    {
+      "path": "assignment2/vendor/course/assignments/assignment1/src/__init__.py",
+      "source": "assignment2/vendor/course/assignments/assignment1/src/__init__.py",
+      "bytes": 677,
+      "sha256": "94e1c84f883c34bdececfdd1ce91ad97bffd9bda7f7300e85fab5f03803e5103"
+    },
+    {
+      "path": "assignment2/vendor/course/assignments/assignment1/src/marker.py",
+      "source": "assignment2/vendor/course/assignments/assignment1/src/marker.py",
+      "bytes": 2491,
+      "sha256": "fc65842b37ae00047b0a5563f569b5fd60e1ef65d355dd487ccec43ceb61d5a7"
+    },
+    {
+      "path": "assignment2/vendor/course/assignments/assignment1/src/pointer.py",
+      "source": "assignment2/vendor/course/assignments/assignment1/src/pointer.py",
+      "bytes": 2049,
+      "sha256": "b65936eab49991f2748f935a60c3f42b0a87c480aad7cc3990bda141fdc0a5a7"
+    },
+    {
+      "path": "assignment2/vendor/course/assignments/assignment1/src/simulation/__init__.py",
+      "source": "assignment2/vendor/course/assignments/assignment1/src/simulation/__init__.py",
+      "bytes": 818,
+      "sha256": "658a1be930d382e47065701016465f031721c05524d5ca7c82580fa561f8922c"
+    },
+    {
+      "path": "assignment2/vendor/course/assignments/assignment1/src/simulation/calibration_sensor.py",
+      "source": "assignment2/vendor/course/assignments/assignment1/src/simulation/calibration_sensor.py",
+      "bytes": 2918,
+      "sha256": "6baf41f682d9006bcae1769d31687e981dacca3cea6c109d573a8bec271bad51"
+    },
+    {
+      "path": "assignment2/vendor/course/assignments/assignment1/src/simulation/constants.py",
+      "source": "assignment2/vendor/course/assignments/assignment1/src/simulation/constants.py",
+      "bytes": 3677,
+      "sha256": "c3ca9a8db690e51e6923dcc2ba1d50489cbacf85ad097eef8172958f2f2ded43"
+    },
+    {
+      "path": "assignment2/vendor/course/assignments/assignment1/src/simulation/marker_body.py",
+      "source": "assignment2/vendor/course/assignments/assignment1/src/simulation/marker_body.py",
+      "bytes": 3762,
+      "sha256": "60bca60541a466fc62ec9af2cc5fa581695d7feec8617269acbe42f5bb4b6b79"
+    },
+    {
+      "path": "assignment2/vendor/course/assignments/assignment1/src/simulation/pointer.py",
+      "source": "assignment2/vendor/course/assignments/assignment1/src/simulation/pointer.py",
+      "bytes": 840,
+      "sha256": "3457cf2dfa4ff803fce93ff85a4dae9e1247e41672441d127d8b3d199483b612"
+    },
+    {
+      "path": "assignment2/vendor/course/assignments/assignment1/src/simulation/tracker.py",
+      "source": "assignment2/vendor/course/assignments/assignment1/src/simulation/tracker.py",
+      "bytes": 3475,
+      "sha256": "b313bc05476097b101e165266cd7232559f4241ce012c9a6962467c9dd7ff4e3"
+    },
+    {
+      "path": "assignment2/vendor/course/assignments/assignment1/src/tracker.py",
+      "source": "assignment2/vendor/course/assignments/assignment1/src/tracker.py",
+      "bytes": 7527,
+      "sha256": "163d3ab0560f058013e86ac00aa1d43b124a90032142825a477cf8a4da855ced"
+    },
+    {
+      "path": "assignment2/vendor/course/assignments/assignment1/src/utils.py",
+      "source": "assignment2/vendor/course/assignments/assignment1/src/utils.py",
+      "bytes": 2925,
+      "sha256": "e857bdebebd458261b5b01eb8ade127642e6b615117b9f4e5f80e35f236f174c"
+    },
+    {
+      "path": "assignment2/vendor/course/data_types/__init__.py",
+      "source": "assignment2/vendor/course/data_types/__init__.py",
+      "bytes": 441,
+      "sha256": "7719ea7ce71f8da6d2108b530d273bb728ba4f12298cc5e1f592acc8c0618985"
+    },
+    {
+      "path": "assignment2/vendor/course/data_types/covariance_types.py",
+      "source": "assignment2/vendor/course/data_types/covariance_types.py",
+      "bytes": 12315,
+      "sha256": "1c03558019f761b9954642d5977b12b8b7634fa41db113927aae88dacd1f3322"
+    },
+    {
+      "path": "assignment2/vendor/course/data_types/nominal_types.py",
+      "source": "assignment2/vendor/course/data_types/nominal_types.py",
+      "bytes": 31689,
+      "sha256": "f7db5c25850c317c7967c8c928c00537efc88c509c7606014998b5f947d5f309"
+    },
+    {
+      "path": "assignment2/vendor/course/data_types/uncertain_types.py",
+      "source": "assignment2/vendor/course/data_types/uncertain_types.py",
+      "bytes": 48896,
+      "sha256": "2db5fcfee33adfc82395be865a7a0a58d4326ac8b2a8276310a7fc27bc9d2590"
+    },
+    {
+      "path": "assignment2/vendor/course/src/uncertainty_networks/__init__.py",
+      "source": "assignment2/vendor/course/src/uncertainty_networks/__init__.py",
+      "bytes": 1756,
+      "sha256": "df5a06570d6c3399d5a06be298b14f1b176a1b235962129123ac237dc68d1ff4"
+    },
+    {
+      "path": "assignment2/vendor/course/src/uncertainty_networks/closed_loop.py",
+      "source": "assignment2/vendor/course/src/uncertainty_networks/closed_loop.py",
+      "bytes": 17829,
+      "sha256": "d42f86716bc94bfa8637ab877538c89309e4da8a4e31e015e014aa7883007361"
+    },
+    {
+      "path": "assignment2/vendor/course/src/uncertainty_networks/covariance_types.py",
+      "source": "assignment2/vendor/course/src/uncertainty_networks/covariance_types.py",
+      "bytes": 12315,
+      "sha256": "1c03558019f761b9954642d5977b12b8b7634fa41db113927aae88dacd1f3322"
+    },
+    {
+      "path": "assignment2/vendor/course/src/uncertainty_networks/examples.py",
+      "source": "assignment2/vendor/course/src/uncertainty_networks/examples.py",
+      "bytes": 1954,
+      "sha256": "ac155c0f70266388506ae14d433ebd36bf65b426ef8d3be8f6076924675e7b1b"
+    },
+    {
+      "path": "assignment2/vendor/course/src/uncertainty_networks/network.py",
+      "source": "assignment2/vendor/course/src/uncertainty_networks/network.py",
+      "bytes": 37512,
+      "sha256": "96df0c13ff3dad5ccd9160701a9e51418e22e2e6ec707e16918bc42947de8290"
+    },
+    {
+      "path": "assignment2/vendor/course/src/uncertainty_networks/nominal_types.py",
+      "source": "assignment2/vendor/course/src/uncertainty_networks/nominal_types.py",
+      "bytes": 31629,
+      "sha256": "6d03e8ead8db6e86b4c3291a54d4cd9e82020f07cedc90163d2ca90217bf19e1"
+    },
+    {
+      "path": "assignment2/vendor/course/src/uncertainty_networks/observations.py",
+      "source": "assignment2/vendor/course/src/uncertainty_networks/observations.py",
+      "bytes": 19224,
+      "sha256": "02283a6c092d35dc81a6c708e9e6e4f934fae100ae7b65c8e580b6732653f1b1"
+    },
+    {
+      "path": "assignment2/vendor/course/src/uncertainty_networks/se3.py",
+      "source": "assignment2/vendor/course/src/uncertainty_networks/se3.py",
+      "bytes": 12983,
+      "sha256": "13ff6c6914e8aa6b07a68c5b5e393a40066f2728462efd5ac072e7724c6b7cb5"
+    },
+    {
+      "path": "assignment2/vendor/course/src/uncertainty_networks/uncertain_geometry.py",
+      "source": "assignment2/vendor/course/src/uncertainty_networks/uncertain_geometry.py",
+      "bytes": 15857,
+      "sha256": "2bcd696dda1118437a197ce1574b3d992b2d718f22947f485ad35d574cdadacb"
+    },
+    {
+      "path": "assignment2/vendor/course/src/uncertainty_networks/uncertain_types.py",
+      "source": "assignment2/vendor/course/src/uncertainty_networks/uncertain_types.py",
+      "bytes": 48836,
+      "sha256": "5e406e2c14afb5cf55e5ad74cd981198436f665e876170fe44c3c78f8c85fb7a"
+    },
+    {
+      "path": "assignment2/vendor/course/src/uncertainty_networks/visualization.py",
+      "source": "assignment2/vendor/course/src/uncertainty_networks/visualization.py",
+      "bytes": 20810,
+      "sha256": "8201f172d60d00a519347d5ec6d42ecf4a851aab853460a3ddd1a3a47b951925"
+    },
+    {
+      "path": "assignment2/vendor/functions/_fit_constraints.py",
+      "source": "assignment2/vendor/functions/_fit_constraints.py",
+      "bytes": 8849,
+      "sha256": "80b01a220ef22fad4857813699264f99d68b4450811c0cd3fa2403eb23f367de"
+    },
+    {
+      "path": "assignment2/vendor/functions/visualization.py",
+      "source": "assignment2/vendor/functions/visualization.py",
+      "bytes": 6849,
+      "sha256": "061482d974ade8b83e78678e8f7a59e3cb05477b8a324977d60a54497a3a5435"
+    },
+    {
+      "path": "assignment2/report/CIS_Assignment2_Report.pdf",
+      "source": "assignment2/report/CIS_Assignment2_Overleaf/CIS_Assignment2_Report.pdf",
+      "bytes": 2343598,
+      "sha256": "cb11723019825c9cdcf381ff78b64bf0bfe4ca52373fa2176e8f9ba20980771b"
+    },
+    {
+      "path": "assignment2/report/figures/evaluation_categories.pdf",
+      "source": "assignment2/report/CIS_Assignment2_Overleaf/figures/evaluation_categories.pdf",
+      "bytes": 172624,
+      "sha256": "35902115c7b18a1b36758179be0ba80ebfa073b9f88c1a75d35612be2f77016e"
+    },
+    {
+      "path": "assignment2/report/figures/evaluation_joints.pdf",
+      "source": "assignment2/report/CIS_Assignment2_Overleaf/figures/evaluation_joints.pdf",
+      "bytes": 369668,
+      "sha256": "67b1e3e500e99897b73fa7bdf1a998830defd41c53d4dd1c4ecaab1314a0c03c"
+    },
+    {
+      "path": "README.md",
+      "source": "assignment2/results/submission_audit_2026-10-31/CANDIDATE_README.md",
+      "generated_candidate_only": true,
+      "bytes": 1479,
+      "sha256": "2c88ef11a7d41f8ba48d10e83b4d56d51eede182feb0a7e4ea77a3fdcf5382e9"
+    },
+    {
+      "path": "assignment2/SETUP.md",
+      "source": "assignment2/results/submission_audit_2026-10-31/CANDIDATE_SETUP.md",
+      "generated_candidate_only": true,
+      "bytes": 1988,
+      "sha256": "2fa7c7a5cfc96bf042aeb1e6c1dac9e38062a6e6799ef8d5150b6e311acb0ee3"
+    }
+  ],
+  "excluded": [
+    ".git/",
+    "venv/",
+    "caches/",
+    "other assignments/",
+    "local archives/",
+    "duplicate report sources/ZIPs/intermediate reports/",
+    "unused experiment prose/",
+    "large *_sNNN_full.json attempt exports",
+    "duplicate PNG/PDF plots",
+    "pilot projection and manifest",
+    "Codex/Claude project instructions"
+  ]
+}

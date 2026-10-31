@@ -1,0 +1,243 @@
+{
+  "package_type": "CODE_ONLY_CANDIDATE",
+  "final_report_pending": true,
+  "files": 94,
+  "zip_sha256": "b85b2892bda2df7da5d79f1ec3dee8815b66c047e99690a53811755591cd6ccf",
+  "zip_bytes": 1490214,
+  "dev_commit": "60edbd84469570456dd1dd95c7b757878e2868f6",
+  "main_commit": "d1afc7704ae85b993a0204d15a5373349f5b3781",
+  "fresh_install": true,
+  "dependency_check": "No broken requirements found",
+  "runtime_imports": "All resolve inside isolated extraction; PYTHONPATH/PYTHONHOME cleared",
+  "tests": {
+    "TA files": {
+      "passed": 36,
+      "failed": 1,
+      "xfailed": 0
+    },
+    "student regressions": {
+      "passed": 219,
+      "failed": 0,
+      "xfailed": 3
+    }
+  },
+  "test_wall_s": 30.69,
+  "notebook": {
+    "seed": 1,
+    "calibration_samples": 765,
+    "distinct_calibration_configurations": 69,
+    "t_calibration": 554.0305690934507,
+    "t_testing": 1058.5375250398156,
+    "baseline_time": 83.80046709344737,
+    "step7_time": 469.85926535897903,
+    "fit_success": true,
+    "fit_wall": 66.11793078000119,
+    "max_distortion_ratio": 0.9306956271054049,
+    "max_derivative_ratio": 0.9999999999999982,
+    "minimum_normalized_margin": 1.7763568394002505e-15,
+    "performance_rows": [
+      [
+        "FK",
+        "Nominal",
+        "729/729",
+        "7.80128 / 17.00448",
+        "3.290e-02 / 5.578e-02",
+        "0/729 (0.0%)"
+      ],
+      [
+        "FK",
+        "Improved",
+        "729/729",
+        "0.06946 / 0.11478",
+        "2.445e-04 / 4.083e-04",
+        "729/729 (100.0%)"
+      ],
+      [
+        "Physical IK",
+        "Nominal",
+        "40/40",
+        "8.16242 / 14.24355",
+        "3.447e-02 / 5.572e-02",
+        "0/40 (0.0%)"
+      ],
+      [
+        "Physical IK",
+        "Improved",
+        "40/40",
+        "0.07393 / 0.10576",
+        "2.947e-04 / 6.312e-04",
+        "40/40 (100.0%)"
+      ]
+    ],
+    "failure_rows": [
+      [
+        "Nominal",
+        40,
+        0,
+        0,
+        40,
+        0
+      ],
+      [
+        "Improved",
+        40,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "summary_markdown": "| Evaluation | Model | Scored/attempted | Position RMS/max (mm) | Orientation RMS/max (rad) | Both pass |\n| --- | --- | --- | --- | --- | --- |\n| FK | Nominal | 729/729 | 7.80128 / 17.00448 | 3.290e-02 / 5.578e-02 | 0/729 (0.0%) |\n| FK | Improved | 729/729 | 0.06946 / 0.11478 | 2.445e-04 / 4.083e-04 | 729/729 (100.0%) |\n| Physical IK | Nominal | 40/40 | 8.16242 / 14.24355 | 3.447e-02 / 5.572e-02 | 0/40 (0.0%) |\n| Physical IK | Improved | 40/40 | 0.07393 / 0.10576 | 2.947e-04 / 6.312e-04 | 40/40 (100.0%) |",
+    "completed": true,
+    "wall_clock_normal_workflow_s": 103.62923352400321,
+    "cell_timings": [
+      {
+        "cell": 0,
+        "type": "markdown",
+        "wall_s": 0.00012068100113538094
+      },
+      {
+        "cell": 1,
+        "type": "code",
+        "wall_s": 0.3082016209991707
+      },
+      {
+        "cell": 2,
+        "type": "markdown",
+        "wall_s": 2.9656999686267227e-05
+      },
+      {
+        "cell": 3,
+        "type": "code",
+        "wall_s": 0.003971678001107648
+      },
+      {
+        "cell": 4,
+        "type": "markdown",
+        "wall_s": 2.398599826847203e-05
+      },
+      {
+        "cell": 5,
+        "type": "code",
+        "wall_s": 0.01746469199861167
+      },
+      {
+        "cell": 6,
+        "type": "code",
+        "wall_s": 1.2400227219986846
+      },
+      {
+        "cell": 7,
+        "type": "markdown",
+        "wall_s": 2.4443997972412035e-05
+      },
+      {
+        "cell": 8,
+        "type": "code",
+        "wall_s": 0.00949498800036963
+      },
+      {
+        "cell": 9,
+        "type": "markdown",
+        "wall_s": 2.405199847999029e-05
+      },
+      {
+        "cell": 10,
+        "type": "code",
+        "wall_s": 5.600353522997466
+      },
+      {
+        "cell": 11,
+        "type": "markdown",
+        "wall_s": 9.115400098380633e-05
+      },
+      {
+        "cell": 12,
+        "type": "code",
+        "wall_s": 0.014901992999512004
+      },
+      {
+        "cell": 13,
+        "type": "markdown",
+        "wall_s": 8.488899766234681e-05
+      },
+      {
+        "cell": 14,
+        "type": "code",
+        "wall_s": 0.017317051999270916
+      },
+      {
+        "cell": 15,
+        "type": "markdown",
+        "wall_s": 8.882100155460648e-05
+      },
+      {
+        "cell": 16,
+        "type": "code",
+        "wall_s": 0.019913037001970224
+      },
+      {
+        "cell": 17,
+        "type": "markdown",
+        "wall_s": 3.6440000258153304e-05
+      },
+      {
+        "cell": 18,
+        "type": "code",
+        "wall_s": 0.4894763230004173
+      },
+      {
+        "cell": 19,
+        "type": "markdown",
+        "wall_s": 3.682700116769411e-05
+      },
+      {
+        "cell": 20,
+        "type": "code",
+        "wall_s": 94.14008536600159
+      },
+      {
+        "cell": 21,
+        "type": "markdown",
+        "wall_s": 4.282000008970499e-05
+      },
+      {
+        "cell": 22,
+        "type": "code",
+        "wall_s": 0.38390254600017215
+      },
+      {
+        "cell": 23,
+        "type": "markdown",
+        "wall_s": 2.9737999284407124e-05
+      },
+      {
+        "cell": 24,
+        "type": "code",
+        "wall_s": 0.8619922309990216
+      },
+      {
+        "cell": 25,
+        "type": "markdown",
+        "wall_s": 2.8888000088045374e-05
+      },
+      {
+        "cell": 26,
+        "type": "code",
+        "wall_s": 0.009018174001539592
+      }
+    ],
+    "includes_tests_and_plotting": true,
+    "wall_clock_including_cleanup_s": 103.85614496900234
+  },
+  "final_zip_crc_and_manifest_verified": true,
+  "final_zip_sources_identical_to_tested_sources": true,
+  "main_code_files_identical_to_validated_dev": true,
+  "reports_and_unrelated_main_paths_preserved": true,
+  "limitations": [
+    "Optional refinement test intentionally fails unchanged",
+    "Three expected IK failures retained",
+    "Only Linux Python 3.13.11 reproduced; exact grader/Windows unverified",
+    "Final approved report PDF not included; regenerate final ZIP after PDF is provided"
+  ]
+}
