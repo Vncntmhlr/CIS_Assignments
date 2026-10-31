@@ -7,10 +7,12 @@ from typing import Dict, Optional
 import numpy as np
 
 from data_types.nominal_types import vct3, Rot, Frame
-from uncertainty_networks.se3 import log_so3
+from uncertainty_networks.se3 import exp_se3, exp_so3, log_so3
 
 from ..robot import Robot
+from ..simulation import constants
 from .workflow import CalibrationData
+from scipy.optimize import least_squares
 
 
 class ImprovedKinematics(Robot):
@@ -53,24 +55,23 @@ class ImprovedKinematics(Robot):
 
     def initial_params(self) -> np.ndarray:
         """
-        TODO: implement.
-
-        output: the parameter vector that makes this model identical to the
-                nominal kinematics with base frame F_X_init -- with the
-                layout in the class docstring that is simply
-                np.zeros(6 + 10 + 6 + 6 * self.n_poly)
+        Return zero initial corrections for the base, axes, tool, and joint
+        distortion. Measured joint_offsets are stored separately and retained.
         """
-        raise NotImplementedError("TODO: implement initial_params")
+        # 6 base corrections + 10 axis tilts + 6 tool corrections
+        # + n_poly distortion coefficients for each of the 6 joints.
+        return np.zeros(6 + 10 + 6 + 6 * self.n_poly, dtype=float)
 
     def base_frame(self, params: Optional[np.ndarray] = None) -> Frame:
         """
-        TODO: implement.
-
-        output: F_X (robot base relative to the tracker) for params (default:
-                self.params) -- e.g. F_X_init * Exp(params[0:6]), see
-                uFrame.perturb / uncertainty_networks.se3.exp_se3
+        Return F_X_init * Exp(params[0:6]), the corrected robot-base pose
+        relative to the tracker. Default to self.params when params is None.
+        The correction uses twist ordering [rotation; translation-like].
         """
-        raise NotImplementedError("TODO: implement base_frame")
+        params = self.params if params is None else np.asarray(params, dtype=float)
+        correction = Frame(exp_se3(params[0:6]))
+        F_X_estimated = self.F_X_init * correction
+        return F_X_estimated
 
     # ------------------------------------------------------------------ kinematics
 
@@ -85,7 +86,62 @@ class ImprovedKinematics(Robot):
                 error model (joint offsets + distortion, tilted axes, tool
                 frame offset) applied
         """
-        raise NotImplementedError("TODO: implement ImprovedKinematics.fwd_kins")
+
+        theta = np.asarray(theta, dtype=float).reshape(6)
+        params = self.params if params is None else np.asarray(params, dtype=float)
+
+        # 1. Evaluate the joint-distortion polynomials.
+        coefficients = params[22:].reshape(6, self.n_poly)
+
+        # Fixed scales for normalizing the commanded coordinates.
+        scale = np.maximum(
+            np.maximum(np.abs(self.theta_min), np.abs(self.theta_max)),
+            1e-12,
+        )
+        theta_normalized = theta / scale
+
+        distortion = np.zeros(6)
+        for power in range(1, self.n_poly + 1):
+            distortion += coefficients[:, power - 1] * theta_normalized**power
+
+        # Corrected joint coordinates: command + home offset + distortion.
+        theta_cal = theta + self.joint_offsets + distortion
+
+        # 2. Correct the axis directions.
+        # Rows: d1, d2, d3, n4, n5, n6.
+        axes_cal = np.array([
+            axis.vec.ravel() for axis in self.AXES
+        ], dtype=float)
+
+        tilts = params[6:16].reshape(5, 2)
+
+        for joint in range(1, 6):  # Joint 1's axis remains unchanged.
+            nominal_axis = axes_cal[joint].copy()
+
+            # The nominal axes are Cartesian unit vectors.
+            # Select the two Cartesian directions perpendicular to this axis.
+            perpendicular_basis = np.eye(3)[np.abs(nominal_axis) < 0.5]
+
+            tilt_vector = tilts[joint - 1] @ perpendicular_basis
+            axes_cal[joint] = exp_so3(tilt_vector) @ nominal_axis
+
+        # 3. Build the calibrated carriage transform.
+        pc_cal = vct3(*(theta_cal[:3] @ axes_cal[:3]))
+        Fc_cal = Frame(Rot(), pc_cal)
+
+        # 4. Build the calibrated wrist transform.
+        Rw_cal = (
+            Rot(matrix=exp_so3(axes_cal[3] * theta_cal[3]))
+            * Rot(matrix=exp_so3(axes_cal[4] * theta_cal[4]))
+            * Rot(matrix=exp_so3(axes_cal[5] * theta_cal[5]))
+        )
+        Fw_cal = Frame(Rw_cal, vct3())
+
+        #5. Build the calibrated tool transform.
+        F_we_cal = self.F_WE * Frame(exp_se3(params[16:22]))
+
+        return Fc_cal * self.F_CW * Fw_cal * F_we_cal
+
 
     def predict_in_tracker(self, theta, params: Optional[np.ndarray] = None) -> Frame:
         """The end-effector pose in the tracker frame: base_frame * fwd_kins."""
@@ -150,14 +206,24 @@ class ImprovedKinematics(Robot):
 
     def residuals(self, params: np.ndarray, data: CalibrationData) -> np.ndarray:
         """
-        TODO: implement.
-
         input: params - candidate parameter vector; data - CalibrationData
-        output: flat residual vector comparing predict_in_tracker(theta_j,
-                params) with data.frames[j] for every sample (choose how to
-                weigh rotation vs translation)
+        output: flat vector of rotation then position errors for every sample,
+                scaled by the assignment's angular and positional targets.
         """
-        raise NotImplementedError("TODO: implement residuals")
+        if len(data.thetas) != len(data.frames):
+            raise ValueError("Each joint vector must have a corresponding observed frame")
+
+        residuals = []
+        for theta, F_observed in zip(data.thetas, data.frames):
+            F_predicted = self.predict_in_tracker(theta, params)
+            F_error = F_predicted.inv() * F_observed
+
+            rotation_error = log_so3(F_error.R.matrix)
+            position_error = F_error.p.vec.ravel()
+            residuals.extend(rotation_error / constants.TARGET_ANG_ERR_RAD)
+            residuals.extend(position_error / constants.TARGET_POS_ERR_MM)
+
+        return np.asarray(residuals, dtype=float)
 
     def fit(self, data: CalibrationData, **kwargs):
         """
@@ -167,31 +233,132 @@ class ImprovedKinematics(Robot):
         allowed). Must set self.params. Return whatever diagnostics you want
         to report (final cost, iterations, ...).
         """
-        raise NotImplementedError("TODO: implement fit")
+        if len(data.frames) == 0:
+            raise ValueError("At least one observation is required for fitting")
+
+        iterations = 0
+
+        def count_iteration(params):
+            nonlocal iterations
+            iterations += 1
+
+        kwargs.setdefault("x_scale", "jac")
+        result = least_squares(
+            self.residuals,
+            self.params,
+            args=(data,),
+            method="trf",
+            callback=count_iteration,
+            **kwargs,
+        )
+        self.params = result.x.copy()
+
+        return {
+            "iterations": iterations,
+            "final_cost": float(result.cost),
+            "nfev": result.nfev,
+            "success": result.success,
+            "message": result.message,
+        }
 
     def jacobian_rank_report(self, data: CalibrationData, params: Optional[np.ndarray] = None) -> dict:
         """
-        TODO: implement.
-
-        Numerically differentiate residuals w.r.t. params and report the
-        singular values (and which parameter directions are poorly
-        determined). Use it to justify your parameterization and your
-        choice of calibration poses in the report.
+        Estimate the residual Jacobian using central differences, then its SVD.
+        Rank uses a relative tolerance of 1e-6 to allow for differentiation
+        noise. Results use the current parameter units and residual scaling.
+        Each poorly determined direction is a row in parameter-vector order.
         """
-        raise NotImplementedError("TODO: implement jacobian_rank_report")
+        params = np.asarray(self.params if params is None else params, dtype=float).copy()
+        if params.shape != self.params.shape or not np.isfinite(params).all():
+            raise ValueError("params must be a finite vector matching self.params")
+
+        residuals = self.residuals(params, data)
+        if residuals.size == 0:
+            raise ValueError("At least one observation is required for a rank report")
+
+        n_params = params.size
+        J = np.zeros((residuals.size, n_params))
+        for j in range(n_params):
+            step = 1e-6 * max(1.0, abs(params[j]))
+            params_plus, params_minus = params.copy(), params.copy()
+            params_plus[j] += step
+            params_minus[j] -= step
+            J[:, j] = (
+                self.residuals(params_plus, data)
+                - self.residuals(params_minus, data)
+            ) / (2.0 * step)
+
+        # Keep all right singular vectors if there are fewer residuals than parameters.
+        _, singular_values, Vt = np.linalg.svd(J, full_matrices=J.shape[0] < n_params)
+        tolerance = 1e-6 * singular_values[0]
+        rank = int(np.count_nonzero(singular_values > tolerance))
+
+        return {
+            "rank": rank,
+            "n_params": n_params,
+            "singular_values": singular_values,
+            "tolerance": float(tolerance),
+            "nullity": n_params - rank,
+            "poorly_determined_directions": Vt[rank:].copy(),
+        }
 
     # ------------------------------------------------------------------ reporting
 
     def parameters_report(self) -> Dict[str, np.ndarray]:
         """
-        TODO: implement.
+        Report the fitted model without reading simulator ground truth.
 
-        The handout (method 1 (e)) asks your program to report the updated
-        kinematic parameters in physical terms, and your debugging runs to
-        compare them with ground truth (rob.ground_truth_parameters()).
-        Report at least: the axis tilt vectors / unit axes, the angles
-        between the axes, the per-joint offsets and scale factors, and the
-        tool-frame offset. Note which of these are only defined up to the
-        base-frame gauge (and so are better compared as angles between axes).
+        Axis rows are d1, d2, d3, n4, n5, n6; axis_angles_deg[i, j] is the
+        angle between rows i and j. Tilt vectors are in radians. Absolute
+        axes/tilts and tool parameters depend on the chosen frame convention;
+        mutual axis angles are invariant under a common rotation of the axes.
+
+        joint_offset is the measured home-offset estimate (mm/rad).
+        joint_scale is the dimensionless distortion slope at theta=0;
+        joint_scale_factor is 1 + joint_scale. These describe the fitted
+        polynomial, not a unique separation of the simulator's ripple and
+        linear terms. joint_poly_coefficients use joint_normalization.
+
+        F_we_twist has ordering [rotation; translation-like]. F_we_offset
+        is its exponential, the right-multiplied tool correction, and F_we
+        is the corrected wrist-to-end-effector transform (both 4x4 matrices).
         """
-        raise NotImplementedError("TODO: implement parameters_report")
+        axes_cal = np.array([axis.vec.ravel() for axis in self.AXES], dtype=float)
+        axis_tilts = np.zeros((6, 3))
+        tilts = self.params[6:16].reshape(5, 2)
+
+        for joint in range(1, 6):
+            nominal_axis = axes_cal[joint].copy()
+            perpendicular_basis = np.eye(3)[np.abs(nominal_axis) < 0.5]
+            axis_tilts[joint] = tilts[joint - 1] @ perpendicular_basis
+            axes_cal[joint] = exp_so3(axis_tilts[joint]) @ nominal_axis
+
+        axis_angles_deg = np.degrees(np.arccos(np.clip(axes_cal @ axes_cal.T, -1.0, 1.0)))
+        np.fill_diagonal(axis_angles_deg, 0.0)
+
+        scale = np.maximum(
+            np.maximum(np.abs(self.theta_min), np.abs(self.theta_max)), 1e-12
+        )
+        coefficients = self.params[22:].reshape(6, self.n_poly).copy()
+        joint_scale = coefficients[:, 0] / scale if self.n_poly > 0 else np.zeros(6)
+
+        F_we_twist = self.params[16:22].copy()
+        F_we_offset = exp_se3(F_we_twist)
+        F_we_cal = self.F_WE * Frame(F_we_offset)
+        F_we = np.eye(4)
+        F_we[:3, :3] = F_we_cal.R.matrix
+        F_we[:3, 3] = F_we_cal.p.vec.ravel()
+
+        return {
+            "axis_tilts": axis_tilts,
+            "axes": axes_cal,
+            "axis_angles_deg": axis_angles_deg,
+            "joint_offset": self.joint_offsets.copy(),
+            "joint_scale": joint_scale,
+            "joint_scale_factor": 1.0 + joint_scale,
+            "joint_poly_coefficients": coefficients,
+            "joint_normalization": scale,
+            "F_we_twist": F_we_twist,
+            "F_we_offset": F_we_offset,
+            "F_we": F_we,
+        }
