@@ -38,21 +38,17 @@ def register_points(a: List[vct3], b: List[vct3]) -> Frame:
     source_mean, target_mean = source.mean(axis=0), target.mean(axis=0)
     source_centered = source - source_mean
     target_centered = target - target_mean
-    # Three noncollinear points (rank 2) suffice; planar layouts are valid.
-    # NumPy's default numerical rank tolerance scales with the data and eps.
     if (np.linalg.matrix_rank(source_centered) < 2
             or np.linalg.matrix_rank(target_centered) < 2):
         raise ValueError("registration requires noncollinear source and target points")
 
-    # Lecture 3, slide 17: H = sum(a'_k b'_k.T), R = V U.T (a -> b).
     H = source_centered.T @ target_centered
     U, singular_values, Vt = np.linalg.svd(H)
     tolerance = 3 * np.finfo(float).eps * singular_values[0]
     if singular_values[1] <= tolerance:
         raise ValueError("point correspondences do not constrain a unique rotation")
     correction = np.eye(3)
-    # Flip the least-constrained singular direction if the orthogonal fit
-    # reflects. This gives the least-squares SO(3) fit, without adding scale.
+
     correction[2, 2] = -1.0 if np.linalg.det(Vt.T @ U.T) < 0 else 1.0
     rotation = Vt.T @ correction @ U.T
     translation = target_mean - rotation @ source_mean
@@ -84,9 +80,6 @@ def average_frames(frames: List[Frame]) -> Frame:
             or not np.allclose(np.linalg.det(rotations), 1.0, atol=1e-8, rtol=0)):
         raise ValueError("input frame rotations must belong to SO(3)")
 
-    # Chordal least-squares mean: project M = mean(R_i) onto SO(3).
-    # This uses the same SVD/orthogonal-Procrustes idea as Arun registration,
-    # but M is a mean rotation, so the reconstruction is U D V.T here.
     U, _, Vt = np.linalg.svd(rotations.mean(axis=0))
     correction = np.eye(3)
     correction[2, 2] = -1.0 if np.linalg.det(U @ Vt) < 0 else 1.0

@@ -90,7 +90,6 @@ def test_refine_marker_body_reduces_layout_error(monkeypatch):
     from src import uvct3
     from scipy.spatial.transform import Rotation
 
-    # Make camera noise deterministic without changing NumPy's global RNG state.
     rng = np.random.default_rng(11)
     monkeypatch.setattr(np.random, "multivariate_normal", rng.multivariate_normal)
     simulation.clock.reset()
@@ -98,7 +97,7 @@ def test_refine_marker_body_reduces_layout_error(monkeypatch):
     nominal = [vct3(-30, -30, -30), vct3(30, 30, -30),
                vct3(30, -30, 30), vct3(-30, 30, 30)]
     body = simulation.define_marker_body("refine_body", nominal)
-    # A known manufacturing deformation is test data, not available to the solver.
+
     offsets = [vct3(-1, 2, 1), vct3(2, -1, -2), vct3(-2, 1, -1), vct3(1, -2, 2)]
     truth = [p + offset for p, offset in zip(nominal, offsets)]
     body.actual_marker_positions = [uvct3(p) for p in truth]
@@ -107,7 +106,6 @@ def test_refine_marker_body_reduces_layout_error(monkeypatch):
     truth_before = np.array([p.vec.ravel() for p in truth])
 
     def shape_error(layout):
-        # Independent proper-rotation alignment removes gauge but rejects reflection.
         points = np.array([p.vec.ravel() for p in layout])
         centered = points - points.mean(axis=0)
         reference = truth_before - truth_before.mean(axis=0)
