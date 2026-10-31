@@ -79,7 +79,7 @@ def test_average_frames_is_a_proper_rotation():
     assert np.allclose(R.T @ R, np.eye(3), atol=1e-9) and np.isclose(np.linalg.det(R), 1.0)
 
 
-def test_refine_marker_body_reduces_layout_error():
+def test_refine_marker_body_reduces_layout_error(monkeypatch):
     """TODO: write this test.
 
     Hint: define a body, place it in front of a tracker, measure how far the
@@ -87,7 +87,42 @@ def test_refine_marker_body_reduces_layout_error():
     allowed in a test) up to a rigid transform, refine, and show the
     distance shrank. Also check how much simulated time it cost.
     """
-    pytest.skip("TODO")
+    from src import uvct3
+    from scipy.spatial.transform import Rotation
+
+    rng = np.random.default_rng(11)
+    monkeypatch.setattr(np.random, "multivariate_normal", rng.multivariate_normal)
+    simulation.clock.reset()
+    tracker = simulation.create_tracker("refine_tracker", Frame(Rot(), vct3(0, 0, -1600)), seed=11)
+    nominal = [vct3(-30, -30, -30), vct3(30, 30, -30),
+               vct3(30, -30, 30), vct3(-30, 30, 30)]
+    body = simulation.define_marker_body("refine_body", nominal)
+
+    offsets = [vct3(-1, 2, 1), vct3(2, -1, -2), vct3(-2, 1, -1), vct3(1, -2, 2)]
+    truth = [p + offset for p, offset in zip(nominal, offsets)]
+    body.actual_marker_positions = [uvct3(p) for p in truth]
+    placed = simulation.place_marker_body(body, Frame(Rot('z', 0.2), vct3()), precision="exact")
+    simulation.add_marker_bodies(tracker, [placed])
+    truth_before = np.array([p.vec.ravel() for p in truth])
+
+    def shape_error(layout):
+        points = np.array([p.vec.ravel() for p in layout])
+        centered = points - points.mean(axis=0)
+        reference = truth_before - truth_before.mean(axis=0)
+        rotation, _ = Rotation.align_vectors(reference, centered)
+        residual = rotation.apply(centered) - reference
+        return float(np.sqrt(np.mean(np.sum(residual ** 2, axis=1))))
+
+    before = shape_error(nominal)
+    started = simulation.clock.elapsed
+    n_readings = 60
+    refined = registration.refine_marker_body(tracker, placed, n_readings=n_readings)
+    assert len(refined) == len(nominal)
+    assert shape_error(refined) < 0.25 * before
+    assert np.allclose([p.vec for p in refined], [p.vec for p in body.nominal_marker_positions])
+    assert np.array_equal(truth_before, [p.p.vec.ravel() for p in body.get_actual_marker_positions()])
+    assert np.isclose(simulation.clock.elapsed - started,
+                      n_readings * simulation.constants.SAMPLE_DELTA_T_SEC)
 
 
 # ---------------------------------------------------------------- workflow
@@ -109,7 +144,24 @@ def test_estimate_base_frame_on_synthetic_data():
 
 def test_planned_poses_are_visible_and_within_limits():
     """TODO: write this test for your plan_calibration_poses."""
-    pytest.skip("TODO")
+    simulation.clock.reset()
+    rob = simulation.create_robot("plan_robot", Frame(Rot(), vct3(-800, 0, 1300)), seed=12)
+    trk = simulation.create_tracker("plan_tracker", Frame.eye(), seed=12)
+    s = 37.5
+    markers = [vct3(s, s, s), vct3(s, -s, -s), vct3(-s, s, -s), vct3(-s, -s, s)]
+    before_theta = rob.state().theta.copy()
+    poses = workflow.plan_calibration_poses(
+        rob, trk, markers, desired_accuracy=simulation.constants.TARGET_ANG_ERR_RAD)
+    poses = np.asarray(poses, dtype=float)
+    assert poses.ndim == 2 and poses.shape[0] > 0 and poses.shape[1] == 6
+    assert np.all(np.isfinite(poses))
+    assert np.all(np.ptp(poses, axis=0) > 1e-6), "Every joint needs excitation"
+    for theta in poses:
+        assert rob.within_limits(theta)
+        F_ee = rob.F_rob * rob.fwd_kins(theta)
+        assert trk.is_visible([F_ee * p for p in markers])
+    assert simulation.clock.elapsed == 0.0
+    assert np.array_equal(rob.state().theta, before_theta)
 
 
 def test_measure_home_offsets_matches_encoders():
@@ -158,4 +210,44 @@ def test_fit_recovers_synthetic_parameters():
     the parameters themselves need not match if your model has a null
     direction -- compare poses, not parameters.
     """
-    pytest.skip("TODO")
+    from scipy.spatial.transform import Rotation
+
+    rob = simulation.create_robot("fit_robot", Frame.eye(), seed=13)
+    F_X = Frame(Rot('z', 0.2), vct3(50, -20, 100))
+    rng = np.random.default_rng(13)
+    generating = kinematics.ImprovedKinematics(rob, F_X)
+    generating.params = generating.initial_params() + 1e-3 * rng.normal(size=generating.params.shape)
+    # Student TODO fixture: retain a nonzero model inside the known physical
+    # derivative bounds. The assertion tolerances and TA tests stay unchanged.
+    coefficients = generating.params[22:].reshape(6, 2)
+    scales = np.maximum(abs(rob.theta_min), abs(rob.theta_max))
+    worst_numerator = abs(coefficients[:, 0]) + 2 * abs(coefficients[:, 1])
+    coefficients *= np.minimum(1., .5 * simulation.constants.OMEGA_SYS * scales
+                                / worst_numerator)[:, None]
+    data = workflow.CalibrationData()
+    for _ in range(60):
+        theta = random_theta(rng)
+        data.thetas.append(theta)
+        data.frames.append(generating.predict_in_tracker(theta))
+    held_out = [random_theta(rng) for _ in range(20)]
+    fitted = kinematics.ImprovedKinematics(rob, F_X)
+
+    def prediction_errors(model):
+        errors = []
+        for theta in held_out:
+            truth = generating.predict_in_tracker(theta)
+            estimate = model.predict_in_tracker(theta)
+            # Independent oracle avoids depending on the unimplemented metrics module.
+            angle = Rotation.from_matrix(truth.R.matrix.T @ estimate.R.matrix).magnitude()
+            distance = (truth.p - estimate.p).norm()
+            errors.append((angle, distance))
+        return np.asarray(errors)
+
+    angle_tol, position_tol = 1e-5, 1e-3  # rad, mm; synthetic noise-free tolerances
+    before = prediction_errors(fitted)
+    assert np.any(before.max(axis=0) > 10 * np.array([angle_tol, position_tol]))
+    fitted.fit(data)
+    after = prediction_errors(fitted)
+    assert np.all(np.isfinite(after))
+    assert after[:, 0].max() < angle_tol
+    assert after[:, 1].max() < position_tol
