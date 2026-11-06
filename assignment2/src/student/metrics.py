@@ -59,8 +59,15 @@ def frame_error(F_a: Frame, F_b: Frame) -> Tuple[float, float]:
     # Prevent rounding errors from putting the input outside [-1, 1].
     cos_angle = np.clip(cos_angle, -1.0, 1.0)
 
+    # The skew-symmetric part gives the sine magnitude, stable near zero.
+    sin_angle = 0.5 * np.linalg.norm([
+        R[2, 1] - R[1, 2],
+        R[0, 2] - R[2, 0],
+        R[1, 0] - R[0, 1],
+    ])
+
     # Rotation-error magnitude in radians, between 0 and pi.
-    angle_rad = float(np.arccos(cos_angle))
+    angle_rad = float(np.arctan2(sin_angle, cos_angle))
 
     return angle_rad, dist_mm
 

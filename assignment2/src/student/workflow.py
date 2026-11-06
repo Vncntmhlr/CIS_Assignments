@@ -145,7 +145,7 @@ for joint in range(3, 6):  # Python indices 3, 4, 5 = joints 4, 5, 6
 
     # Allocate half the orientation-error target to wrist interpolation.
     # Divide by 3 so the three wrist error bounds add to this budget.
-    allowed_error_per_wrist_joint = 0.05 * desired_accuracy / 3.0
+    allowed_error_per_wrist_joint = 0.025 * desired_accuracy / 3.0
 
     for joint in range(3, 6):  # Python indices 3, 4, 5 = joints 4, 5, 6
         slope_bound = constants.OMEGA_SYS[joint]
