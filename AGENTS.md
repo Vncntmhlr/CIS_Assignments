@@ -1,161 +1,75 @@
-# CIS_Assignments
+# CIS I — Assignment 3 Development Instructions
 
-JHU Computer Integrated Surgery I, Fall 2026; one repository for assignments 1–4.
+This `AGENTS.md` governs **only `assignment3/`**, the Fall 2026 CIS I assignment **Surface Registration with a Tracked Pointer**. Work on the current assignment only. Do not apply historical implementation, report-version, or teammate-ownership rules from other assignments.
 
-## Sources and organization
-- Project: https://github.com/Vncntmhlr/CIS_Assignments
-- Official TA/course repository: https://github.com/LCSR-CIIS/CIS_I_Course/tree/main
-- Prefer local assignment briefs, READMEs, notebooks, and source files. Fetch upstream resources only when relevant to the task (e.g. a missing reference or requested comparison/update); do not routinely browse, clone, or pull upstream.
-- `assignment1/`: pivot calibration. Student work is in `functions/` and `notebooks/assignment1_final.ipynb`; the report is `notebooks/CIS_I_Assignment1_Report_Final.pdf`. `archive_notebooks/` contains historical experiments, not the primary entry point.
-- `assignment1/src/` (including `simulation/`), `data_types/`, and `uncertainty_networks/` contain course support code. Preserve these unless explicitly asked to modify them.
-- `assignment2/`: current work; brief: `2026_assignment_2.pdf`. `assignment3/` and `assignment4/` are placeholders. Keep each assignment's code and documentation in its own directory.
-- `.local_archive/` holds ignored local backups, including a course checkout; consult only as relevant reference, not as the active implementation.
-- For Assignment 2, when implementing or selecting mathematical methods (e.g., registration, calibration, interpolation, least squares, covariance propagation, or kinematics-related derivations), prioritize the methods documented in `assignment2/CIS_I_Assignment2_Classroom_Math_Methods.md` before considering alternative approaches. Alternative methods may be used when justified by accuracy, numerical stability, or runtime requirements.
+## 1. Sources, scope, and initial setup
 
-## Development
-- Follow the relevant assignment README and brief. Assignment 1 uses Python 3.9+ and `assignment1/requirements.txt`; use an isolated environment.
-- Follow existing Python/NumPy conventions and naming. Preserve coordinate-frame meanings, units, array shapes, and numerical assumptions; explain non-obvious mathematics.
-- Preserve notebook relative imports: execute Assignment 1's final notebook with `assignment1/notebooks/` as the working directory.
-- Validate changes with focused numerical checks and relevant notebooks; for notebook changes, restart the kernel and run all cells when feasible. Account for simulation randomness and report checks run or limitations.
-- Avoid unrelated notebook output churn; do not add environments, caches, or generated artifacts unless required for the task.
+- Student project: https://github.com/Vncntmhlr/CIS_Assignments
+- Official TA/course repository: https://github.com/LCSR-CIIS/CIS_I_Course/tree/main/assignments/assignment3
+- Read the **local** Assignment 3 handout, TA `README.md`, `notebooks/assignment3_template.ipynb`, relevant `src/student/` stubs and `tests/test_student.py` before deciding what to implement. Use the official upstream repository only to obtain the missing Assignment 3 starter or verify an actual discrepancy. Do not routinely pull, re-clone, or overwrite working files.
+- Read `assignment3/CIS_I_Assignment3_Classroom_Math_Methods.md` before choosing mathematical methods. It is a source-grounded **selection guide**, not evidence that a method has been implemented or tested. Its labels `[COURSE]`, `[DERIVED]`, and `[ENGINEERING]` must not be conflated.
+- The local `assignment3/` directory may initially be empty. When asked to set up Assignment 3, bring in the official TA starter **without replacing existing user or teammate changes**. Preserve upstream provenance and keep implementation, experiments, results, and documentation inside `assignment3/`.
+- Follow the TA's documented Python dependencies and working-directory conventions. Keep environment setup notes in `assignment3/SETUP.md` only when useful.
 
+## 2. Work step by step
 
-## TA Starter Code and Template Protection
+- Implement **only the step or specific functions requested by the user**. Do not silently complete later steps or replace agreed methods.
+- For each step: inspect the actual starter API and tests; state its goal, inputs/outputs, frame convention, the selected classroom method, alternatives/trade-offs, and key assumptions; implement; run focused tests; report results and remaining limitations.
+- If a step depends on unfinished modules, use explicitly labeled **synthetic test data or mocks** for isolated verification. Never report mock or planned outcomes as actual simulator results.
+- Preserve the notebook as a teaching and validation entry point. The grader invokes `workflow.design_scene()` and `workflow.run_registration(session, mesh, boxes)` **headlessly**; those functions must not depend on notebook globals or a particular practice-session seed.
+- Choose simple, course-supported approaches as the baseline. Add complexity only when measured accuracy, robustness, conditioning, or runtime motivates it. Explain any deviation from the mathematical reference.
 
-- Treat all TA-provided starter files as read-only reference material by default.
-- Do not add student-created files inside TA-provided folders. For Assignment 2, keep helpers in the existing `vendor/functions/`, additional tests and essential experiment scripts in `experiments/`, and reusable datasets, fitted parameters and essential outputs in `results/`. Reuse these folders; preserve the original `src/student/` and `tests/` file lists.
-- In the assignment notebook, only modify code explicitly marked `TODO` or clearly designated for student implementation.
-- Never modify, rewrite, shorten, expand, or reorganize TA-provided Markdown cells, including the instructions above each code cell, unless explicitly requested by the user.
-- Do not modify non-TODO code cells, original equations, examples, evaluation procedures, or notebook structure without explicit permission.
-- Do not alter TA-provided test cases, assertions, or expected results. Only implement tests explicitly marked as student TODOs when requested.
-- Do not change TA-provided simulation modules or APIs.
-- If a necessary implementation appears to require changes outside the designated TODO areas, explain the reason and request permission before editing.
-- Prefer creating separate experimental files rather than modifying protected starter content.
-- Before completing a task, review the Git diff and ensure no unintended changes were made to protected content.
-- Preserve the original TA notebook template whenever possible; use a separate working copy for student development.
+## 3. Protect TA starter code and interfaces
 
+- Implement student TODOs in `src/student/closest_point.py`, `src/student/icp.py`, `src/student/uncertainty.py`, and `src/student/workflow.py`; fill student-designated notebook TODO cells and explicitly student-TODO test cases when appropriate.
+- Treat `src/session.py`, `src/mesh.py`, `src/student/report.py`, original non-TODO tests, provided data, and other TA infrastructure as read-only by default. Do not change the simulator or its APIs.
+- Do not rewrite the notebook's original Markdown, equations, example code, evaluation cells, non-TODO code, or layout without explicit permission. Prefer a separate working copy or an `experiments/` script for additional investigations.
+- Keep public function signatures, `Session` methods, expected `Frame`/`vct3`/NumPy types, array shapes, `SampleSet`, `IcpResult`, and `RegistrationReport` compatible with the official starter and grader.
+- Additional helper code may be written inside authorized student implementations. Put extra offline experiments, benchmarks, and supplementary tests in separate `assignment3/experiments/` files where useful; never shadow TA packages.
+- If a necessary fix appears to require changing a protected file or API, explain the specific blocker and ask permission before editing it.
+- Inspect the Git working tree and diffs before and after changes. Preserve other people's work. **Do not commit, push, alter branches/remotes, or change GitHub settings unless explicitly requested.**
 
-## Collaboration
-- Inspect the working tree before edits, preserve user changes, and keep changes scoped to the request. Do not change other assignments or course simulation code incidentally.
-- Explain material assumptions, mathematical changes, and validation results. Ask when requirements are ambiguous enough to affect correctness.
-- Do not commit, push, or change GitHub settings unless the user requests it. Keep shared instructions here; `CLAUDE.md` imports this file.
+## 4. Mathematical defaults and frame invariants
 
-## Report-Oriented Documentation
-- Maintain `REPORT_NOTES.md` inside each assignment directory for report-worthy material only: major design decisions, mathematical derivations and key equations, algorithmic approaches, important experimental settings and quantitative results, validation evidence, and meaningful limitations.
-- Keep environment/setup checks, dependency/import results, and setup test summaries out of report notes. Put necessary runtime instructions in `SETUP.md`; retain algorithmic validation relevant to the final report.
-- Update notes after significant milestones, not every interaction or minor code change. Organize by topic, consolidate superseded material, and avoid repetitive activity logs. Preserve links to relevant code, figures, tables, and test results; distinguish measured evidence from planned work.
-- Target approximately 20 pages for the final report, following the general quality and structure of Assignment 1's report while avoiding unnecessary length; official assignment requirements take precedence.
-- Focus the report's unit-test discussion on approximately 2–4 high-value tests, especially kinematics tests. Still implement and run all officially required tests; the discussion limit does not reduce testing requirements.
+- Prefer the classroom methods in `CIS_I_Assignment3_Classroom_Math_Methods.md`: exact closest point on a triangle (plane projection plus face/edge/vertex cases); batched/vectorized exact mesh search; spatially informative and visible patches; Arun/SVD rigid point registration; robust patch-based coarse alignment; point-to-point ICP with **implemented** MAD-based outlier rejection; left-CT Jacobian-based covariance and first-order TRE propagation.
+- Optional alternatives (point-to-plane refinement, robust weighted LS, search trees, Monte Carlo uncertainty) require a concrete reason and comparative testing. Do not introduce unexplained advanced methods merely to make the solution look sophisticated.
+- **`F_reg` maps Reference → CT:** `c_CT = F_reg * d_ref`. A measured tip is `d_ref = F_ref.inv() * F_ptr * p_tip`. Use explicit names for source and destination frames; check multiplication order, dimensions, millimeters versus radians, and valid rotation matrices (`R.T @ R ≈ I`, `det(R) ≈ +1`).
+- The Assignment 3 handout's pointer-placement expression uses an inconsistent/inverse registration convention. Use the official GitHub `Reference → CT` API convention; explicitly note any handout/starter discrepancies rather than silently mixing conventions.
+- Patch IDs identify **approximate surface regions**, not exact CT point correspondences. Never give the estimator the simulator's hidden selected points or true transform.
+- `reject="mad"` is only the starter's default **parameter value**; the MAD logic is student code, not a provided solver.
+- Distinguish point-to-surface residuals/FRE, **predicted** TRE, and **practice-server actual** TRE. Low residual alone does not establish accurate registration. The handout mentions ~1 mm while the TA README/notebook specifies ≤2 mm; retain both as a source discrepancy until clarified.
+- The grader has a **10-minute wall-clock limit**; track wall time separately from simulated time (`place_pointer`: 1 simulated second; `sample_marker_bodies`: 0.03 s).
+- For uncertainty, state the left/right perturbation convention, error model, Jacobian, and covariance assumptions. Check rank, numerical conditioning, symmetry, and positive semidefiniteness. Do not confuse per-vertex RMS predictions with the mean or percentile of an actual random TRE distribution.
+- The provided `IcpResult` lacks the original `d_ref` array; for Step 7, agree on an accurate and API-compatible way to obtain or approximate transformed points before implementing the covariance calculation.
 
-## Assignment 2 — Continuous Report Version and Change Tracking
+## 5. Tests, simulator access, and numerical evidence
 
-Maintain `assignment2/report/REPORT_UPDATE_LOG.md` as the persistent source of truth for report versions and report-relevant changes.
+- Run `python -m pytest tests -q` from `assignment3/` as a baseline, then run focused tests after each completed component. Early `NotImplementedError` failures are expected; do not misreport them as regressions or success.
+- Cover face/edge/vertex triangle cases, mesh-search exactness, known synthetic rigid transforms, coarse alignment, ICP convergence, injected outliers, missing tracker observations, and covariance rank/PSD where relevant.
+- Benchmark closest-point search and ICP using real mesh sizes; do not assume an algorithm is fast merely because it is vectorized.
+- Once the full pipeline works, use **multiple independent practice seeds** to compare actual TRE, predicted TRE, residual statistics, outlier detection, visibility, convergence, simulated time, and wall-clock time. Record test settings and numeric results.
+- `session.evaluate_tre()` and `session.true_outliers()` are **practice-validation only**. Never call them inside `run_registration()`, during a graded run, or as hidden inputs to the estimator. Use only the documented `Session` interface in the graded workflow.
+- Keep the TA's original assertions and evaluation rules unchanged. Complete student-designated TODO tests or add separate tests instead of weakening existing ones.
+- Clearly distinguish **PLANNED**, **VERIFIED**, **FAILED**, and **NOT RUN**. Never invent measurements, claim hidden-grader success, or extrapolate a single passing seed into a guarantee.
 
-### 1. Current Report Version
+## 6. Continuous, report-ready documentation
 
-The log must always identify:
+- Maintain **`assignment3/REPORT_NOTES.md` throughout development**. Create it at the first substantive implementation milestone if missing. Update it after each important design choice, functioning algorithm, substantial change, or meaningful experiment—not after every tiny edit.
+- Keep `CIS_I_Assignment3_Classroom_Math_Methods.md` as the general mathematical reference; `REPORT_NOTES.md` must describe **methods actually chosen and used, what the code currently does, and what has really been measured**. Replace or label superseded decisions rather than leaving contradictory descriptions.
+- For every report-worthy milestone, capture concisely:
+  1. Notebook step, function(s), source file(s), and contributor if known.
+  2. Goal, input/output data, coordinate frames, and numerical units.
+  3. Actual mathematical method, key derivation/equations, assumptions, and justification; relevant rejected alternatives when consequential.
+  4. **Verified** course slide numbers and handout/README citations for major formulas; mark lecture-derived adaptations rather than attributing them verbatim to the professor.
+  5. Short pseudocode or algorithm/data-flow description, including non-obvious edge cases.
+  6. Reproducible validation: tests run, seeds, configurations, numeric results, tables/plots, timing, and paths to relevant figures/results.
+  7. Limitations, observed failures, unresolved checks, and changes needed before integration or reporting.
+- Organize notes so the eventual report can cover: scene/device design and specifications; mathematical approach; algorithmic approach and call hierarchy; sampling plan; registration and rejection methods; uncertainty/TRE calculations; verification and achieved performance; discussion, limitations, and team contributions.
+- **Write for the CIS I TA, not for a specialist research audience.** Prefer terms and notation used in lectures: `rigid registration`, `Arun/SVD`, `least squares`, `closest point`, `ICP`, `surface normal`, `outlier rejection`, `Jacobian`, `covariance`, `FRE`, `TRE`. Define variables and abbreviations, explain what each equation physically does, and introduce unfamiliar technical language only when needed, with a plain-English definition.
+- Avoid name-dropping methods not used in the final code; do not write speculative results or overcomplicate the math section. Favor a few correct, well-explained derivations over excessive terminology. Keep report prose clear and direct.
+- Keep routine dependency installations, environment details, import troubleshooting, and verbose test logs out of `REPORT_NOTES.md`; put reusable instructions in `SETUP.md`, and link to concise reproducible evidence instead.
+- If two teammates work in parallel, agree on ownership and function interfaces first. Preserve each person's code, and document **verified** individual technical contributions without assuming who did what.
 
-- `current_report_version`: latest user-approved report version (v1, v2, v3, ...).
-- `report_baseline_commit`: Git commit associated with that version.
-- `report_baseline_hash`: SHA-256 hash of its `main.tex`.
-- `report_status`: whether the latest version is locally approved or also confirmed synchronized to Overleaf.
-- `next_report_version`: proposed next version.
-- `pending_changes`: changes not yet incorporated into the approved report.
+## 7. End-of-step handoff
 
-Initialize these values from the actual report state. Never assume an unverified version or Overleaf synchronization.
-
-### 2. Track Changes Against the Correct Version
-
-After each substantive report-relevant code, algorithm, mathematical, experimental, or documentation change, append a concise entry containing:
-
-- Unique change ID (CHG-001, CHG-002, ...).
-- `based_on_report_version`: the current approved version at the time of the change.
-- Previous versus new behavior and the reason for modification.
-- Exact affected source files and functions.
-- Verified tests, measurements, and result-file references.
-- Affected report chapters, equations, tables, and figures.
-- Status: `PENDING`, `INCORPORATED`, or `SUPERSEDED`.
-- `incorporated_in_version`, once applicable.
-
-Multiple development changes may accumulate against the same report version.
-
-Do not increment the report version after individual code modifications.
-
-### 3. Generate the Next Report Version
-
-When explicitly requested to update the report:
-
-1. Read the current report version and all pending changes.
-2. Audit Git changes since the current report baseline, including uncommitted and untracked files.
-3. Reconcile missing or superseded changes.
-4. Verify relevant mathematical claims and experimental results against current sources.
-5. Update only affected report sections while preserving the approved report structure and formatting.
-6. Compile and validate the revised LaTeX project where possible.
-7. Present the proposed new version for user review.
-
-Do not mark the new version as approved before explicit user confirmation.
-
-### 4. Finalize and Advance the Version
-
-After the user approves the revised report:
-
-- Advance `current_report_version` from vN to vN+1.
-- Record the new report baseline commit and source hashes, or mark any missing commit/hash as pending.
-- Record the previous version as the parent version.
-- Mark incorporated changes with `incorporated_in_version: vN+1`.
-- Preserve the historical version record and previous change entries.
-- Begin recording subsequent modifications against vN+1.
-
-Preserve an identifiable snapshot of each approved report using Git history or archived LaTeX source.
-
-Overleaf synchronization must be confirmed separately. Do not assume that a local Git commit has updated the Overleaf project.
-
-### 5. Efficiency and Safety
-
-- Keep the change log concise and organized by report version.
-- Never delete historical changes.
-- Do not repeatedly analyze changes already incorporated in earlier approved versions.
-- Use links to code and result files instead of duplicating large logs or datasets.
-- Read only relevant supporting documentation when possible.
-- Do not modify TA-provided source code.
-- Do not commit, push, or change report versions without the required user authorization.
-
-## Assignment 2 — Report Ownership and Incremental Updates
-
-### Version 2 Transition
-
-The upcoming Report v2 is a transition version. It may incorporate all verified pending changes since Report v1, including changes affecting Chapters 1–4.
-
-After Report v2 is explicitly approved, the following ownership restrictions apply permanently.
-
-### Report Ownership After v2
-
-- My responsibility is limited to Chapter 5 (Experimental Results and Evaluation), Chapter 6 (Discussion), Chapter 7 (Conclusion), and explicitly assigned related appendices.
-- Chapters 1–4 belong to my teammate and must not be modified by my Codex workflows.
-- Do not rewrite, reformat, or silently correct Chapters 1–4 during subsequent report updates.
-- If a new code modification affects Chapters 1–4, flag it as a cross-chapter issue for my teammate rather than modifying those chapters.
-- After v2, maintain detailed pending change records only for changes affecting my assigned report sections. Preserve earlier version history and incorporated entries.
-- These restrictions apply to all subsequent report versions unless I explicitly change them.
-
-### Incremental LaTeX Updates
-
-For future report updates, prefer minimal replacement snippets rather than regenerating the entire LaTeX document.
-
-For each required modification:
-1. Identify the exact chapter, subsection, and original text or unique LaTeX anchor.
-2. Provide the complete replacement LaTeX snippet.
-3. Explain briefly why the modification is required and which verified change-log entries it incorporates.
-4. Include only necessary equations, tables, citations, and figure references.
-5. Avoid changing unrelated text, formatting, labels, or document structure.
-
-Do not output the entire `main.tex` unless explicitly requested.
-
-### Version Management
-
-- Generate each proposed version from the latest approved report, not from the original v1 template.
-- Do not advance the current report version merely because replacement snippets were generated.
-- Advance to vN+1 only after I confirm the changes have been incorporated and approved.
-- After approval, record the new baseline and associate incorporated change-log entries with vN+1.
-- Preserve historical version information and keep subsequent changes associated with the newly approved version.
-- If the actual Overleaf report differs from the local source, identify the discrepancy before generating replacements.
-- Do not commit or push without explicit authorization.
+After each requested implementation step, provide a concise handoff stating: files/functions changed; selected mathematical method and reason; relevant tests passed/failed/not run with evidence; numerical and performance results; remaining risks or blockers; and the exact `REPORT_NOTES.md` sections updated. Review the diff before concluding. Do not advance to the next step unless requested.
