@@ -2,7 +2,8 @@
 
 The [official starter](https://github.com/LCSR-CIIS/CIS_I_Course/tree/0723d0b6793c3288457b34acfaf2cd872914207e/assignments/assignment2)
 is pinned to TA commit `0723d0b6793c3288457b34acfaf2cd872914207e`.
-`src/`, `notebooks/`, `tests/`, and `requirements.txt` are unmodified.
+The TA simulator, vendor support snapshot, and `requirements.txt` are preserved;
+student modules, tests, and notebook design cells are developed in this repository.
 The [official TA README](https://github.com/LCSR-CIIS/CIS_I_Course/blob/0723d0b6793c3288457b34acfaf2cd872914207e/assignments/assignment2/README.md)
 contains the assignment workflow guide.
 
@@ -59,7 +60,39 @@ See [provenance](vendor/PROVENANCE.md) and [checksums](vendor/SHA256SUMS.json).
 
 ## Development
 
-To run all provided tests, use `venv/bin/python -m pytest tests -q`. Student tests currently
-fail on unimplemented stubs or skip TODO tests; those are expected at setup time.
-Full notebook execution also awaits scene and algorithm TODOs. Implement student
-work in `src/student/`; preserve the supplied simulator and support snapshot.
+`pytest.ini` disables automatic loading of third-party plugins, preventing
+inherited system ROS plugins from conflicting with this assignment's pytest.
+Built-in plugins and `tests/conftest.py` still load. Keep the notebook's original
+test command; no environment-variable workaround is needed in its code cell.
+Load any intentionally needed third-party plugin explicitly with `-p plugin_name`.
+
+Keep the original TA file lists in `src/student/` and `tests/`. Implement only
+existing designated TODOs there. Student helpers live in `vendor/functions/`;
+additional regression tests and retained experiment drivers live in `experiments/`.
+Datasets, fitted parameters and essential evidence live in `results/`. The
+protected notebook keeps its original test command (official `tests/` only);
+use the commands below to include our additional regression coverage.
+
+From `assignment2/`:
+
+```bash
+venv/bin/python -m pytest tests -q           # Complete original TA test files
+venv/bin/python -m pytest experiments -q     # Student regression suite
+venv/bin/python -m pytest -q                 # Both, via pytest.ini
+venv/bin/python experiments/step8_phase_e.py --verify-fit
+```
+
+The complete TA suite includes a known failure in the intentionally unimplemented
+`refine_marker_body()` TODO (the exact special marker body currently needs no
+refinement). Three student tests explicitly document expected failures in the
+unchanged provided IK near singularities/limits. Preserve these limitations;
+do not alter original assertions to obtain a green summary.
+
+The verification command reuses saved calibration/held-out measurements and checks
+the normal constrained fit against the adopted model without acquiring data or
+overwriting archives. See [experiment guide](experiments/README.md) and
+[result index](results/README.md). Step 9 can be reproduced with
+`venv/bin/python experiments/step9_forward.py` using the saved seed-1 fit;
+Step 10 can be reproduced with `venv/bin/python experiments/step10_inverse.py`;
+its public-motion reconstruction time is recorded separately from testing.
+See the experiment guide for the unchanged target-selection protocol.

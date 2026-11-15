@@ -79,7 +79,7 @@ def test_average_frames_is_a_proper_rotation():
     assert np.allclose(R.T @ R, np.eye(3), atol=1e-9) and np.isclose(np.linalg.det(R), 1.0)
 
 
-def test_refine_marker_body_reduces_layout_error():
+def test_refine_marker_body_reduces_layout_error(monkeypatch):
     """TODO: write this test.
 
     Hint: define a body, place it in front of a tracker, measure how far the
