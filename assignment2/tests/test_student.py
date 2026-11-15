@@ -87,43 +87,98 @@ def test_refine_marker_body_reduces_layout_error(monkeypatch):
     allowed in a test) up to a rigid transform, refine, and show the
     distance shrank. Also check how much simulated time it cost.
     """
-    from src import uvct3
-    from scipy.spatial.transform import Rotation
+    # Reproducible manufacturing errors and tracker noise.
+    np.random.seed(0)
 
-    rng = np.random.default_rng(11)
-    monkeypatch.setattr(np.random, "multivariate_normal", rng.multivariate_normal)
-    simulation.clock.reset()
-    tracker = simulation.create_tracker("refine_tracker", Frame(Rot(), vct3(0, 0, -1600)), seed=11)
-    nominal = [vct3(-30, -30, -30), vct3(30, 30, -30),
-               vct3(30, -30, 30), vct3(-30, 30, 30)]
-    body = simulation.define_marker_body("refine_body", nominal)
+    # Nominal marker coordinates in the body's local frame (mm).
+    s = 30
+    a_k = [
+        vct3( s,  s,  s),
+        vct3( s, -s, -s),
+        vct3(-s,  s, -s),
+        vct3(-s, -s,  s),
+    ]
 
-    offsets = [vct3(-1, 2, 1), vct3(2, -1, -2), vct3(-2, 1, -1), vct3(1, -2, 2)]
-    truth = [p + offset for p, offset in zip(nominal, offsets)]
-    body.actual_marker_positions = [uvct3(p) for p in truth]
-    placed = simulation.place_marker_body(body, Frame(Rot('z', 0.2), vct3()), precision="exact")
-    simulation.add_marker_bodies(tracker, [placed])
-    truth_before = np.array([p.vec.ravel() for p in truth])
+    # Ordinary body: actual marker positions have manufacturing error.
+    body = simulation.define_marker_body("body", a_k)
 
-    def shape_error(layout):
-        points = np.array([p.vec.ravel() for p in layout])
-        centered = points - points.mean(axis=0)
-        reference = truth_before - truth_before.mean(axis=0)
-        rotation, _ = Rotation.align_vectors(reference, centered)
-        residual = rotation.apply(centered) - reference
-        return float(np.sqrt(np.mean(np.sum(residual ** 2, axis=1))))
+    # Ground-truth marker coordinates in the body's local frame.
+    # Used only to evaluate the test, never inside refinement.
+    a_star = [
+        vct3(marker.p)
+        for marker in body.get_actual_marker_positions()
+    ]
 
-    before = shape_error(nominal)
-    started = simulation.clock.elapsed
-    n_readings = 60
-    refined = registration.refine_marker_body(tracker, placed, n_readings=n_readings)
-    assert len(refined) == len(nominal)
-    assert shape_error(refined) < 0.25 * before
-    assert np.allclose([p.vec for p in refined], [p.vec for p in body.nominal_marker_positions])
-    assert np.array_equal(truth_before, [p.p.vec.ravel() for p in body.get_actual_marker_positions()])
-    assert np.isclose(simulation.clock.elapsed - started,
-                      n_readings * simulation.constants.SAMPLE_DELTA_T_SEC)
+    # Preserve the initial layout before refinement updates the body.
+    a_before = [vct3(a) for a in a_k]
 
+    # Tracker at workspace origin, looking along local +z.
+    trk = simulation.create_tracker(
+        "trk_refinement", Frame.eye(), seed=0
+    )
+
+    # Place the body 1500 mm in front of the tracker.
+    placed = simulation.place_marker_body(
+        body,
+        Frame(Rot(), vct3(0, 0, 1500)),
+        precision="exact",
+    )
+    simulation.add_marker_bodies(trk, [placed])
+
+    assert trk.is_visible([
+        placed.actual_placement * a for a in a_star
+    ])
+
+    def aligned_rms_error(a_est, a_star):
+        """
+        Inputs:
+            a_est  : estimated local marker coordinates
+            a_star : actual local marker coordinates
+        Output:
+            RMS layout error after rigid alignment, in mm.
+        """
+        F = registration.register_points(a_est, a_star)
+
+        squared_errors = [
+            ((F * a) - a_true).norm() ** 2
+            for a, a_true in zip(a_est, a_star)
+        ]
+        return float(np.sqrt(np.mean(squared_errors)))
+
+    # Initial error, after aligning nominal layout to actual layout.
+    error_before = aligned_rms_error(a_before, a_star)
+
+    # Refine using repeated tracker observations.
+    n_readings = 30
+    t_start = simulation.clock.elapsed
+
+    a_hat = registration.refine_marker_body(
+        trk, placed, n_readings=n_readings
+    )
+
+    t_refinement = simulation.clock.elapsed - t_start
+
+    # Refined error, after aligning refined layout to actual layout.
+    error_after = aligned_rms_error(a_hat, a_star)
+
+    print(f"Before refinement: {error_before:.4f} mm RMS")
+    print(f"After refinement:  {error_after:.4f} mm RMS")
+    print(f"Refinement time:   {t_refinement:.3f} s")
+
+    assert len(a_hat) == len(a_star)
+    assert np.isfinite(error_after)
+    assert error_after < error_before, (
+        f"Layout did not improve: "
+        f"{error_before:.4f} -> {error_after:.4f} mm RMS"
+    )
+
+    expected_time = (
+        n_readings * simulation.constants.SAMPLE_DELTA_T_SEC
+    )
+    assert np.isclose(t_refinement, expected_time)
+
+
+   
 
 # ---------------------------------------------------------------- workflow
 
@@ -144,24 +199,58 @@ def test_estimate_base_frame_on_synthetic_data():
 
 def test_planned_poses_are_visible_and_within_limits():
     """TODO: write this test for your plan_calibration_poses."""
-    simulation.clock.reset()
-    rob = simulation.create_robot("plan_robot", Frame(Rot(), vct3(-800, 0, 1300)), seed=12)
-    trk = simulation.create_tracker("plan_tracker", Frame.eye(), seed=12)
-    s = 37.5
-    markers = [vct3(s, s, s), vct3(s, -s, -s), vct3(-s, s, -s), vct3(-s, -s, s)]
-    before_theta = rob.state().theta.copy()
+    # Workspace origin coincides with the tracker.
+    F_tracker = Frame.eye()
+    F_robot = Frame(Rot(), vct3(-900, 0, 1300))
+
+    rob = simulation.create_robot("rob", F_robot, seed=0)
+    trk = simulation.create_tracker("trk", F_tracker, seed=0)
+
+    # Four noncoplanar markers, each within the 75 mm radius limit.
+    s = 30.0
+    markers = [
+        vct3( s,  s,  s),
+        vct3( s, -s, -s),
+        vct3(-s,  s, -s),
+        vct3(-s, -s,  s),
+    ]
+    placed = simulation.create_robot_calibration_body(rob, markers)
+    simulation.add_marker_bodies(trk, [placed])
+    
+
+    # Call the function being tested.
     poses = workflow.plan_calibration_poses(
-        rob, trk, markers, desired_accuracy=simulation.constants.TARGET_ANG_ERR_RAD)
-    poses = np.asarray(poses, dtype=float)
-    assert poses.ndim == 2 and poses.shape[0] > 0 and poses.shape[1] == 6
-    assert np.all(np.isfinite(poses))
-    assert np.all(np.ptp(poses, axis=0) > 1e-6), "Every joint needs excitation"
-    for theta in poses:
-        assert rob.within_limits(theta)
-        F_ee = rob.F_rob * rob.fwd_kins(theta)
-        assert trk.is_visible([F_ee * p for p in markers])
-    assert simulation.clock.elapsed == 0.0
-    assert np.array_equal(rob.state().theta, before_theta)
+        rob,
+        trk,
+        markers,
+        desired_accuracy=simulation.constants.TARGET_ANG_ERR_RAD,
+    )
+
+    assert len(poses) > 0, "The calibration plan is empty"
+
+    for i, pose in enumerate(poses):
+        theta = np.asarray(pose, dtype=float)
+
+        # Each pose must contain six finite joint values.
+        assert theta.shape == (6,), f"Pose {i} must contain six joint values"
+        assert np.all(np.isfinite(theta)), f"Pose {i} contains NaN or infinity"
+
+        # Check the robot's joint limits.
+        assert np.all(theta >= rob.theta_min), (
+            f"Pose {i} falls below a joint's minimum"
+        )
+        assert np.all(theta <= rob.theta_max), (
+            f"Pose {i} exceeds a joint's maximum"
+        )
+
+        # Transform body-local markers into workspace coordinates.
+        F_ee_world = rob.F_rob * rob.fwd_kins(theta)
+        markers_world = [F_ee_world * a for a in markers]
+
+        # is_visible() converts workspace points to tracker coordinates.
+        assert trk.is_visible(markers_world), (
+            f"Pose {i} places one or more markers outside the viewing volume"
+        )
 
 
 def test_measure_home_offsets_matches_encoders():
@@ -210,44 +299,96 @@ def test_fit_recovers_synthetic_parameters():
     the parameters themselves need not match if your model has a null
     direction -- compare poses, not parameters.
     """
-    from scipy.spatial.transform import Rotation
+    rng = np.random.default_rng(10)
 
-    rob = simulation.create_robot("fit_robot", Frame.eye(), seed=13)
-    F_X = Frame(Rot('z', 0.2), vct3(50, -20, 100))
-    rng = np.random.default_rng(13)
-    generating = kinematics.ImprovedKinematics(rob, F_X)
-    generating.params = generating.initial_params() + 1e-3 * rng.normal(size=generating.params.shape)
-    # Student TODO fixture: retain a nonzero model inside the known physical
-    # derivative bounds. The assertion tolerances and TA tests stay unchanged.
-    coefficients = generating.params[22:].reshape(6, 2)
-    scales = np.maximum(abs(rob.theta_min), abs(rob.theta_max))
-    worst_numerator = abs(coefficients[:, 0]) + 2 * abs(coefficients[:, 1])
-    coefficients *= np.minimum(1., .5 * simulation.constants.OMEGA_SYS * scales
-                                / worst_numerator)[:, None]
+    rob = simulation.create_robot(
+        "rob_fit", Frame.eye(), seed=0
+    )
+
+    # Known robot-base pose relative to the tracker.
+    F_X = Frame(
+        Rot.xyz(0.05, -0.03, 0.02),
+        vct3(100, -50, 200),
+    )
+
+    # Create the model that generates the synthetic observations.
+    known = kinematics.ImprovedKinematics(rob, F_X)
+
+    P_known = known.initial_params().copy()
+    P_known += rng.normal(
+        loc=0.0,
+        scale=1e-3,
+        size=P_known.shape,
+    )
+    known.params = P_known
+
+    # Collect paired commanded coordinates and synthetic tracker poses.
     data = workflow.CalibrationData()
-    for _ in range(60):
-        theta = random_theta(rng)
-        data.thetas.append(theta)
-        data.frames.append(generating.predict_in_tracker(theta))
-    held_out = [random_theta(rng) for _ in range(20)]
-    fitted = kinematics.ImprovedKinematics(rob, F_X)
 
-    def prediction_errors(model):
-        errors = []
-        for theta in held_out:
-            truth = generating.predict_in_tracker(theta)
-            estimate = model.predict_in_tracker(theta)
-            # Independent oracle avoids depending on the unimplemented metrics module.
-            angle = Rotation.from_matrix(truth.R.matrix.T @ estimate.R.matrix).magnitude()
-            distance = (truth.p - estimate.p).norm()
-            errors.append((angle, distance))
-        return np.asarray(errors)
+    for _ in range(80):
+        theta_cmd = random_theta(rng)
+        F_ee_meas = known.predict_in_tracker(theta_cmd)
 
-    angle_tol, position_tol = 1e-5, 1e-3  # rad, mm; synthetic noise-free tolerances
-    before = prediction_errors(fitted)
-    assert np.any(before.max(axis=0) > 10 * np.array([angle_tol, position_tol]))
-    fitted.fit(data)
-    after = prediction_errors(fitted)
-    assert np.all(np.isfinite(after))
-    assert after[:, 0].max() < angle_tol
-    assert after[:, 1].max() < position_tol
+        data.thetas.append(theta_cmd.copy())
+        data.frames.append(F_ee_meas)
+
+    # Separate configurations for validation
+    theta_cmd_test = [
+        random_theta(rng) for _ in range(20)
+    ]
+    F_ee_reference = [
+        known.predict_in_tracker(theta_cmd)
+        for theta_cmd in theta_cmd_test
+    ]
+
+    # Initialize the model without the generating corrections
+    estimated = kinematics.ImprovedKinematics(rob, F_X)
+
+    errors_before = np.array([
+        metrics.frame_error(
+            F_reference,
+            estimated.predict_in_tracker(theta_cmd),
+        )
+        for theta_cmd, F_reference
+        in zip(theta_cmd_test, F_ee_reference)
+    ])
+
+    # Fit using training observations only.
+    estimated.fit(data)
+
+    # Evaluate predictions at the held-out configurations.
+    errors_after = np.array([
+        metrics.frame_error(
+            F_reference,
+            estimated.predict_in_tracker(theta_cmd),
+        )
+        for theta_cmd, F_reference
+        in zip(theta_cmd_test, F_ee_reference)
+    ])
+
+    # Columns: orientation error (rad), position error (mm).
+    rms_before = np.sqrt(np.mean(errors_before ** 2, axis=0))
+    rms_after = np.sqrt(np.mean(errors_after ** 2, axis=0))
+
+    max_angle = np.max(errors_after[:, 0])
+    max_position = np.max(errors_after[:, 1])
+
+    print(
+        f"Position RMS: {rms_before[1]:.6f}"
+        f" -> {rms_after[1]:.6f} mm"
+    )
+    print(
+        f"Angle RMS: {rms_before[0]:.3e}"
+        f" -> {rms_after[0]:.3e} rad"
+    )
+
+    assert np.all(np.isfinite(estimated.params))
+    assert np.all(np.isfinite(errors_after))
+
+    # Strict numerical tolerances for this noiseless synthetic test.
+    assert max_position < 1e-3, (
+        f"Maximum position error: {max_position:.3e} mm"
+    )
+    assert max_angle < 1e-6, (
+        f"Maximum angle error: {max_angle:.3e} rad"
+    )

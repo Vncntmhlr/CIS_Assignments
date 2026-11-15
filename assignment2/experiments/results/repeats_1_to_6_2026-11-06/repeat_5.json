@@ -1,0 +1,17 @@
+{
+  "repeats": 5,
+  "status": "ok",
+  "error": "",
+  "calibration_time_s": 2094.3676305293607,
+  "testing_time_s": 1057.412885551084,
+  "fit_success": true,
+  "collected_observations": 360,
+  "skipped_observations": 0,
+  "forward_passed": 729,
+  "forward_evaluated": 729,
+  "forward_accuracy_pct": 100.0,
+  "inverse_passed": 38,
+  "inverse_evaluated": 40,
+  "inverse_accuracy_pct": 95.0,
+  "wall_time_s": 35.29250343400054
+}

@@ -5,8 +5,8 @@ Assignments for JHU Computer Integrated Surgery I, Fall 2026.
 | Assignment | Directory | Status |
 | --- | --- | --- |
 | Assignment 1 | [assignment1](assignment1/) | Existing project and final report |
-| Assignment 2 | [assignment2](assignment2/) | In progress |
-| Assignment 3 | [assignment3](assignment3/) | Planned |
+| Assignment 2 | [assignment2](assignment2/) | Completed |
+| Assignment 3 | [assignment3](assignment3/) | In Progress|
 | Assignment 4 | [assignment4](assignment4/) | Planned |
 
 Each assignment keeps its own code, notebooks, data, and documentation inside its directory. See the individual README files for details.

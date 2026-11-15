@@ -1,0 +1,4 @@
+interface:
+  display_name: CIS Working Notes
+  short_description: Capture discussion points in Ahmed’s working notes
+  default_prompt: Use $cis-working-notes for my Assignment 2 work on dev/ahmed.

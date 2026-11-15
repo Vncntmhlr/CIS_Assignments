@@ -1,0 +1,4 @@
+interface:
+  display_name: CIS Report Notes
+  short_description: Draft explanatory report text from working notes
+  default_prompt: Use $cis-report-notes for my Assignment 2 work on dev/ahmed.
