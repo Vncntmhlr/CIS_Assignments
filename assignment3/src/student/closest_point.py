@@ -8,134 +8,96 @@ from data_types.nominal_types import vct3
 from ..mesh import Mesh
 
 
-def closest_point_on_triangle(a: vct3, p: vct3, q: vct3, r: vct3) -> vct3:
+_QUERY_BATCH_SIZE = 32
+
+
+def _dot(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """Dot product along the coordinate axis, broadcasting the other axes."""
+    return np.einsum("...i,...i->...", a, b)
+
+
+def _closest_points(points: np.ndarray, triangles: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Map float queries (K,3) and triangles (T,3,3) to points, indices, distances.
+
+    Inputs share a coordinate frame. Search all triangles in batches of queries;
+    collapsed faces use their segments, and equal minima keep the first triangle.
     """
-    TODO: implement.
-    input: query point a, triangle corners p , q, r
-    output: the point of the triangle (face, edge or vertex) closest to a
+    anchors = triangles[:, 0]
+    edges = np.roll(triangles, -1, axis=1) - triangles  # AB, BC, CA
+    edge_lengths_squared = _dot(edges, edges)
+    ab = edges[:, 0]
+    ac = -edges[:, 2]
+    normals = np.cross(ab, ac)
+    normal_squared = _dot(normals, normals)
+
+    # Compare the doubled area to the squared edge length to detect a
+    # numerically collapsed face at the triangle's scale.
+    area_tol = np.finfo(float).eps * edge_lengths_squared.max(axis=1)
+    has_face = normal_squared > area_tol**2
+    # These dot products give the two in-plane coordinates of P - A.
+    # Using the cross product for the area avoids subtracting nearly equal
+    # terms in the determinant of the 2x2 projection system.
+    safe_normal_squared = np.where(has_face, normal_squared, 1.0)
+    lambda_axis = np.cross(ac, normals) / safe_normal_squared[:, None]
+    mu_axis = np.cross(normals, ab) / safe_normal_squared[:, None]
+    safe_edge_lengths = np.where(edge_lengths_squared > 0.0, edge_lengths_squared, 1.0)
+    segment_axes = edges / safe_edge_lengths[..., None]
+
+    closest = np.empty_like(points)
+    triangle_indices = np.empty(len(points), dtype=int)
+    distances = np.empty(len(points))
+    for start in range(0, len(points), _QUERY_BATCH_SIZE):
+        batch = slice(start, start + _QUERY_BATCH_SIZE)
+        queries = points[batch, None, :]
+        offsets = queries - anchors
+        lam = _dot(offsets, lambda_axis)
+        mu = _dot(offsets, mu_axis)
+        inside = has_face & (lam >= 0.0) & (mu >= 0.0) & (lam + mu <= 1.0)
+        candidates = anchors + lam[..., None] * ab + mu[..., None] * ac
+        delta = queries - candidates
+        squared_distances = np.where(inside, _dot(delta, delta), np.inf)
+
+        for side in range(3):
+            edge_start = triangles[:, side]
+            fraction = np.clip(_dot(queries - edge_start, segment_axes[:, side]), 0.0, 1.0)
+            edge_points = edge_start + fraction[..., None] * edges[:, side]
+            delta = queries - edge_points
+            edge_distances = _dot(delta, delta)
+            better = ~inside & (edge_distances < squared_distances)
+            candidates[better] = edge_points[better]
+            squared_distances[better] = edge_distances[better]
+
+        rows = np.arange(len(queries))
+        winners = np.argmin(squared_distances, axis=1)
+        closest[batch] = candidates[rows, winners]
+        triangle_indices[batch] = winners
+        distances[batch] = np.sqrt(squared_distances[rows, winners])
+
+    return closest, triangle_indices, distances
+
+
+def closest_point_on_triangle(p: vct3, a: vct3, b: vct3, c: vct3) -> vct3:
+    """Return a vct3 closest to query p on triangle (a,b,c), including its boundary.
+
+    All four vct3 inputs use the same frame and mm. Collinear or repeated
+    corners are treated as segments or an isolated point.
     """
-   
-    """Return the point on triangle pqr closest to query point a."""
-    a, p, q, r = [
-        np.asarray(v.vec, dtype=float).reshape(3)
-        for v in (a, p, q, r)
-    ]
-
-    def project_on_segment(c, p, q):
-        direction = q - p
-        denominator = np.dot(direction, direction)
-
-        if denominator == 0:
-            return p.copy()
-
-        lam = np.dot(c - p, direction) / denominator
-        lam_seg = max(0.0, min(lam, 1.0))
-
-        return p + lam_seg * direction
-
-    # a - p ≈ lambda*(q - p) + mu*(r - p)
-    A = np.column_stack((q - p, r - p))
-    coefficients, _, rank, _ = np.linalg.lstsq(
-        A, a - p, rcond=None
-    )
-    lam, mu = coefficients
-
-    c = p + lam * (q - p) + mu * (r - p)
-
-    if rank < 2:
-        # Collinear or repeated triangle vertices.
-        candidates = [
-            project_on_segment(a, p, q),
-            project_on_segment(a, q, r),
-            project_on_segment(a, r, p),
-        ]
-    elif lam >= 0 and mu >= 0 and lam + mu <= 1:
-        return vct3(*c)
-    else:
-        candidates = []
-
-        if lam < 0:
-            candidates.append(project_on_segment(c, r, p))
-
-        if mu < 0:
-            candidates.append(project_on_segment(c, p, q))
-
-        if lam + mu > 1:
-            candidates.append(project_on_segment(c, q, r))
-
-    closest = min(
-        candidates,
-        key=lambda point: np.dot(a - point, a - point),
-    )
-
-    return vct3(*closest)
+    query = np.asarray(p.vec, dtype=float).reshape(1, 3)
+    triangle = np.array([a.vec, b.vec, c.vec], dtype=float).reshape(1, 3, 3)
+    closest, _, _ = _closest_points(query, triangle)
+    return vct3(closest[0])
 
 
 def closest_points_on_mesh(points: np.ndarray, mesh: Mesh) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    TODO: implement (vectorised; a per-triangle Python loop is far too slow).
-    input: points (K,3) in CT coordinates, mesh
-    output: closest (K,3), triangle index (K,), distance (K,)
-    """
-    """
-    Input:
-        points: (K, 3) query points in CT coordinates
-        mesh.vertices: (V, 3) vertex coordinates
-        mesh.triangles: (T, 3) integer vertex indices
+    """Find exact surface matches for finite CT queries points (K,3), in mm.
 
-    Output:
-        closest: (K, 3) closest surface points
-        triangle_index: (K,) indices of the winning triangles
-        distance: (K,) Euclidean distances
+    Return closest CT points (K,3), triangle indices (K,), and Euclidean
+    distances (K,), in mm. An empty query array is allowed; an empty mesh
+    raises ValueError. NumPy batches avoid a Python loop over triangles.
     """
     points = np.asarray(points, dtype=float)
-    vertices = np.asarray(mesh.vertices, dtype=float)
-    triangles = np.asarray(mesh.triangles)
-
     if points.ndim != 2 or points.shape[1] != 3:
         raise ValueError("points must have shape (K, 3)")
-    if len(triangles) == 0:
+    if mesh.n_triangles == 0:
         raise ValueError("mesh must contain at least one triangle")
-
-    K = len(points)
-    closest = np.empty((K, 3), dtype=float)
-    triangle_index = np.empty(K, dtype=int)
-    distance = np.empty(K, dtype=float)
-
-    # Convert vertices once for the existing vct3-based function.
-    vertex_vectors = [vct3(*vertex) for vertex in vertices]
-
-    for k, a_k in enumerate(points):
-        a = vct3(*a_k)
-
-        best_squared_distance = np.inf
-        best_point = None
-        best_triangle = -1
-
-        for i, indices in enumerate(triangles):
-            p, q, r = [vertex_vectors[index] for index in indices]
-
-            # Existing function: query first, then triangle corners.
-            candidate = closest_point_on_triangle(a, p, q, r)
-            candidate = np.asarray(
-                candidate.vec, dtype=float
-            ).reshape(3)
-
-            difference = a_k - candidate
-            squared_distance = np.dot(difference, difference)
-
-            if squared_distance < best_squared_distance:
-                best_squared_distance = squared_distance
-                best_point = candidate
-                best_triangle = i
-
-        if best_point is None:
-            raise ValueError(
-                f"No finite closest point found for query {k}"
-            )
-
-        closest[k] = best_point
-        triangle_index[k] = best_triangle
-        distance[k] = np.sqrt(best_squared_distance)
-
-    return closest, triangle_index, distance
+    return _closest_points(points, np.asarray(mesh.tri_vertices, dtype=float))

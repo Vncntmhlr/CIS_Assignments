@@ -1,0 +1,70 @@
+{
+  "status": "VERIFIED",
+  "validation": "mock tracker transport replaying saved measured reference tips",
+  "seed": null,
+  "actual_tre": "NOT RUN (Step 8)",
+  "true_outlier_labels": "NOT REQUESTED",
+  "code_sha256": {
+    "icp.py": "b7810989fe12e0a0820ea77a57b3988a1fd3103f52ebc1d5d978e65e292231f9",
+    "uncertainty.py": "63893e7f1b1b7f66d39cda6af625bba19a742278a1862873f9e00f561543acd1",
+    "workflow.py": "1435d520049f274c28b6af73e3a1ddc60ca5b45efa6ea4428a5eba520b6386eb"
+  },
+  "mu_reference": "saved coarse pose used as mock F0; original server F0 unavailable",
+  "converged": true,
+  "n_patches": 33,
+  "n_attempts": 132,
+  "n_valid_observations": 132,
+  "n_invisible": 0,
+  "n_used": 112,
+  "n_icp_rejected": 20,
+  "n_icp_iterations": 39,
+  "residual_rms_mm": 0.16320006088779276,
+  "residual_stats": {
+    "n_used": 112,
+    "mean": 0.1283216208956395,
+    "std": 0.10083561615071851,
+    "max": 0.4633724208263702,
+    "p90": 0.25074243903063453
+  },
+  "predicted_tre_mm": {
+    "rms": 0.0888773858858806,
+    "mean": 0.08676578466349325,
+    "max": 0.1313374222796485,
+    "p90": 0.11698539141645736
+  },
+  "t_simulated_total": 152.96000000000015,
+  "t_wall_workflow_seconds": 3.768594118000692,
+  "covariance_diagnostics": {
+    "model": "local_point_to_plane",
+    "approximate_input": false,
+    "point_source": "transformed_samples_ct",
+    "noise_scale": "signed_normal_residual",
+    "inliers": 112,
+    "degrees_of_freedom": 106,
+    "rank": 6,
+    "scaled_condition": 3.7934251289396266,
+    "sigma_squared_mm2": 0.02813141627002341,
+    "icp_converged": true
+  },
+  "covariance_eigenvalues": [
+    4.5475969599326676e-07,
+    6.962391043934617e-07,
+    4.573562310538572e-06,
+    0.0007977785326758729,
+    0.0008354903948503765,
+    0.001247249148309235
+  ],
+  "notebook_step7": "VERIFIED unchanged cell; agrees with headless report",
+  "report_round_trip": "VERIFIED",
+  "compatibility_proxy": {
+    "warned": true,
+    "relative_covariance_frobenius_difference": 0.00036823180553223483,
+    "predicted_tre_mm": {
+      "rms": 0.08889400209525314,
+      "mean": 0.0867820394345959,
+      "max": 0.1313613588353638,
+      "p90": 0.11700677806816907
+    }
+  },
+  "validation_wall_seconds": 3.9093248619992664
+}
