@@ -86,6 +86,13 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 venv/bin/python -m pytest -p no:cacheprovider t
 
 ## Submission layout
 
+The final code-only upload is built with `submission/build_submission.py`.
+See `submission/FINAL_REVIEW.md` for the final checks and
+`submission/README_FOR_ZIP.md` for portable execution instructions. It includes
+the required course Python sources, excluding development tests/experiments
+and environments. Per Vincent's instruction, the notebook source/token are
+preserved; skip its optional pytest cell when using the test-free ZIP.
+
 The official course root contains `data_types/`, `assignments/assignment1/src/`,
 and `src/uncertainty_networks/` alongside the path `assignments/assignment3/`.
 If the TA requests a standalone ZIP, include those shared course sources in

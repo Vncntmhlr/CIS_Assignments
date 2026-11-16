@@ -979,3 +979,40 @@ tests, ran the fresh practice sessions and regression checks, and prepared
 these measured results and explanations. Previously agreed methods and
 Ahmed's sampling policy were preserved. No production algorithm, protected
 TA file, original notebook cell, or public API was changed in Step 8.
+
+## Final code review and submission packaging — 2026-11-16
+
+**VERIFIED.** Reviewed all four student implementations and reran the complete
+offline suite: **97 passed**, no failures/skips, **42.73 s**. Production code,
+the original notebook sources, TA infrastructure and data needed no edits.
+There are no ground-truth scoring calls in the graded estimator. Existing
+multi-seed results and covariance/repeatability limitations remain applicable.
+
+An independent package was assembled with the required official course
+modules. A separate temporary Python environment omitted the checkout's course
+path configuration; module-origin checks confirmed all runtime course imports
+came from the package. All ten non-test notebook code cells ran successfully.
+The optional pytest cell alone was skipped externally because Vincent
+explicitly excluded unit tests from the upload ZIP. Its source is unchanged,
+and the ZIP README tells the TA which cell needs the full development checkout.
+
+Fresh seed-1 package sessions gave actual stepwise TRE RMS **0.070219 mm**
+(max **0.106577 mm**, 18 correctly rejected outliers and no false alarms or
+misses) and fresh headless RMS **0.071 mm** (the original cell's rounded
+practice score). The headless fit converged, predicted RMS was **0.079516 mm**,
+wall time **34.485 s**, simulated time **135.96 s**. Both sessions closed.
+Evidence is in `submission/verification/`; `submission/FINAL_REVIEW.md`
+describes the review and `build_submission.py` reproduces the allowlisted ZIP.
+
+Only the code package is prepared; the narrative report is to be submitted
+separately. The ZIP contains the notebook, all Assignment 3 original sources,
+data, requirements, necessary course source dependencies and a short README.
+It excludes experiments, unit tests, environments, caches, sessions and these
+development notes. Shared course modules use the verified snapshot/provenance
+already described in SETUP; no TA source or public API is altered.
+
+**Requested scope.** Vincent confirmed `main` + existing `dev/vincent`, code
+ZIP only with the report separate, and preserving the original course token
+and notebook code. Packaging helpers and verification evidence are separate
+from the upload files. The final report and its disclosure are handled by
+the student separately.

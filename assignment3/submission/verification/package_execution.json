@@ -1,0 +1,29 @@
+{
+  "step8_actual_tre_mm": {
+    "n": 1568,
+    "rms": 0.07021947535517492,
+    "mean": 0.06787022728159257,
+    "std": 0.01801130111627106,
+    "max": 0.10657743287516604,
+    "p90": 0.094700976002717
+  },
+  "headless_converged": true,
+  "headless_predicted_tre_mm": {
+    "rms": 0.0795160557286803,
+    "mean": 0.07763233778109785,
+    "max": 0.11793857583005224,
+    "p90": 0.10488378385792814
+  },
+  "headless_wall_seconds": 34.48491460399964,
+  "headless_simulated_seconds": 135.96000000000012,
+  "step8_correct_outliers": 18,
+  "step8_false_alarms": 0,
+  "step8_missed_outliers": 0,
+  "course_modules_loaded_from_package": true,
+  "headless_actual_tre_rms_mm_rounded": 0.071,
+  "status": "VERIFIED",
+  "code_cells_executed": 10,
+  "optional_pytest_cell": "SKIPPED: tests deliberately excluded from code ZIP",
+  "notebook_sources": "VERIFIED unchanged",
+  "isolated_kernel": "a3-submission-check"
+}
