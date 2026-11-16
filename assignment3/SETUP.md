@@ -24,6 +24,17 @@ In Jupyter or VS Code, select `assignment3/venv/bin/python` and open [assignment
 
 The imports/data and Step 1 code cells passed in an in-process Jupyter kernel using `assignment3/venv/bin/python` with `PYTHONPATH` unset.
 
+## Test collection on this workstation
+
+If the local ROS `launch_testing` pytest plugin prevents test collection, disable
+automatic third-party plugin loading for these offline tests:
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 venv/bin/python -m pytest -p no:cacheprovider tests -q
+```
+
+This avoids the incompatible external plugin without changing the TA tests.
+
 ## Fresh environment
 
 Use Python 3.9 or newer as specified by the TA. Run these commands from `assignment3/` when recreating the environment or after moving the checkout.
@@ -44,6 +55,33 @@ PY
 python -m pip check
 python -m pytest experiments/test_step1_scene.py -q -s
 python -m notebook
+```
+
+## Step 8 practice validation
+
+Run from `assignment3/` with a working course-server configuration in the
+notebook's existing `SERVER_URL` and `COURSE_TOKEN` assignments:
+
+```bash
+PYTHONPATH=. venv/bin/python experiments/validate_step8.py --seeds 1 2 3 1 --tag fresh_check
+```
+
+Use a new `--tag` for each batch; existing evidence is never overwritten.
+The script opens and closes a fresh practice session for each seed, saves the
+headless report before asking for truth scores, and executes the notebook's
+unchanged Step 8 evaluation cell. Credentials are not copied into results.
+Results are in `experiments/results/step8/`; the saved `practice` batch is
+summarized in `README.md`. Repeated seeds are measured independently because
+identical seeds did not reproduce identical tracker observations in this batch.
+The script exits nonzero on execution/cleanup failure, nonconvergence, a
+workflow taking 600 s or more, or actual TRE RMS above 2 mm. It also records
+the stricter all-vertices 2 mm and RMS 1 mm comparisons separately. This is
+practice evidence, not a hidden-grader guarantee.
+
+Offline validation, including the Step 8 scoring bookkeeping checks:
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 venv/bin/python -m pytest -p no:cacheprovider tests experiments -q
 ```
 
 ## Submission layout

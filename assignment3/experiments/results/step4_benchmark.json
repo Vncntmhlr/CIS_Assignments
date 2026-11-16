@@ -1,0 +1,34 @@
+{
+  "validation": "offline geometry; no simulator calls",
+  "python": "3.13.11",
+  "numpy": "2.5.4",
+  "platform": "Linux-6.8.0-149-generic-x86_64-with-glibc2.35",
+  "seed": 0,
+  "query_count": 200,
+  "query_distribution": "uniform(-60, 60) mm per CT axis",
+  "vertex_count": 1568,
+  "triangle_count": 3135,
+  "query_batch_size": 32,
+  "mesh_triangle_cache_preloaded": true,
+  "batched_seconds": [
+    0.14773954700012837,
+    0.14527499500036356,
+    0.1422192919999361,
+    0.15032041299946286,
+    0.14590137400045933
+  ],
+  "batched_median_seconds": 0.14590137400045933,
+  "mean_distance_mm": 23.384300548984758,
+  "simulated_seconds": 0,
+  "ahmed_baseline": {
+    "source_file": "ahmed_closest_point_ca10a27.py",
+    "source_sha256": "d69021ccace32ab18ffe93923e7d18d6d7ec4184b7518a4d5aa2ba629d2a615c",
+    "seconds": 13.120710967999912,
+    "repetitions": 1,
+    "speedup_vs_batched_median": 89.92863198093396,
+    "max_distance_difference_mm": 7.105427357601002e-15,
+    "max_point_difference_mm": 2.8435583831733384e-14,
+    "matching_triangle_indices": 174,
+    "different_indices_on_shared_boundary": 26
+  }
+}

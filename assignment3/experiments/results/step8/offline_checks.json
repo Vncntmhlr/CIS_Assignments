@@ -1,0 +1,70 @@
+{
+  "status": "VERIFIED",
+  "tests": [
+    {
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 venv/bin/python -m pytest -p no:cacheprovider tests -q --tb=short",
+      "passed": 9,
+      "seconds": 25.53,
+      "scope": "before Step 8 edits"
+    },
+    {
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 venv/bin/python -m pytest -p no:cacheprovider tests experiments/test_step4_closest_point.py experiments/test_step5_sampling.py experiments/test_step6_registration.py experiments/test_step7_uncertainty.py experiments/test_step8_validation.py -q --tb=short",
+      "passed": 95,
+      "seconds": 43.58
+    },
+    {
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 venv/bin/python -m pytest -p no:cacheprovider experiments/test_step1_scene.py -q --tb=short",
+      "passed": 2,
+      "seconds": 0.28
+    }
+  ],
+  "distinct_current_tests_passed": 97,
+  "failed": 0,
+  "skipped": 0,
+  "preserved_since_step8_start": {
+    "assignment3/src/student/icp.py": true,
+    "assignment3/src/student/workflow.py": true,
+    "assignment3/src/student/uncertainty.py": true,
+    "assignment3/src/student/closest_point.py": true,
+    "assignment3/src/student/report.py": true,
+    "assignment3/src/session.py": true,
+    "assignment3/src/mesh.py": true,
+    "assignment3/tests/test_student.py": true,
+    "assignment3/notebooks/assignment3_template.ipynb": true
+  },
+  "truth_calls_in_production_student_code": [],
+  "token_absent_from_step8_evidence": true,
+  "saved_live_report_audits": [
+    {
+      "run": "step8_practice_run1_seed1",
+      "proper_rotation": true,
+      "covariance_symmetric_positive_definite": true,
+      "report_counts_indices_and_residuals_agree": true,
+      "estimator_and_data_hashes_match": true
+    },
+    {
+      "run": "step8_practice_run2_seed2",
+      "proper_rotation": true,
+      "covariance_symmetric_positive_definite": true,
+      "report_counts_indices_and_residuals_agree": true,
+      "estimator_and_data_hashes_match": true
+    },
+    {
+      "run": "step8_practice_run3_seed3",
+      "proper_rotation": true,
+      "covariance_symmetric_positive_definite": true,
+      "report_counts_indices_and_residuals_agree": true,
+      "estimator_and_data_hashes_match": true
+    },
+    {
+      "run": "step8_practice_run4_seed1",
+      "proper_rotation": true,
+      "covariance_symmetric_positive_definite": true,
+      "report_counts_indices_and_residuals_agree": true,
+      "estimator_and_data_hashes_match": true
+    }
+  ],
+  "validation_script_sha256": "e265429745fabe08dbfd1a211582befa95004611e477a73a8a9a9be380c8e40e",
+  "existing_batch_overwrite_guard": "VERIFIED: exit 2 before session creation; saved files unchanged",
+  "readme_evidence_links": "VERIFIED all targets exist"
+}

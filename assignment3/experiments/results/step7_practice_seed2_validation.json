@@ -1,0 +1,70 @@
+{
+  "status": "VERIFIED",
+  "validation": "fresh practice session",
+  "seed": 2,
+  "actual_tre": "NOT RUN (Step 8)",
+  "true_outlier_labels": "NOT REQUESTED",
+  "code_sha256": {
+    "icp.py": "b7810989fe12e0a0820ea77a57b3988a1fd3103f52ebc1d5d978e65e292231f9",
+    "uncertainty.py": "63893e7f1b1b7f66d39cda6af625bba19a742278a1862873f9e00f561543acd1",
+    "workflow.py": "1435d520049f274c28b6af73e3a1ddc60ca5b45efa6ea4428a5eba520b6386eb"
+  },
+  "mu_reference": "original server initial_registration_guess",
+  "converged": true,
+  "n_patches": 33,
+  "n_attempts": 132,
+  "n_valid_observations": 132,
+  "n_invisible": 0,
+  "n_used": 115,
+  "n_icp_rejected": 17,
+  "n_icp_iterations": 40,
+  "residual_rms_mm": 0.14457643052867744,
+  "residual_stats": {
+    "n_used": 115,
+    "mean": 0.12114608532135938,
+    "std": 0.07890481782326986,
+    "max": 0.38809663443826076,
+    "p90": 0.24919445190133196
+  },
+  "predicted_tre_mm": {
+    "rms": 0.07497512795983596,
+    "mean": 0.07344159404125321,
+    "max": 0.10892773292793488,
+    "p90": 0.09660671077076015
+  },
+  "t_simulated_total": 135.96000000000012,
+  "t_wall_workflow_seconds": 39.123662383999545,
+  "covariance_diagnostics": {
+    "model": "local_point_to_plane",
+    "approximate_input": false,
+    "point_source": "transformed_samples_ct",
+    "noise_scale": "signed_normal_residual",
+    "inliers": 115,
+    "degrees_of_freedom": 109,
+    "rank": 6,
+    "scaled_condition": 3.578250114582108,
+    "sigma_squared_mm2": 0.02200929432055743,
+    "icp_converged": true
+  },
+  "covariance_eigenvalues": [
+    4.118137525063771e-07,
+    5.108590758826474e-07,
+    3.2898638294917996e-06,
+    0.0005687600869535258,
+    0.0006234459688128799,
+    0.00085890438874539
+  ],
+  "notebook_step7": "VERIFIED unchanged cell; agrees with headless report",
+  "report_round_trip": "VERIFIED",
+  "compatibility_proxy": {
+    "warned": true,
+    "relative_covariance_frobenius_difference": 0.0019839677258722023,
+    "predicted_tre_mm": {
+      "rms": 0.07504817884519159,
+      "mean": 0.07351310444818393,
+      "max": 0.10903580140627395,
+      "p90": 0.09670314286465034
+    }
+  },
+  "validation_wall_seconds": 39.839768022999124
+}

@@ -1,0 +1,140 @@
+{
+  "status": "VERIFIED",
+  "seed": 2,
+  "started_utc": "2026-11-16T04:01:03.043808+00:00",
+  "validation": "fresh live practice session, unchanged headless workflow",
+  "settings": {
+    "n_patches": 46,
+    "samples_per_patch": 4,
+    "max_iter": 100,
+    "tol": 0.0001,
+    "reject": "mad"
+  },
+  "code_sha256": {
+    "src/student/closest_point.py": "c2cb57f67f5a716745ee221db9918a84da3d18da4dc378bdd883923341aae535",
+    "src/student/__init__.py": "2d76d5a2cd928fcee18e99b19ab2a649efd464dfd12a168bc64dfd102c41aa06",
+    "src/student/icp.py": "b7810989fe12e0a0820ea77a57b3988a1fd3103f52ebc1d5d978e65e292231f9",
+    "src/student/report.py": "4fe47114f72fc9f7537c6564998fb252c948a81f24fe253334df3096207d6b9f",
+    "src/student/uncertainty.py": "63893e7f1b1b7f66d39cda6af625bba19a742278a1862873f9e00f561543acd1",
+    "src/student/workflow.py": "1435d520049f274c28b6af73e3a1ddc60ca5b45efa6ea4428a5eba520b6386eb",
+    "data/ProximalFemurMeshFile.sur": "641c0013b51d26429d5ba6632ae192f19ef7df759b81372783f60b142b3921ff",
+    "data/box-centroids-rotations-world.json": "a137c42cfaa34b385e6205c1ce3567c82eb50374f879cc6d59a9e72f550cca83"
+  },
+  "actual_tre_mm": {
+    "n": 1568,
+    "rms": 0.11433811372038952,
+    "mean": 0.10280347773926762,
+    "std": 0.050046470543372294,
+    "max": 0.21805099999678942,
+    "p90": 0.18448788548239317
+  },
+  "accuracy_rms_le_2mm": "PASS",
+  "accuracy_all_vertices_le_2mm": "PASS",
+  "accuracy_rms_le_1mm": "PASS",
+  "predicted_tre_mm": {
+    "rms": 0.06816803711416611,
+    "mean": 0.06668319182619169,
+    "max": 0.1002457632826966,
+    "p90": 0.08878846095430272
+  },
+  "actual_to_predicted_rms_ratio": 1.6772980206089685,
+  "residual_rms_mm": 0.1298959193252545,
+  "residual_stats": {
+    "n_used": 118,
+    "mean": 0.10670417459248138,
+    "std": 0.0740754276524292,
+    "max": 0.30474263674488467,
+    "p90": 0.20868839025361338
+  },
+  "outliers": {
+    "population": "observed tracker samples; original placement indices",
+    "true_outlier_indices": [
+      22,
+      41,
+      44,
+      60,
+      68,
+      80,
+      91,
+      95,
+      101,
+      105,
+      111
+    ],
+    "flagged_indices": [
+      11,
+      20,
+      22,
+      38,
+      41,
+      44,
+      60,
+      68,
+      80,
+      91,
+      95,
+      101,
+      105,
+      111
+    ],
+    "missing_indices": [],
+    "true_outliers_missing": [],
+    "tp": 11,
+    "fp": 3,
+    "fn": 0,
+    "tn": 118,
+    "precision": 0.7857142857142857,
+    "recall": 1.0,
+    "f1": 0.88
+  },
+  "n_patches": 33,
+  "n_attempts": 132,
+  "n_valid": 132,
+  "n_missing": 0,
+  "n_used": 118,
+  "converged": true,
+  "n_icp_iterations": 41,
+  "t_simulated_seconds": 135.96000000000012,
+  "t_wall_workflow_seconds": 33.21072278900101,
+  "workflow_wall_lt_600s": true,
+  "covariance_diagnostics": {
+    "model": "local_point_to_plane",
+    "approximate_input": false,
+    "point_source": "transformed_samples_ct",
+    "noise_scale": "signed_normal_residual",
+    "inliers": 118,
+    "degrees_of_freedom": 112,
+    "rank": 6,
+    "scaled_condition": 3.71264036418636,
+    "sigma_squared_mm2": 0.017776857885425507,
+    "icp_converged": true
+  },
+  "covariance_eigenvalues": [
+    3.1570045329782235e-07,
+    4.1065930313278815e-07,
+    2.8433095759083476e-06,
+    0.0004478482071259471,
+    0.0005076327415307683,
+    0.0006888745584769731
+  ],
+  "initial_tre_mm": {
+    "n": 1568,
+    "rms": 14.741474134850725,
+    "mean": 13.356105701708081,
+    "std": 6.239030385666813,
+    "max": 30.970301050795072,
+    "p90": 22.28776807702326
+  },
+  "coarse_tre_mm": {
+    "n": 1568,
+    "rms": 2.168943687152233,
+    "mean": 2.0434261642725495,
+    "std": 0.7271356332926464,
+    "max": 3.8229128788372675,
+    "p90": 3.2422285248054585
+  },
+  "notebook_step8": "VERIFIED unchanged evaluation cell",
+  "report_round_trip": "VERIFIED",
+  "session_closed": true,
+  "validation_wall_seconds": 34.18478264999794
+}

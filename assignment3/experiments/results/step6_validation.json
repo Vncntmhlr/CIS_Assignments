@@ -1,0 +1,1238 @@
+{
+  "validation": "offline only; saved practice observations and synthetic truth",
+  "configuration": {
+    "max_iter": 100,
+    "tol_mm": 0.0001,
+    "reject": "mad",
+    "mad_normal_scale": 1.4826,
+    "mad_cutoff": 3.0,
+    "mad_scale_floor_mm": 0.01,
+    "motion_tolerance_factor": 10.0,
+    "implementation_sha256": "e9fbfb49fe5260447c7899e0de35b797c39d07f42775b5ff277ea9ff8a5e8d9e"
+  },
+  "synthetic": [
+    {
+      "F_reg_reference_to_ct": [
+        [
+          0.9733696738090327,
+          -0.1865612894349283,
+          0.13321547730377697,
+          12.000639662190894
+        ],
+        [
+          0.1947539968389389,
+          0.9795117492445159,
+          -0.05126025562954937,
+          -6.999363764620309
+        ],
+        [
+          -0.12092294581325276,
+          0.07583942494721879,
+          0.989760588627128,
+          14.999798943844848
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "converged": true,
+      "iterations": 55,
+      "n_samples": 120,
+      "n_used": 108,
+      "inlier_rms_mm": 0.0006206547856318383,
+      "inlier_residual_stats_mm": {
+        "n_used": 108,
+        "mean": 0.0004656626617498967,
+        "std": 0.00041032992625411136,
+        "max": 0.0027975716630939413,
+        "p90": 0.0008821425621177553
+      },
+      "history_inlier_rms_mm": [
+        0.6871112520001066,
+        0.47277589188062874,
+        0.3427413809469573,
+        0.2683667763700541,
+        0.22061783144888608,
+        0.18294494310386553,
+        0.14470195049211176,
+        0.12017022036508204,
+        0.10132310050918553,
+        0.08659336024151125,
+        0.07155829879663625,
+        0.06281319136633769,
+        0.055697938698545724,
+        0.049679343997882146,
+        0.044507588753055445,
+        0.0400650840434629,
+        0.03480063545724411,
+        0.030523881640403185,
+        0.02701374263571576,
+        0.02497603376103294,
+        0.023193728769068188,
+        0.021615354854875916,
+        0.020206033097143687,
+        0.018927143319206745,
+        0.017783458493060365,
+        0.015986395827318096,
+        0.014742624185643462,
+        0.013599583936347965,
+        0.012546949310622044,
+        0.012646166111729747,
+        0.012024931173187333,
+        0.010838895958119437,
+        0.009784720280486771,
+        0.00941584160309796,
+        0.008385483323992355,
+        0.007475612849436836,
+        0.006667409330528083,
+        0.006645780276974208,
+        0.005759102920046102,
+        0.004996789737931978,
+        0.004338632527606686,
+        0.00376908029547036,
+        0.003275570348863537,
+        0.0028486428671968596,
+        0.002479504824643375,
+        0.002158421121759011,
+        0.0018790536361037136,
+        0.0016359321933140224,
+        0.0014243229629994907,
+        0.0012401219047556615,
+        0.0010797665731142444,
+        0.0009401619899910443,
+        0.0008186176793513344,
+        0.0007127937933348156,
+        0.0006206547856318383
+      ],
+      "seed": 11,
+      "input_kind": "synthetic surface samples with known Reference-to-CT truth",
+      "n_injected_outliers": 12,
+      "wall_icp_seconds": 5.088998473000174,
+      "clean_max_paired_error_mm": 0.0031704257549854623,
+      "synthetic_mesh_displacement_rms_mm": 0.0018428884247870324,
+      "rejected_injected_outliers": 12,
+      "rejected_clean_samples": 0
+    },
+    {
+      "F_reg_reference_to_ct": [
+        [
+          0.973379717832533,
+          -0.18651990309503577,
+          0.13320004002130117,
+          12.000246015469248
+        ],
+        [
+          0.19471222856864132,
+          0.9795195948270848,
+          -0.05126901009007894,
+          -6.999979927028461
+        ],
+        [
+          -0.12090935843883635,
+          0.07583989121301381,
+          0.9897622128282668,
+          15.00050137066706
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "converged": true,
+      "iterations": 41,
+      "n_samples": 120,
+      "n_used": 108,
+      "inlier_rms_mm": 0.0005060281783907227,
+      "inlier_residual_stats_mm": {
+        "n_used": 108,
+        "mean": 0.0004124376612426573,
+        "std": 0.0002931888349069934,
+        "max": 0.0013028221187380072,
+        "p90": 0.0008868730092982406
+      },
+      "history_inlier_rms_mm": [
+        0.6214396558400598,
+        0.414512777643036,
+        0.29130391454367915,
+        0.2341628529299782,
+        0.1871846125599163,
+        0.1513205823031692,
+        0.12288063062105424,
+        0.10131924684651873,
+        0.08439984823772564,
+        0.07083633620879154,
+        0.05967473564824246,
+        0.050055754737025705,
+        0.04075904892499588,
+        0.03472386033168752,
+        0.0296773290224266,
+        0.025417540181821862,
+        0.021781271994397035,
+        0.018685644336999534,
+        0.016044102864196795,
+        0.014245971472939553,
+        0.012115137585707973,
+        0.010316874242515914,
+        0.008795319190217667,
+        0.007504604453960317,
+        0.006404964698203035,
+        0.005470013272689805,
+        0.004667593561199945,
+        0.003975093184951423,
+        0.0033885594548306555,
+        0.0028893920298762046,
+        0.0024643311173305413,
+        0.002102229708653503,
+        0.0017936562008427999,
+        0.0015306195278154556,
+        0.0013063415449379352,
+        0.0011150675679996664,
+        0.0009519080184003148,
+        0.0008127056245776185,
+        0.0006939237515923279,
+        0.0005925522872844662,
+        0.0005060281783907227
+      ],
+      "seed": 22,
+      "input_kind": "synthetic surface samples with known Reference-to-CT truth",
+      "n_injected_outliers": 12,
+      "wall_icp_seconds": 3.719143313001041,
+      "clean_max_paired_error_mm": 0.002040514386924907,
+      "synthetic_mesh_displacement_rms_mm": 0.0012807814256151188,
+      "rejected_injected_outliers": 12,
+      "rejected_clean_samples": 0
+    },
+    {
+      "F_reg_reference_to_ct": [
+        [
+          0.9733734626046755,
+          -0.18654640721873264,
+          0.13320863429510796,
+          12.000517618143279
+        ],
+        [
+          0.194738674207596,
+          0.9795147180945879,
+          -0.051261738206464645,
+          -6.999355940192462
+        ],
+        [
+          -0.12091712477913494,
+          0.07583768845279465,
+          0.9897614328439376,
+          15.000563889674464
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "converged": true,
+      "iterations": 46,
+      "n_samples": 120,
+      "n_used": 108,
+      "inlier_rms_mm": 0.0006134096569643129,
+      "inlier_residual_stats_mm": {
+        "n_used": 108,
+        "mean": 0.0004675124273562053,
+        "std": 0.00039711904704330776,
+        "max": 0.0020148567166786238,
+        "p90": 0.0008894159872813055
+      },
+      "history_inlier_rms_mm": [
+        0.683916934520521,
+        0.4380848415286687,
+        0.3265590711752057,
+        0.25045530452919906,
+        0.19106859981320776,
+        0.15043880720090216,
+        0.12174051290010679,
+        0.09713492374335815,
+        0.07851330315687431,
+        0.06684034685888521,
+        0.05763871175278258,
+        0.05008533381757054,
+        0.04056181692924933,
+        0.03586153893194852,
+        0.03191405232659996,
+        0.028522213971569146,
+        0.02557225021930073,
+        0.022974066714002764,
+        0.020667355760294645,
+        0.01860895784160724,
+        0.016764069528063436,
+        0.01510223409813363,
+        0.013609606004107062,
+        0.012267672549506193,
+        0.011060498757152606,
+        0.01107180312457422,
+        0.009735538269310826,
+        0.009693999861802064,
+        0.008244820607930125,
+        0.007036919827126678,
+        0.0060257157323356505,
+        0.005164431060870236,
+        0.004429269095656162,
+        0.003800907647335523,
+        0.003263317117832746,
+        0.002803046093602686,
+        0.002406629887259446,
+        0.002064846762050348,
+        0.0017722582680723676,
+        0.0015216330806354132,
+        0.001306865511452226,
+        0.0011227550313833573,
+        0.0009648680845083901,
+        0.0008294222592948385,
+        0.0007131887060994791,
+        0.0006134096569643129
+      ],
+      "seed": 33,
+      "input_kind": "synthetic surface samples with known Reference-to-CT truth",
+      "n_injected_outliers": 12,
+      "wall_icp_seconds": 3.971229206999851,
+      "clean_max_paired_error_mm": 0.0029948895501376053,
+      "synthetic_mesh_displacement_rms_mm": 0.0017194287129555777,
+      "rejected_injected_outliers": 12,
+      "rejected_clean_samples": 0
+    }
+  ],
+  "practice_replay": {
+    "F_reg_reference_to_ct": [
+      [
+        0.9173906693275989,
+        0.24643328697133712,
+        0.31251399153183845,
+        42.930829830445276
+      ],
+      [
+        -0.11634176771579166,
+        0.9169892449343294,
+        -0.3815695451153476,
+        63.631063217119696
+      ],
+      [
+        -0.38060340633712697,
+        0.3136899101776638,
+        0.8699078614067727,
+        8.68732601931443
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "converged": true,
+    "iterations": 39,
+    "n_samples": 132,
+    "n_used": 112,
+    "inlier_rms_mm": 0.16320006088780117,
+    "inlier_residual_stats_mm": {
+      "n_used": 112,
+      "mean": 0.12832162089564877,
+      "std": 0.1008356161507203,
+      "max": 0.4633724208263777,
+      "p90": 0.25074243903062704
+    },
+    "history_inlier_rms_mm": [
+      0.5267663957998511,
+      0.41875057188789044,
+      0.3469709835744786,
+      0.2866339271448282,
+      0.25426882092987085,
+      0.2330818722322569,
+      0.21891924748967967,
+      0.20938290264184664,
+      0.1954478376894383,
+      0.1900424343322351,
+      0.18548353296794032,
+      0.181818572485571,
+      0.179013686407612,
+      0.17684752111491092,
+      0.1751648422029036,
+      0.17385179045907878,
+      0.1728151962780601,
+      0.17199340797163354,
+      0.16601758087221485,
+      0.1652906832804467,
+      0.16478988989913246,
+      0.1644303610152963,
+      0.1641635201740984,
+      0.16396602933885787,
+      0.1638110664135163,
+      0.16367539381641194,
+      0.16356368174509348,
+      0.16347507394634006,
+      0.16340676708195698,
+      0.16335429009166375,
+      0.16331408971266526,
+      0.1632834849374939,
+      0.16326015523723497,
+      0.16324234835576268,
+      0.16322874220860467,
+      0.16321830243876254,
+      0.1632103736971951,
+      0.16320446524923035,
+      0.16320006088780117
+    ],
+    "input_kind": "replay of saved actual practice observations; truth unavailable offline",
+    "source_file": "step5_practice.json",
+    "practice_collection_seed": 1,
+    "mesh_vertices": 1568,
+    "mesh_triangles": 3135,
+    "n_patches": 33,
+    "F_coarse_reference_to_ct": [
+      [
+        0.9124985901124811,
+        0.23486364298964613,
+        0.3349408787299136,
+        41.63821283630641
+      ],
+      [
+        -0.0898481954807826,
+        0.9138384403780047,
+        -0.39601339201640984,
+        64.78966390447124
+      ],
+      [
+        -0.39909099815904336,
+        0.3312678283340046,
+        0.8549783629421801,
+        8.797104321591986
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "coarse_all_sample_rms_mm": 5.494697258452794,
+    "wall_coarse_seconds": 0.0006114590014476562,
+    "wall_icp_seconds": 3.7079811570001766,
+    "sample_results": [
+      {
+        "sample_index": 0,
+        "patch_id": 0,
+        "residual_mm": 0.14146205048396848,
+        "used": true
+      },
+      {
+        "sample_index": 1,
+        "patch_id": 0,
+        "residual_mm": 8.643255536617689,
+        "used": false
+      },
+      {
+        "sample_index": 2,
+        "patch_id": 0,
+        "residual_mm": 0.40808446704844636,
+        "used": true
+      },
+      {
+        "sample_index": 3,
+        "patch_id": 0,
+        "residual_mm": 0.2161450643957158,
+        "used": true
+      },
+      {
+        "sample_index": 4,
+        "patch_id": 1,
+        "residual_mm": 0.12699837861003188,
+        "used": true
+      },
+      {
+        "sample_index": 5,
+        "patch_id": 1,
+        "residual_mm": 0.10366045647434718,
+        "used": true
+      },
+      {
+        "sample_index": 6,
+        "patch_id": 1,
+        "residual_mm": 0.08510488907473172,
+        "used": true
+      },
+      {
+        "sample_index": 7,
+        "patch_id": 1,
+        "residual_mm": 0.14322724799670608,
+        "used": true
+      },
+      {
+        "sample_index": 8,
+        "patch_id": 3,
+        "residual_mm": 0.0691781403259701,
+        "used": true
+      },
+      {
+        "sample_index": 9,
+        "patch_id": 3,
+        "residual_mm": 3.929059112102372,
+        "used": false
+      },
+      {
+        "sample_index": 10,
+        "patch_id": 3,
+        "residual_mm": 0.04573429040088709,
+        "used": true
+      },
+      {
+        "sample_index": 11,
+        "patch_id": 3,
+        "residual_mm": 3.6653835654354525,
+        "used": false
+      },
+      {
+        "sample_index": 12,
+        "patch_id": 5,
+        "residual_mm": 0.2663728253077882,
+        "used": true
+      },
+      {
+        "sample_index": 13,
+        "patch_id": 5,
+        "residual_mm": 0.02014970744744863,
+        "used": true
+      },
+      {
+        "sample_index": 14,
+        "patch_id": 5,
+        "residual_mm": 0.07292125432388631,
+        "used": true
+      },
+      {
+        "sample_index": 15,
+        "patch_id": 5,
+        "residual_mm": 6.67904843603621,
+        "used": false
+      },
+      {
+        "sample_index": 16,
+        "patch_id": 7,
+        "residual_mm": 0.027231389901357244,
+        "used": true
+      },
+      {
+        "sample_index": 17,
+        "patch_id": 7,
+        "residual_mm": 0.14915474349378438,
+        "used": true
+      },
+      {
+        "sample_index": 18,
+        "patch_id": 7,
+        "residual_mm": 4.903151519475608,
+        "used": false
+      },
+      {
+        "sample_index": 19,
+        "patch_id": 7,
+        "residual_mm": 0.04473447986718104,
+        "used": true
+      },
+      {
+        "sample_index": 20,
+        "patch_id": 8,
+        "residual_mm": 7.063004048878276,
+        "used": false
+      },
+      {
+        "sample_index": 21,
+        "patch_id": 8,
+        "residual_mm": 16.16866716022082,
+        "used": false
+      },
+      {
+        "sample_index": 22,
+        "patch_id": 8,
+        "residual_mm": 0.024293095608719596,
+        "used": true
+      },
+      {
+        "sample_index": 23,
+        "patch_id": 8,
+        "residual_mm": 0.06779796025897791,
+        "used": true
+      },
+      {
+        "sample_index": 24,
+        "patch_id": 10,
+        "residual_mm": 1.1857695973123579,
+        "used": false
+      },
+      {
+        "sample_index": 25,
+        "patch_id": 10,
+        "residual_mm": 0.12627531780258294,
+        "used": true
+      },
+      {
+        "sample_index": 26,
+        "patch_id": 10,
+        "residual_mm": 0.040763197140087706,
+        "used": true
+      },
+      {
+        "sample_index": 27,
+        "patch_id": 10,
+        "residual_mm": 0.22689342865576703,
+        "used": true
+      },
+      {
+        "sample_index": 28,
+        "patch_id": 11,
+        "residual_mm": 0.009830923876899952,
+        "used": true
+      },
+      {
+        "sample_index": 29,
+        "patch_id": 11,
+        "residual_mm": 0.31903340632766364,
+        "used": true
+      },
+      {
+        "sample_index": 30,
+        "patch_id": 11,
+        "residual_mm": 0.4581854894471992,
+        "used": true
+      },
+      {
+        "sample_index": 31,
+        "patch_id": 11,
+        "residual_mm": 0.22871128563826415,
+        "used": true
+      },
+      {
+        "sample_index": 32,
+        "patch_id": 12,
+        "residual_mm": 0.14530529693458155,
+        "used": true
+      },
+      {
+        "sample_index": 33,
+        "patch_id": 12,
+        "residual_mm": 0.23548721714821905,
+        "used": true
+      },
+      {
+        "sample_index": 34,
+        "patch_id": 12,
+        "residual_mm": 0.016130389885192768,
+        "used": true
+      },
+      {
+        "sample_index": 35,
+        "patch_id": 12,
+        "residual_mm": 0.09173127440441409,
+        "used": true
+      },
+      {
+        "sample_index": 36,
+        "patch_id": 13,
+        "residual_mm": 0.05773185472725518,
+        "used": true
+      },
+      {
+        "sample_index": 37,
+        "patch_id": 13,
+        "residual_mm": 0.08580451826892371,
+        "used": true
+      },
+      {
+        "sample_index": 38,
+        "patch_id": 13,
+        "residual_mm": 0.10292028591110391,
+        "used": true
+      },
+      {
+        "sample_index": 39,
+        "patch_id": 13,
+        "residual_mm": 0.03364570529520427,
+        "used": true
+      },
+      {
+        "sample_index": 40,
+        "patch_id": 14,
+        "residual_mm": 0.5221827658335803,
+        "used": false
+      },
+      {
+        "sample_index": 41,
+        "patch_id": 14,
+        "residual_mm": 12.603430248228394,
+        "used": false
+      },
+      {
+        "sample_index": 42,
+        "patch_id": 14,
+        "residual_mm": 0.11337157269403862,
+        "used": true
+      },
+      {
+        "sample_index": 43,
+        "patch_id": 14,
+        "residual_mm": 0.020751306801152305,
+        "used": true
+      },
+      {
+        "sample_index": 44,
+        "patch_id": 15,
+        "residual_mm": 2.34249200277027,
+        "used": false
+      },
+      {
+        "sample_index": 45,
+        "patch_id": 15,
+        "residual_mm": 0.08752227626860097,
+        "used": true
+      },
+      {
+        "sample_index": 46,
+        "patch_id": 15,
+        "residual_mm": 0.012972106731435784,
+        "used": true
+      },
+      {
+        "sample_index": 47,
+        "patch_id": 15,
+        "residual_mm": 0.3657372826907613,
+        "used": true
+      },
+      {
+        "sample_index": 48,
+        "patch_id": 16,
+        "residual_mm": 0.16396367625677208,
+        "used": true
+      },
+      {
+        "sample_index": 49,
+        "patch_id": 16,
+        "residual_mm": 0.02021781506360401,
+        "used": true
+      },
+      {
+        "sample_index": 50,
+        "patch_id": 16,
+        "residual_mm": 0.19636714851885928,
+        "used": true
+      },
+      {
+        "sample_index": 51,
+        "patch_id": 16,
+        "residual_mm": 0.34183687774534094,
+        "used": true
+      },
+      {
+        "sample_index": 52,
+        "patch_id": 18,
+        "residual_mm": 0.27894818516397296,
+        "used": true
+      },
+      {
+        "sample_index": 53,
+        "patch_id": 18,
+        "residual_mm": 6.256775992739201,
+        "used": false
+      },
+      {
+        "sample_index": 54,
+        "patch_id": 18,
+        "residual_mm": 0.058821187687519226,
+        "used": true
+      },
+      {
+        "sample_index": 55,
+        "patch_id": 18,
+        "residual_mm": 0.005916277512499146,
+        "used": true
+      },
+      {
+        "sample_index": 56,
+        "patch_id": 21,
+        "residual_mm": 7.425437569606481,
+        "used": false
+      },
+      {
+        "sample_index": 57,
+        "patch_id": 21,
+        "residual_mm": 0.12482366875498593,
+        "used": true
+      },
+      {
+        "sample_index": 58,
+        "patch_id": 21,
+        "residual_mm": 0.596349704364338,
+        "used": false
+      },
+      {
+        "sample_index": 59,
+        "patch_id": 21,
+        "residual_mm": 0.05798819747938668,
+        "used": true
+      },
+      {
+        "sample_index": 60,
+        "patch_id": 22,
+        "residual_mm": 11.745556206138973,
+        "used": false
+      },
+      {
+        "sample_index": 61,
+        "patch_id": 22,
+        "residual_mm": 0.1088637403377156,
+        "used": true
+      },
+      {
+        "sample_index": 62,
+        "patch_id": 22,
+        "residual_mm": 0.14120508970473927,
+        "used": true
+      },
+      {
+        "sample_index": 63,
+        "patch_id": 22,
+        "residual_mm": 0.08243325574242712,
+        "used": true
+      },
+      {
+        "sample_index": 64,
+        "patch_id": 23,
+        "residual_mm": 0.2509239966931751,
+        "used": true
+      },
+      {
+        "sample_index": 65,
+        "patch_id": 23,
+        "residual_mm": 0.08821824945208297,
+        "used": true
+      },
+      {
+        "sample_index": 66,
+        "patch_id": 23,
+        "residual_mm": 0.2513011098902127,
+        "used": true
+      },
+      {
+        "sample_index": 67,
+        "patch_id": 23,
+        "residual_mm": 0.10481535350277858,
+        "used": true
+      },
+      {
+        "sample_index": 68,
+        "patch_id": 26,
+        "residual_mm": 0.03984805725488086,
+        "used": true
+      },
+      {
+        "sample_index": 69,
+        "patch_id": 26,
+        "residual_mm": 0.13503690246193956,
+        "used": true
+      },
+      {
+        "sample_index": 70,
+        "patch_id": 26,
+        "residual_mm": 0.11291521540555388,
+        "used": true
+      },
+      {
+        "sample_index": 71,
+        "patch_id": 26,
+        "residual_mm": 0.09544842431454148,
+        "used": true
+      },
+      {
+        "sample_index": 72,
+        "patch_id": 28,
+        "residual_mm": 0.046256476946560515,
+        "used": true
+      },
+      {
+        "sample_index": 73,
+        "patch_id": 28,
+        "residual_mm": 0.08889408026087113,
+        "used": true
+      },
+      {
+        "sample_index": 74,
+        "patch_id": 28,
+        "residual_mm": 22.305209708344538,
+        "used": false
+      },
+      {
+        "sample_index": 75,
+        "patch_id": 28,
+        "residual_mm": 0.026375697299567968,
+        "used": true
+      },
+      {
+        "sample_index": 76,
+        "patch_id": 29,
+        "residual_mm": 0.08036416437922002,
+        "used": true
+      },
+      {
+        "sample_index": 77,
+        "patch_id": 29,
+        "residual_mm": 0.14364926222592042,
+        "used": true
+      },
+      {
+        "sample_index": 78,
+        "patch_id": 29,
+        "residual_mm": 0.05867347680142257,
+        "used": true
+      },
+      {
+        "sample_index": 79,
+        "patch_id": 29,
+        "residual_mm": 0.024721816575081254,
+        "used": true
+      },
+      {
+        "sample_index": 80,
+        "patch_id": 30,
+        "residual_mm": 0.04613649078091767,
+        "used": true
+      },
+      {
+        "sample_index": 81,
+        "patch_id": 30,
+        "residual_mm": 45.18438257291835,
+        "used": false
+      },
+      {
+        "sample_index": 82,
+        "patch_id": 30,
+        "residual_mm": 0.011302346337752619,
+        "used": true
+      },
+      {
+        "sample_index": 83,
+        "patch_id": 30,
+        "residual_mm": 0.08531144961497425,
+        "used": true
+      },
+      {
+        "sample_index": 84,
+        "patch_id": 32,
+        "residual_mm": 0.16418443938733807,
+        "used": true
+      },
+      {
+        "sample_index": 85,
+        "patch_id": 32,
+        "residual_mm": 0.11477280141103888,
+        "used": true
+      },
+      {
+        "sample_index": 86,
+        "patch_id": 32,
+        "residual_mm": 0.014321316074462128,
+        "used": true
+      },
+      {
+        "sample_index": 87,
+        "patch_id": 32,
+        "residual_mm": 0.19503040508962355,
+        "used": true
+      },
+      {
+        "sample_index": 88,
+        "patch_id": 34,
+        "residual_mm": 0.08029401147364236,
+        "used": true
+      },
+      {
+        "sample_index": 89,
+        "patch_id": 34,
+        "residual_mm": 8.113713417217152,
+        "used": false
+      },
+      {
+        "sample_index": 90,
+        "patch_id": 34,
+        "residual_mm": 0.08217697508756804,
+        "used": true
+      },
+      {
+        "sample_index": 91,
+        "patch_id": 34,
+        "residual_mm": 0.050530897208869024,
+        "used": true
+      },
+      {
+        "sample_index": 92,
+        "patch_id": 35,
+        "residual_mm": 4.237679165607512,
+        "used": false
+      },
+      {
+        "sample_index": 93,
+        "patch_id": 35,
+        "residual_mm": 0.08022953515134346,
+        "used": true
+      },
+      {
+        "sample_index": 94,
+        "patch_id": 35,
+        "residual_mm": 0.14550117832966594,
+        "used": true
+      },
+      {
+        "sample_index": 95,
+        "patch_id": 35,
+        "residual_mm": 0.1398047155299654,
+        "used": true
+      },
+      {
+        "sample_index": 96,
+        "patch_id": 37,
+        "residual_mm": 0.24394797194176976,
+        "used": true
+      },
+      {
+        "sample_index": 97,
+        "patch_id": 37,
+        "residual_mm": 0.02746940644857915,
+        "used": true
+      },
+      {
+        "sample_index": 98,
+        "patch_id": 37,
+        "residual_mm": 22.942722982520817,
+        "used": false
+      },
+      {
+        "sample_index": 99,
+        "patch_id": 37,
+        "residual_mm": 0.015364375199733356,
+        "used": true
+      },
+      {
+        "sample_index": 100,
+        "patch_id": 38,
+        "residual_mm": 0.24581509165097443,
+        "used": true
+      },
+      {
+        "sample_index": 101,
+        "patch_id": 38,
+        "residual_mm": 0.20152227419553048,
+        "used": true
+      },
+      {
+        "sample_index": 102,
+        "patch_id": 38,
+        "residual_mm": 0.056231535013510504,
+        "used": true
+      },
+      {
+        "sample_index": 103,
+        "patch_id": 38,
+        "residual_mm": 0.15634142042319227,
+        "used": true
+      },
+      {
+        "sample_index": 104,
+        "patch_id": 39,
+        "residual_mm": 0.0991794960053602,
+        "used": true
+      },
+      {
+        "sample_index": 105,
+        "patch_id": 39,
+        "residual_mm": 0.08872412842883803,
+        "used": true
+      },
+      {
+        "sample_index": 106,
+        "patch_id": 39,
+        "residual_mm": 0.049388575276568154,
+        "used": true
+      },
+      {
+        "sample_index": 107,
+        "patch_id": 39,
+        "residual_mm": 0.07054406072881422,
+        "used": true
+      },
+      {
+        "sample_index": 108,
+        "patch_id": 40,
+        "residual_mm": 0.20449968166866872,
+        "used": true
+      },
+      {
+        "sample_index": 109,
+        "patch_id": 40,
+        "residual_mm": 0.24849784331567687,
+        "used": true
+      },
+      {
+        "sample_index": 110,
+        "patch_id": 40,
+        "residual_mm": 0.4478819383490864,
+        "used": true
+      },
+      {
+        "sample_index": 111,
+        "patch_id": 40,
+        "residual_mm": 0.4633724208263777,
+        "used": true
+      },
+      {
+        "sample_index": 112,
+        "patch_id": 41,
+        "residual_mm": 0.0379850284778552,
+        "used": true
+      },
+      {
+        "sample_index": 113,
+        "patch_id": 41,
+        "residual_mm": 0.11660616162244504,
+        "used": true
+      },
+      {
+        "sample_index": 114,
+        "patch_id": 41,
+        "residual_mm": 0.21302538328740814,
+        "used": true
+      },
+      {
+        "sample_index": 115,
+        "patch_id": 41,
+        "residual_mm": 0.10498466541334771,
+        "used": true
+      },
+      {
+        "sample_index": 116,
+        "patch_id": 42,
+        "residual_mm": 0.07532590411724974,
+        "used": true
+      },
+      {
+        "sample_index": 117,
+        "patch_id": 42,
+        "residual_mm": 0.25737668685548326,
+        "used": true
+      },
+      {
+        "sample_index": 118,
+        "patch_id": 42,
+        "residual_mm": 0.19954272120556638,
+        "used": true
+      },
+      {
+        "sample_index": 119,
+        "patch_id": 42,
+        "residual_mm": 0.24910842006769418,
+        "used": true
+      },
+      {
+        "sample_index": 120,
+        "patch_id": 43,
+        "residual_mm": 0.14682747447925354,
+        "used": true
+      },
+      {
+        "sample_index": 121,
+        "patch_id": 43,
+        "residual_mm": 0.12155983501650984,
+        "used": true
+      },
+      {
+        "sample_index": 122,
+        "patch_id": 43,
+        "residual_mm": 0.09092955892572875,
+        "used": true
+      },
+      {
+        "sample_index": 123,
+        "patch_id": 43,
+        "residual_mm": 0.23670064168568924,
+        "used": true
+      },
+      {
+        "sample_index": 124,
+        "patch_id": 44,
+        "residual_mm": 0.049428818585238586,
+        "used": true
+      },
+      {
+        "sample_index": 125,
+        "patch_id": 44,
+        "residual_mm": 0.11279965518436215,
+        "used": true
+      },
+      {
+        "sample_index": 126,
+        "patch_id": 44,
+        "residual_mm": 0.09360431169264319,
+        "used": true
+      },
+      {
+        "sample_index": 127,
+        "patch_id": 44,
+        "residual_mm": 0.07908515253587117,
+        "used": true
+      },
+      {
+        "sample_index": 128,
+        "patch_id": 45,
+        "residual_mm": 0.13136715844463293,
+        "used": true
+      },
+      {
+        "sample_index": 129,
+        "patch_id": 45,
+        "residual_mm": 0.004653633041582943,
+        "used": true
+      },
+      {
+        "sample_index": 130,
+        "patch_id": 45,
+        "residual_mm": 0.2305633633313964,
+        "used": true
+      },
+      {
+        "sample_index": 131,
+        "patch_id": 45,
+        "residual_mm": 0.07228820429193682,
+        "used": true
+      }
+    ]
+  },
+  "practice_actual_tre": "NOT RUN; no live scoring or hidden outlier labels requested",
+  "timing_note": "Per-call wall times observed during numerical validation alongside pytest; machine/load dependent, not an isolated benchmark.",
+  "superseded_gate_check": {
+    "mad_scale_floor_mm": 1e-06,
+    "synthetic_seeds": [
+      11,
+      22,
+      33
+    ],
+    "rejected_clean_samples": [
+      5,
+      0,
+      10
+    ],
+    "rejected_injected_outliers": [
+      12,
+      12,
+      12
+    ],
+    "status": "SUPERSEDED by the measured 0.01 mm scale floor; final run retains all 108 clean samples in each case"
+  }
+}

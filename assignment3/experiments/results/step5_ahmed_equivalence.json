@@ -1,0 +1,9 @@
+{
+  "status": "VERIFIED",
+  "reference_commit": "ca10a27f8d71cfd64076b0b7610546c614517d98",
+  "reference_workflow_blob": "9ed3bf803016ab7075542df7ec8b0b3bc1015d75",
+  "patch_plan_cases": 94,
+  "collection_mock_cases": 3,
+  "comparison": "exact plan lists, handles, patch IDs, d_ref arrays, simulated time and skip messages",
+  "simulator_calls": 0
+}
